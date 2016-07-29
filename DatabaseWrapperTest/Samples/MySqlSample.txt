@@ -1,0 +1,8 @@
+﻿CREATE TABLE `person` (
+  `personId` int(11) NOT NULL AUTO_INCREMENT,
+  `firstName` varchar(32) NOT NULL,
+  `lastName` varchar(32) NOT NULL,
+  `age` int(11) NOT NULL,
+  `notes` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`personId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

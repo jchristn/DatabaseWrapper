@@ -1,0 +1,25 @@
+﻿USE [test]
+GO
+
+/****** Object:  Table [dbo].[person]    Script Date: 7/28/2016 6:46:04 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[person](
+	[personId] [int] IDENTITY(1,1) NOT NULL,
+	[firstName] [nvarchar](32) NOT NULL,
+	[lastName] [nvarchar](32) NOT NULL,
+	[age] [int] NOT NULL,
+	[notes] [nvarchar](128) NULL,
+ CONSTRAINT [PK_person] PRIMARY KEY CLUSTERED 
+(
+	[personId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+

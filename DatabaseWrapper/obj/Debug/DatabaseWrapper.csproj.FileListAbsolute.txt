@@ -1,0 +1,10 @@
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\DatabaseWrapper.dll.config
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\DatabaseWrapper.dll
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\DatabaseWrapper.pdb
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\EntityFramework.dll
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\EntityFramework.SqlServer.dll
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\MySql.Data.dll
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\EntityFramework.xml
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\EntityFramework.SqlServer.xml
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\obj\Debug\DatabaseWrapper.dll
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\obj\Debug\DatabaseWrapper.pdb
