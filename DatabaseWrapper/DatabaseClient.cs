@@ -838,10 +838,12 @@ namespace DatabaseWrapper
                     //
                     for (int i = 0; i < s.Length; i++)
                     {
-                        if (
-                            ((int)(s[i]) == 0) || // null
-                            ((int)(s[i]) < 32)
-                            )
+                        if (((int)(s[i]) == 10) ||      // Preserve carriage return
+                            ((int)(s[i]) == 13))        // and line feed
+                        {
+                            ret += s[i];
+                        }
+                        else if ((int)(s[i]) < 32)
                         {
                             continue;
                         }
