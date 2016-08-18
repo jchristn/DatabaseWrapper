@@ -1,4 +1,10 @@
 # DatabaseWrapper
+
+[![][nuget-img]][nuget]
+
+[nuget]:     https://www.nuget.org/packages/DatabaseWrapper/
+[nuget-img]: https://badge.fury.io/nu/Object.svg
+
 Simple database wrapper for Microsoft SQL Server and MySQL written in C#.  
 
 For a sample app exercising this library, refer to the test project contained within the solution.
