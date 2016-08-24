@@ -26,9 +26,10 @@ namespace DatabaseWrapperTest
             {
                 // MsSql
                 // client = new DatabaseClient(DbTypes.MsSql, "localhost", 0, null, null, "SQLEXPRESS", "test");
-
+                
                 // MySql
                 client = new DatabaseClient(DbTypes.MySql, "127.0.0.1", 3306, "root", "password", null, "test");
+
 
                 client.DebugRawQuery = true;
                 client.DebugResultRowCount = true;
@@ -56,6 +57,11 @@ namespace DatabaseWrapperTest
             catch (Exception e)
             {
                 ExceptionConsole("Main", "Outer exception", e);
+            }
+            finally
+            {
+                Console.WriteLine("Press ENTER to exit");
+                Console.ReadLine();
             }
         }
 

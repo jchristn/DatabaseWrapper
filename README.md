@@ -77,5 +77,15 @@ Expression e = new Expression {
 };
 ```
 
+## Need a timestamp?
+We added a simple static method for this which you can use when building expressions (or elsewhere).
+```
+string tsMssql = DatabaseClient.DbTimestamp(DbTypes.MsSql, DateTime.Now));
+// 08/23/2016 05:34:32.4349034 PM
+
+string tsMysql = DatabaseClient.DbTimestamp(DbTypes.MySql, DateTime.Now));
+// 2016-08-23 17:34:32.446913 
+```
+
 ## Other Notes
 MySQL does not like to return updated rows.  Sorry about that.  I thought about making the UPDATE clause require that you supply the ID field and the ID value so that I could retrieve it after the fact, but that approach is just too limiting.
