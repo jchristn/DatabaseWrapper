@@ -137,7 +137,7 @@ namespace DatabaseWrapper
                     if (RightTerm == null) return null;
                     int inAdded = 0;
                     if (!Helper.IsList(RightTerm)) return null;
-                    List<object> tempList = Helper.ObjectToList(RightTerm);
+                    List<object> inTempList = Helper.ObjectToList(RightTerm);
                     clause += " IN ";
                     if (RightTerm is Expression)
                     {
@@ -146,7 +146,7 @@ namespace DatabaseWrapper
                     else
                     {
                         clause += "(";
-                        foreach (object currObj in tempList)
+                        foreach (object currObj in inTempList)
                         {
                             if (inAdded == 0)
                             {
@@ -157,6 +157,36 @@ namespace DatabaseWrapper
                             {
                                 clause += ",'" + SanitizeString(currObj.ToString()) + "'";
                                 inAdded++;
+                            }
+                        }
+                        clause += ")";
+                    }
+                    break;
+
+                case Operators.NotIn:
+                    if (RightTerm == null) return null;
+                    int notInAdded = 0;
+                    if (!Helper.IsList(RightTerm)) return null;
+                    List<object> notInTempList = Helper.ObjectToList(RightTerm);
+                    clause += " NOT IN ";
+                    if (RightTerm is Expression)
+                    {
+                        clause += ((Expression)RightTerm).ToWhereClause();
+                    }
+                    else
+                    {
+                        clause += "(";
+                        foreach (object currObj in notInTempList)
+                        {
+                            if (notInAdded == 0)
+                            {
+                                clause += "'" + SanitizeString(currObj.ToString()) + "'";
+                                notInAdded++;
+                            }
+                            else
+                            {
+                                clause += ",'" + SanitizeString(currObj.ToString()) + "'";
+                                notInAdded++;
                             }
                         }
                         clause += ")";

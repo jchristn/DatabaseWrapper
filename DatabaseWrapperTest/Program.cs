@@ -30,7 +30,6 @@ namespace DatabaseWrapperTest
                 // MySql
                 client = new DatabaseClient(DbTypes.MySql, "127.0.0.1", 3306, "root", "password", null, "test");
 
-
                 client.DebugRawQuery = true;
                 client.DebugResultRowCount = true;
 

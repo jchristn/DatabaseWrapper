@@ -25,6 +25,7 @@ namespace DatabaseWrapper
         Equals,
         NotEquals,
         In,
+        NotIn,
         Contains,
         ContainsNot,
         GreaterThan,

@@ -8,3 +8,4 @@ D:\code\misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\EntityFramework.xml
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\EntityFramework.SqlServer.xml
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\obj\Debug\DatabaseWrapper.dll
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\obj\Debug\DatabaseWrapper.pdb
+D:\code\misc\DatabaseWrapper\DatabaseWrapper\obj\Debug\DatabaseWrapper.csprojResolveAssemblyReference.cache
