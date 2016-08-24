@@ -12,6 +12,9 @@ namespace DatabaseWrapper
     {
         #region Constructor
 
+        /// <summary>
+        /// A structure in the form of term-operator-term that defines a boolean operation within a WHERE clause.
+        /// </summary>
         public Expression()
         {
         }
@@ -20,8 +23,19 @@ namespace DatabaseWrapper
 
         #region Public-Members
 
+        /// <summary>
+        /// The left term of the expression; can either be a string term or a nested Expression.
+        /// </summary>
         public object LeftTerm;
+
+        /// <summary>
+        /// The boolean operator.
+        /// </summary>
         public Operators Operator;
+
+        /// <summary>
+        /// The right term of the expression; can either be an object for comparison or a nested Expression.
+        /// </summary>
         public object RightTerm;
         
         #endregion
@@ -32,6 +46,10 @@ namespace DatabaseWrapper
 
         #region Public-Methods
         
+        /// <summary>
+        /// Converts an Expression to a string that is compatible for use in a WHERE clause.
+        /// </summary>
+        /// <returns></returns>
         public string ToWhereClause()
         {
             string clause = "";

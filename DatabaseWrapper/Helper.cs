@@ -12,6 +12,11 @@ namespace DatabaseWrapper
 {
     public class Helper
     {
+        /// <summary>
+        /// Determines if an object is a list.
+        /// </summary>
+        /// <param name="o">An object.</param>
+        /// <returns>Boolean indicating if the object is a list.</returns>
         public static bool IsList(object o)
         {
             if (o == null) return false;
@@ -20,6 +25,11 @@ namespace DatabaseWrapper
                    o.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
         }
 
+        /// <summary>
+        /// Converts an object to a List object.
+        /// </summary>
+        /// <param name="o">An object.</param>
+        /// <returns>A List object.</returns>
         public static List<object> ObjectToList(object o)
         {
             if (o == null) return null;
@@ -32,6 +42,11 @@ namespace DatabaseWrapper
             return ret;
         }
 
+        /// <summary>
+        /// Determines if a DataTable is null or empty.
+        /// </summary>
+        /// <param name="t">A DataTable.</param>
+        /// <returns>Boolean indicating if the DataTable is null or empty.</returns>
         public static bool DataTableIsNullOrEmpty(DataTable t)
         {
             if (t == null) return true;
@@ -39,6 +54,12 @@ namespace DatabaseWrapper
             return false;
         }
 
+        /// <summary>
+        /// Converts a DataTable to an object of a given type.
+        /// </summary>
+        /// <typeparam name="T">The type of object to which the DataTable should be converted.</typeparam>
+        /// <param name="t">A DataTable.</param>
+        /// <returns>An object of type T containing values from the DataTable.</returns>
         public static T DataTableToObject<T>(DataTable t) where T : new()
         {
             if (t == null) throw new ArgumentNullException(nameof(t));
@@ -50,6 +71,12 @@ namespace DatabaseWrapper
             return default(T);
         }
 
+        /// <summary>
+        /// Converts a DataTable to a List of objects of a given type.
+        /// </summary>
+        /// <typeparam name="T">The type of object to which each DataRow within the DataTable should be converted.</typeparam>
+        /// <param name="t">A DataTable.</param>
+        /// <returns>A list of objects of type T containing values from each DataRow within the DataTable.</returns>
         public static List<T> DataTableToListObject<T>(DataTable t)
         {
             if (t == null) throw new ArgumentNullException(nameof(t));
@@ -74,6 +101,12 @@ namespace DatabaseWrapper
             }).ToList();
         }
 
+        /// <summary>
+        /// Convert a DataRow to an object of type T.
+        /// </summary>
+        /// <typeparam name="T">The type of object to which the DataRow should be converted.</typeparam>
+        /// <param name="r">A DataRow.</param>
+        /// <returns>An object of type T containing values from the DataRow.</returns>
         public static T DataRowToObject<T>(DataRow r) where T : new()
         {
             if (r == null) throw new ArgumentNullException(nameof(r));
@@ -86,6 +119,12 @@ namespace DatabaseWrapper
             return item;
         }
 
+        /// <summary>
+        /// Deserialize a JSON string to an object of type T.
+        /// </summary>
+        /// <typeparam name="T">The type of object to which the JSON should be deserialized.</typeparam>
+        /// <param name="json">The JSON string.</param>
+        /// <returns>An object of type T built using data from the JSON string.</returns>
         public static T DeserializeJson<T>(string json)
         {
             JavaScriptSerializer ser = new JavaScriptSerializer();
@@ -93,6 +132,12 @@ namespace DatabaseWrapper
             return (T)ser.Deserialize<T>(json);
         }
 
+        /// <summary>
+        /// Deserialize a byte array containing JSON to an object of type T.
+        /// </summary>
+        /// <typeparam name="T">The type of object to which the JSON should be deserialized.</typeparam>
+        /// <param name="bytes">The byte array containing JSON data.</param>
+        /// <returns>An object of type T built using data from the JSON byte data.</returns>
         public static T DeserializeJson<T>(byte[] bytes)
         {
             JavaScriptSerializer ser = new JavaScriptSerializer();
@@ -100,6 +145,11 @@ namespace DatabaseWrapper
             return (T)ser.Deserialize<T>(Encoding.UTF8.GetString(bytes));
         }
 
+        /// <summary>
+        /// Serialize an object to a JSON string.
+        /// </summary>
+        /// <param name="obj">An object.</param>
+        /// <returns>A string containing JSON built from the supplied object.</returns>
         public static string SerializeJson(object obj)
         {
             JavaScriptSerializer ser = new JavaScriptSerializer();

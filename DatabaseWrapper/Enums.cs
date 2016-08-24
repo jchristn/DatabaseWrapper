@@ -6,12 +6,18 @@ using System.Threading.Tasks;
 
 namespace DatabaseWrapper
 {
+    /// <summary>
+    /// Enumeration containing the supported database types.
+    /// </summary>
     public enum DbTypes
     {
         MsSql,
         MySql
     }
 
+    /// <summary>
+    /// Enumeration containing the supported WHERE clause operators.
+    /// </summary>
     public enum Operators
     {
         And,
