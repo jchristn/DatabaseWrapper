@@ -50,15 +50,16 @@ namespace DatabaseWrapper
         /// Converts an Expression to a string that is compatible for use in a WHERE clause.
         /// </summary>
         /// <returns></returns>
-        public string ToWhereClause()
+        public string ToWhereClause(DbTypes dbType)
         {
             string clause = "";
+            
             if (LeftTerm == null) return null;
             clause += "(";
 
             if (LeftTerm is Expression)
             {
-                clause += ((Expression)LeftTerm).ToWhereClause() + " ";
+                clause += ((Expression)LeftTerm).ToWhereClause(dbType) + " ";
             }
             else
             {
@@ -86,7 +87,7 @@ namespace DatabaseWrapper
                     clause += "AND ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
@@ -99,7 +100,7 @@ namespace DatabaseWrapper
                     clause += "OR ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
@@ -112,11 +113,18 @@ namespace DatabaseWrapper
                     clause += "= ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
-                        clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        if (RightTerm is DateTime || RightTerm is DateTime?)
+                        {
+                            clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
+                        }
+                        else
+                        {
+                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        }
                     }
                     break;
 
@@ -125,11 +133,18 @@ namespace DatabaseWrapper
                     clause += "<> ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
-                        clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        if (RightTerm is DateTime || RightTerm is DateTime?)
+                        {
+                            clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
+                        }
+                        else
+                        {
+                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        }
                     }
                     break;
 
@@ -141,7 +156,7 @@ namespace DatabaseWrapper
                     clause += " IN ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
@@ -150,12 +165,26 @@ namespace DatabaseWrapper
                         {
                             if (inAdded == 0)
                             {
-                                clause += "'" + SanitizeString(currObj.ToString()) + "'";
+                                if (currObj is DateTime || currObj is DateTime?)
+                                {
+                                    clause += "'" + DbTimestamp(dbType, currObj) + "'";
+                                }
+                                else
+                                {
+                                    clause += "'" + SanitizeString(currObj.ToString()) + "'";
+                                }
                                 inAdded++;
                             }
                             else
                             {
-                                clause += ",'" + SanitizeString(currObj.ToString()) + "'";
+                                if (currObj is DateTime || currObj is DateTime?)
+                                {
+                                    clause += "'" + DbTimestamp(dbType, currObj) + "'";
+                                }
+                                else
+                                {
+                                    clause += ",'" + SanitizeString(currObj.ToString()) + "'";
+                                }
                                 inAdded++;
                             }
                         }
@@ -171,7 +200,7 @@ namespace DatabaseWrapper
                     clause += " NOT IN ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
@@ -180,12 +209,26 @@ namespace DatabaseWrapper
                         {
                             if (notInAdded == 0)
                             {
-                                clause += "'" + SanitizeString(currObj.ToString()) + "'";
+                                if (currObj is DateTime || currObj is DateTime?)
+                                {
+                                    clause += "'" + DbTimestamp(dbType, currObj) + "'";
+                                }
+                                else
+                                {
+                                    clause += "'" + SanitizeString(currObj.ToString()) + "'";
+                                }
                                 notInAdded++;
                             }
                             else
                             {
-                                clause += ",'" + SanitizeString(currObj.ToString()) + "'";
+                                if (currObj is DateTime || currObj is DateTime?)
+                                {
+                                    clause += "'" + DbTimestamp(dbType, currObj) + "'";
+                                }
+                                else
+                                {
+                                    clause += ",'" + SanitizeString(currObj.ToString()) + "'";
+                                }
                                 notInAdded++;
                             }
                         }
@@ -228,11 +271,18 @@ namespace DatabaseWrapper
                     clause += "> ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
-                        clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        if (RightTerm is DateTime || RightTerm is DateTime?)
+                        {
+                            clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
+                        }
+                        else
+                        {
+                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        }
                     }
                     break;
 
@@ -241,11 +291,18 @@ namespace DatabaseWrapper
                     clause += ">= ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
-                        clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        if (RightTerm is DateTime || RightTerm is DateTime?)
+                        {
+                            clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
+                        }
+                        else
+                        {
+                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        }
                     }
                     break;
 
@@ -254,11 +311,18 @@ namespace DatabaseWrapper
                     clause += "< ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
-                        clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        if (RightTerm is DateTime || RightTerm is DateTime?)
+                        {
+                            clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
+                        }
+                        else
+                        {
+                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        }
                     }
                     break;
 
@@ -267,11 +331,18 @@ namespace DatabaseWrapper
                     clause += "<= ";
                     if (RightTerm is Expression)
                     {
-                        clause += ((Expression)RightTerm).ToWhereClause();
+                        clause += ((Expression)RightTerm).ToWhereClause(dbType);
                     }
                     else
                     {
-                        clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        if (RightTerm is DateTime || RightTerm is DateTime?)
+                        {
+                            clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
+                        }
+                        else
+                        {
+                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        }
                     }
                     break;
 
@@ -373,6 +444,26 @@ namespace DatabaseWrapper
             return ret;
         }
 
+        private string DbTimestamp(DbTypes dbType, object ts)
+        {
+            DateTime dt = DateTime.Now;
+            if (ts == null) return null;
+            if (ts is DateTime?) dt = Convert.ToDateTime(ts);
+            else if (ts is DateTime) dt = (DateTime)ts;
+
+            switch (dbType)
+            {
+                case DbTypes.MsSql:
+                    return dt.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
+
+                case DbTypes.MySql:
+                    return dt.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
+
+                default:
+                    return null;
+            }
+        }
+        
         #endregion
     }
 }

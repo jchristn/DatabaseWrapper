@@ -267,7 +267,7 @@ namespace DatabaseWrapper
                     //
                     if (filter != null)
                     {
-                        whereClause = filter.ToWhereClause();
+                        whereClause = filter.ToWhereClause(DbType);
                     }
                     if (!String.IsNullOrEmpty(whereClause))
                     {
@@ -323,7 +323,7 @@ namespace DatabaseWrapper
                     //
                     if (filter != null)
                     {
-                        whereClause = filter.ToWhereClause();
+                        whereClause = filter.ToWhereClause(DbType);
                     }
                     if (!String.IsNullOrEmpty(whereClause))
                     {
@@ -544,7 +544,7 @@ namespace DatabaseWrapper
                     query += "UPDATE " + tableName + " WITH (ROWLOCK) SET ";
                     query += keyValueClause + " ";
                     query += "OUTPUT INSERTED.* ";
-                    if (filter != null) query += "WHERE " + filter.ToWhereClause() + " ";
+                    if (filter != null) query += "WHERE " + filter.ToWhereClause(DbType) + " ";
                     
                     break;
 
@@ -555,7 +555,7 @@ namespace DatabaseWrapper
 
                     query += "UPDATE " + tableName + " SET ";
                     query += keyValueClause + " ";
-                    if (filter != null) query += "WHERE " + filter.ToWhereClause() + " ";
+                    if (filter != null) query += "WHERE " + filter.ToWhereClause(DbType) + " ";
                     break;
 
                     #endregion
@@ -593,7 +593,7 @@ namespace DatabaseWrapper
                     #region MsSql
 
                     query += "DELETE FROM " + tableName + " WITH (ROWLOCK) ";
-                    if (filter != null) query += "WHERE " + filter.ToWhereClause() + " ";
+                    if (filter != null) query += "WHERE " + filter.ToWhereClause(DbType) + " ";
                     break;
 
                 #endregion
@@ -602,7 +602,7 @@ namespace DatabaseWrapper
                     #region MySql
 
                     query += "DELETE FROM " + tableName + " ";
-                    if (filter != null) query += "WHERE " + filter.ToWhereClause() + " ";
+                    if (filter != null) query += "WHERE " + filter.ToWhereClause(DbType) + " ";
                     break;
 
                     #endregion
