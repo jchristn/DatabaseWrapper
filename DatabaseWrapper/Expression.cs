@@ -407,7 +407,8 @@ namespace DatabaseWrapper
         public static Expression ListToNestedAndExpression(List<Expression> exprList)
         {
             if (exprList == null) throw new ArgumentNullException(nameof(exprList));
-
+            if (exprList.Count < 1) return null;
+            
             int evaluated = 0;
             Expression ret = null;
             Expression left = null;
@@ -460,6 +461,7 @@ namespace DatabaseWrapper
         public static Expression ListToNestedOrExpression(List<Expression> exprList)
         {
             if (exprList == null) throw new ArgumentNullException(nameof(exprList));
+            if (exprList.Count < 1) return null;
 
             int evaluated = 0;
             Expression ret = null;
