@@ -14,7 +14,8 @@ namespace DatabaseWrapperTest
         //
         //
         // Before attempting to run this program, be sure to create the person table in a database
-        // named 'test' per the scripts found in the samples folder!
+        // named 'test' per the scripts found in the samples folder, and set the constructor with
+        // the appropriate parameters!
         //
         //
 
@@ -24,9 +25,19 @@ namespace DatabaseWrapperTest
         {
             try
             {
+                Console.WriteLine("Displaying nested AND expression...");
+                DisplayNestedAndExpression();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
+                Console.WriteLine("Displaying nested OR expression...");
+                DisplayNestedOrExpression();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
                 // MsSql
                 // client = new DatabaseClient(DbTypes.MsSql, "localhost", 0, null, null, "SQLEXPRESS", "test");
-                
+
                 // MySql
                 client = new DatabaseClient(DbTypes.MySql, "127.0.0.1", 3306, "root", "password", null, "test");
 
@@ -62,6 +73,36 @@ namespace DatabaseWrapperTest
                 Console.WriteLine("Press ENTER to exit");
                 Console.ReadLine();
             }
+        }
+
+        static void DisplayNestedAndExpression()
+        {
+            List<Expression> exprList = new List<Expression>();
+            Expression e1 = new Expression { LeftTerm = "key1", Operator = Operators.Or, RightTerm = "val1" };
+            Expression e2 = new Expression { LeftTerm = "key2", Operator = Operators.And, RightTerm = "val2" };
+            Expression e3 = new Expression { LeftTerm = "key3", Operator = Operators.GreaterThan, RightTerm = "val3" };
+            Expression e4 = new Expression { LeftTerm = "key4", Operator = Operators.LessThan, RightTerm = "val4" };
+            exprList.Add(e1);
+            exprList.Add(e2);
+            exprList.Add(e3);
+            exprList.Add(e4);
+            Expression e = Expression.ListToNestedAndExpression(exprList);
+            Console.WriteLine(e.ToWhereClause(DbTypes.MsSql));
+        }
+
+        static void DisplayNestedOrExpression()
+        {
+            List<Expression> exprList = new List<Expression>();
+            Expression e1 = new Expression { LeftTerm = "key1", Operator = Operators.Or, RightTerm = "val1" };
+            Expression e2 = new Expression { LeftTerm = "key2", Operator = Operators.And, RightTerm = "val2" };
+            Expression e3 = new Expression { LeftTerm = "key3", Operator = Operators.GreaterThan, RightTerm = "val3" };
+            Expression e4 = new Expression { LeftTerm = "key4", Operator = Operators.LessThan, RightTerm = "val4" };
+            exprList.Add(e1);
+            exprList.Add(e2);
+            exprList.Add(e3);
+            exprList.Add(e4);
+            Expression e = Expression.ListToNestedOrExpression(exprList);
+            Console.WriteLine(e.ToWhereClause(DbTypes.MsSql));
         }
 
         static void LoadRows()

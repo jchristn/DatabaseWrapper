@@ -49,12 +49,13 @@ namespace DatabaseWrapper
         /// <summary>
         /// Converts an Expression to a string that is compatible for use in a WHERE clause.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>String containing human-readable version of the Expression.</returns>
         public string ToWhereClause(DbTypes dbType)
         {
             string clause = "";
-            
+
             if (LeftTerm == null) return null;
+
             clause += "(";
 
             if (LeftTerm is Expression)
@@ -65,6 +66,7 @@ namespace DatabaseWrapper
             {
                 if (!(LeftTerm is string))
                 {
+                    Console.WriteLine("ToWhereClause LeftTerm is not string");
                     return null;
                 }
 
@@ -91,7 +93,14 @@ namespace DatabaseWrapper
                     }
                     else
                     {
-                        return null;
+                        if (RightTerm is DateTime || RightTerm is DateTime?)
+                        {
+                            clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
+                        }
+                        else
+                        {
+                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        }
                     }
                     break;
 
@@ -104,7 +113,14 @@ namespace DatabaseWrapper
                     }
                     else
                     {
-                        return null;
+                        if (RightTerm is DateTime || RightTerm is DateTime?)
+                        {
+                            clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
+                        }
+                        else
+                        {
+                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                        }
                     }
                     break;
                     
@@ -361,7 +377,134 @@ namespace DatabaseWrapper
 
             return clause;
         }
-        
+
+        /// <summary>
+        /// Display Expression in a human-readable string.
+        /// </summary>
+        /// <returns>String containing human-readable version of the Expression.</returns>
+        public override string ToString()
+        {
+            string ret = "";
+            ret += "(";
+
+            if (LeftTerm is Expression) ret += ((Expression)LeftTerm).ToString();
+            else ret += LeftTerm.ToString();
+
+            ret += " " + Operator.ToString() + " ";
+
+            if (RightTerm is Expression) ret += ((Expression)RightTerm).ToString();
+            else ret += RightTerm.ToString();
+
+            ret += ")";
+            return ret;        
+        }
+
+        /// <summary>
+        /// Convert a List of Expression objects to a nested Expression containing AND between each Expression in the list. 
+        /// </summary>
+        /// <param name="exprList">List of Expression objects.</param>
+        /// <returns>A nested Expression.</returns>
+        public static Expression ListToNestedAndExpression(List<Expression> exprList)
+        {
+            if (exprList == null) throw new ArgumentNullException(nameof(exprList));
+
+            int evaluated = 0;
+            Expression ret = null;
+            Expression left = null;
+            List<Expression> remainder = new List<Expression>();
+
+            if (exprList.Count == 1)
+            {
+                foreach (Expression curr in exprList)
+                {
+                    ret = curr;
+                    break;
+                }
+
+                return ret;
+            }
+            else
+            {
+                foreach (Expression curr in exprList)
+                {
+                    if (evaluated == 0)
+                    {
+                        left = new Expression();
+                        left.LeftTerm = curr.LeftTerm;
+                        left.Operator = curr.Operator;
+                        left.RightTerm = curr.RightTerm;
+                        evaluated++;
+                    }
+                    else
+                    {
+                        remainder.Add(curr);
+                        evaluated++;
+                    }
+                }
+
+                ret = new Expression();
+                ret.LeftTerm = left;
+                ret.Operator = Operators.And;
+                Expression right = ListToNestedAndExpression(remainder);
+                ret.RightTerm = right;
+
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// Convert a List of Expression objects to a nested Expression containing OR between each Expression in the list. 
+        /// </summary>
+        /// <param name="exprList">List of Expression objects.</param>
+        /// <returns>A nested Expression.</returns>
+        public static Expression ListToNestedOrExpression(List<Expression> exprList)
+        {
+            if (exprList == null) throw new ArgumentNullException(nameof(exprList));
+
+            int evaluated = 0;
+            Expression ret = null;
+            Expression left = null;
+            List<Expression> remainder = new List<Expression>();
+
+            if (exprList.Count == 1)
+            {
+                foreach (Expression curr in exprList)
+                {
+                    ret = curr;
+                    break;
+                }
+
+                return ret;
+            }
+            else
+            {
+                foreach (Expression curr in exprList)
+                {
+                    if (evaluated == 0)
+                    {
+                        left = new Expression();
+                        left.LeftTerm = curr.LeftTerm;
+                        left.Operator = curr.Operator;
+                        left.RightTerm = curr.RightTerm;
+                        evaluated++;
+                    }
+                    else
+                    {
+                        remainder.Add(curr);
+                        evaluated++;
+                    }
+                }
+
+                ret = new Expression();
+                ret.LeftTerm = left;
+                ret.Operator = Operators.Or;
+                Expression right = ListToNestedOrExpression(remainder);
+                ret.RightTerm = right;
+
+                return ret;
+            }
+        }
+
         #endregion
 
         #region Private-Methods
