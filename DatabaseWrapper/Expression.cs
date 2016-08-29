@@ -400,6 +400,44 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Prepends the Expression in prepend to the Expression original using an AND clause.
+        /// </summary>
+        /// <param name="prepend">The Expression to prepend.</param>
+        /// <param name="original">The original Expression.</param>
+        /// <returns>A new Expression.</returns>
+        public static Expression PrependAndClause(Expression prepend, Expression original)
+        {
+            if (prepend == null) throw new ArgumentNullException(nameof(prepend));
+            if (original == null) throw new ArgumentNullException(nameof(original));
+            Expression ret = new Expression
+            {
+                LeftTerm = prepend,
+                Operator = Operators.And,
+                RightTerm = original
+            };
+            return ret;
+        }
+
+        /// <summary>
+        /// Prepends the Expression in prepend to the Expression original using an OR clause.
+        /// </summary>
+        /// <param name="prepend">The Expression to prepend.</param>
+        /// <param name="original">The original Expression.</param>
+        /// <returns>A new Expression.</returns>
+        public static Expression PrependOrClause(Expression prepend, Expression original)
+        {
+            if (prepend == null) throw new ArgumentNullException(nameof(prepend));
+            if (original == null) throw new ArgumentNullException(nameof(original));
+            Expression ret = new Expression
+            {
+                LeftTerm = prepend,
+                Operator = Operators.Or,
+                RightTerm = original
+            };
+            return ret;
+        }
+
+        /// <summary>
         /// Convert a List of Expression objects to a nested Expression containing AND between each Expression in the list. 
         /// </summary>
         /// <param name="exprList">List of Expression objects.</param>

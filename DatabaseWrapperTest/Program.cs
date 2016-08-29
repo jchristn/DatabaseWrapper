@@ -25,6 +25,11 @@ namespace DatabaseWrapperTest
         {
             try
             {
+                Console.WriteLine("Displaying prepended AND expression...");
+                PrependAndTest();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
                 Console.WriteLine("Displaying nested AND expression...");
                 DisplayNestedAndExpression();
                 Console.WriteLine("Press ENTER to continue...");
@@ -73,6 +78,31 @@ namespace DatabaseWrapperTest
                 Console.WriteLine("Press ENTER to exit");
                 Console.ReadLine();
             }
+        }
+
+        static void PrependAndTest()
+        {
+            Expression e1 = new Expression
+            {
+                LeftTerm = "key1",
+                Operator = Operators.Or, 
+                RightTerm = new Expression
+                {
+                    LeftTerm = "key2",
+                    Operator = Operators.And,
+                    RightTerm = "val2"
+                }
+            };
+
+            Expression e2 = new Expression
+            {
+                LeftTerm = "something",
+                Operator = Operators.LessThan,
+                RightTerm = "22"
+            };
+
+            Expression e3 = Expression.PrependAndClause(e1, e2);
+            Console.WriteLine(e3.ToWhereClause(DbTypes.MsSql));
         }
 
         static void DisplayNestedAndExpression()
