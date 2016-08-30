@@ -57,7 +57,7 @@ namespace DatabaseWrapper
             if (LeftTerm == null) return null;
 
             clause += "(";
-
+            
             if (LeftTerm is Expression)
             {
                 clause += ((Expression)LeftTerm).ToWhereClause(dbType) + " ";
@@ -66,7 +66,7 @@ namespace DatabaseWrapper
             {
                 if (!(LeftTerm is string))
                 {
-                    Console.WriteLine("ToWhereClause LeftTerm is not string");
+                    Console.WriteLine("ToWhereClause LeftTerm is not string (" + LeftTerm.GetType() + ")");
                     return null;
                 }
 

@@ -205,6 +205,29 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Returns a DataTable containing at most one row with data from the specified table where the specified column contains the specified value.  Should only be used on key or unique fields.
+        /// </summary>
+        /// <param name="tableName">The table from which you wish to SELECT.</param>
+        /// <param name="columnName">The column containing key or unique fields where a match is desired.</param>
+        /// <param name="value">The value to match in the key or unique field column.  This should be an object that can be cast to a string value.</param>
+        /// <returns>A DataTable containing at most one row.</returns>
+        public DataTable GetUniqueObjectById(string tableName, string columnName, object value)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+            if (String.IsNullOrEmpty(columnName)) throw new ArgumentNullException(nameof(columnName));
+            if (value == null) throw new ArgumentNullException(nameof(value));
+
+            Expression e = new Expression
+            {
+                LeftTerm = columnName,
+                Operator = Operators.Equals,
+                RightTerm = value.ToString()
+            };
+
+            return Select(tableName, 1, null, e, null);
+        }
+
+        /// <summary>
         /// Execute a SELECT query.
         /// </summary>
         /// <param name="tableName">The table from which you wish to SELECT.</param>
