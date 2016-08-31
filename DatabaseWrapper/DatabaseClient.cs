@@ -410,13 +410,52 @@ namespace DatabaseWrapper
                 if (added == 0)
                 {
                     keys += curr.Key;
-                    if (curr.Value != null) values += "'" + SanitizeString(curr.Value.ToString()) + "'";
+                    if (curr.Value != null)
+                    {
+                        if (curr.Value is DateTime || curr.Value is DateTime?)
+                        {
+                            switch (DbType)
+                            {
+                                case DbTypes.MsSql:
+                                    values += "'" + DbTimestamp(DbTypes.MsSql, (DateTime)curr.Value) + "'";
+                                    break;
+
+                                case DbTypes.MySql:
+                                    values += "'" + DbTimestamp(DbTypes.MySql, (DateTime)curr.Value) + "'";
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            values += "'" + SanitizeString(curr.Value.ToString()) + "'";
+                        }
+                    }
                     else values += "null";
                 }
                 else
                 {
                     keys += "," + curr.Key;
-                    if (curr.Value != null) values += ",'" + SanitizeString(curr.Value.ToString()) + "'";
+                    if (curr.Value != null)
+                    {
+                        if (curr.Value is DateTime || curr.Value is DateTime?)
+                        {
+                            switch (DbType)
+                            {
+                                case DbTypes.MsSql:
+                                    values += ",'" + DbTimestamp(DbTypes.MsSql, (DateTime)curr.Value) + "'";
+                                    break;
+
+                                case DbTypes.MySql:
+                                    values += ",'" + DbTimestamp(DbTypes.MySql, (DateTime)curr.Value) + "'";
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            values += ",'" + SanitizeString(curr.Value.ToString()) + "'";
+                        }
+
+                    }
                     else values += ",null";
                 }
                 added++;
@@ -544,13 +583,57 @@ namespace DatabaseWrapper
 
                 if (added == 0)
                 {
-                    if (curr.Value != null) keyValueClause += curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
-                    else keyValueClause += curr.Key + "= null";
+                    if (curr.Value != null)
+                    {
+                        if (curr.Value is DateTime || curr.Value is DateTime?)
+                        {
+                            switch (DbType)
+                            {
+                                case DbTypes.MsSql:
+                                    keyValueClause += curr.Key + "='" + DbTimestamp(DbTypes.MsSql, (DateTime)curr.Value) + "'";
+                                    break;
+
+                                case DbTypes.MySql:
+                                    keyValueClause += curr.Key + "='" + DbTimestamp(DbTypes.MySql, (DateTime)curr.Value) + "'";
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            keyValueClause += curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
+                        }
+                    }
+                    else
+                    {
+                        keyValueClause += curr.Key + "= null";
+                    }
                 }
                 else
                 {
-                    if (curr.Value != null) keyValueClause += "," + curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
-                    else keyValueClause += "," + curr.Key + "= null";
+                    if (curr.Value != null)
+                    {
+                        if (curr.Value is DateTime || curr.Value is DateTime?)
+                        {
+                            switch (DbType)
+                            {
+                                case DbTypes.MsSql:
+                                    keyValueClause += "," + curr.Key + "='" + DbTimestamp(DbTypes.MsSql, (DateTime)curr.Value) + "'";
+                                    break;
+
+                                case DbTypes.MySql:
+                                    keyValueClause += "," + curr.Key + "='" + DbTimestamp(DbTypes.MySql, (DateTime)curr.Value) + "'";
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            keyValueClause += "," + curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
+                        }
+                    }
+                    else
+                    {
+                        keyValueClause += "," + curr.Key + "= null";
+                    }
                 }
                 added++;
             }
