@@ -427,7 +427,14 @@ namespace DatabaseWrapper
                         }
                         else
                         {
-                            values += "'" + SanitizeString(curr.Value.ToString()) + "'";
+                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                            {
+                                values += "N'" + SanitizeString(curr.Value.ToString()) + "'";
+                            }
+                            else
+                            {
+                                values += "'" + SanitizeString(curr.Value.ToString()) + "'";
+                            }
                         }
                     }
                     else values += "null";
@@ -452,7 +459,14 @@ namespace DatabaseWrapper
                         }
                         else
                         {
-                            values += ",'" + SanitizeString(curr.Value.ToString()) + "'";
+                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                            {
+                                values += ",N'" + SanitizeString(curr.Value.ToString()) + "'";
+                            }
+                            else
+                            {
+                                values += ",'" + SanitizeString(curr.Value.ToString()) + "'";
+                            }
                         }
 
                     }
@@ -600,7 +614,14 @@ namespace DatabaseWrapper
                         }
                         else
                         {
-                            keyValueClause += curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
+                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                            {
+                                keyValueClause += curr.Key + "=N'" + SanitizeString(curr.Value.ToString()) + "'";
+                            }
+                            else
+                            {
+                                keyValueClause += curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
+                            }
                         }
                     }
                     else
@@ -627,7 +648,14 @@ namespace DatabaseWrapper
                         }
                         else
                         {
-                            keyValueClause += "," + curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
+                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                            {
+                                keyValueClause += "," + curr.Key + "=N'" + SanitizeString(curr.Value.ToString()) + "'";
+                            }
+                            else
+                            {
+                                keyValueClause += "," + curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
+                            }
                         }
                     }
                     else

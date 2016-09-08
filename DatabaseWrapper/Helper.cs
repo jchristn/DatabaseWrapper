@@ -158,5 +158,19 @@ namespace DatabaseWrapper
             return json;
         }
 
+        /// <summary>
+        /// Check to see if extended characters are in use in a string.
+        /// </summary>
+        /// <param name="data">The string to evaluate.</param>
+        /// <returns>A Boolean indicating whether or not extended characters were detected.</returns>
+        public static bool IsExtendedCharacters(string data)
+        {
+            if (String.IsNullOrEmpty(data)) return false;
+            foreach (char c in data)
+            {
+                if ((int)c > 128) return true;
+            }
+            return false;
+        }
     }
 }
