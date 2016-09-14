@@ -19,6 +19,10 @@ Core features:
 - support for SELECT, INSERT, UPDATE, and DELETE, or raw queries
 - built-in sanitization
 
+## New in v1.1.0
+- pagination support in SELECT queries: use indexStart, maxResults, and orderByClause (all are required)
+- numerous bugfixes
+
 ## A Note on Sanitization
 Use of parameterized queries vs building queries dynamically is a sensitive subject.  Proponents of parameterized queries have data on their side - that parameterization does the right thing to prevent SQL injection and other issues.  *I do not disagree with them*.  However, it is worth noting that with proper care, you CAN build systems that allow you to dynamically build queries, and you SHOULD do so as long as you build in the appropriate safeguards.
 
@@ -77,7 +81,13 @@ Expression e = new Expression {
 };
 ```
 
-## Need a timestamp?
+## Select with Pagination
+Use indexStart, maxResults, and orderByClause to retrieve paginated results.  The query will retrieve maxResults records starting at row number indexStart using an ordering based on orderByClause.  See the example in the DatabaseWrapperTest project.
+```
+DataTable result = client.Select("person", 5, 10, null, e, "ORDER BY age DESC");
+```
+
+## Need a Timestamp?
 We added a simple static method for this which you can use when building expressions (or elsewhere).
 ```
 string tsMssql = DatabaseClient.DbTimestamp(DbTypes.MsSql, DateTime.Now));
@@ -89,3 +99,9 @@ string tsMysql = DatabaseClient.DbTimestamp(DbTypes.MySql, DateTime.Now));
 
 ## Other Notes
 MySQL does not like to return updated rows.  Sorry about that.  I thought about making the UPDATE clause require that you supply the ID field and the ID value so that I could retrieve it after the fact, but that approach is just too limiting.
+
+## Running in Mono
+There should be no issues running in Mono, however, this has not (yet) been tested.  
+
+## version history
+notes from previous versions (starting with v1.1.0) will be moved here.

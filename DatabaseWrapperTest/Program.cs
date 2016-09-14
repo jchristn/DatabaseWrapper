@@ -25,25 +25,14 @@ namespace DatabaseWrapperTest
         {
             try
             {
-                Console.WriteLine("Displaying prepended AND expression...");
-                PrependAndTest();
-                Console.WriteLine("Press ENTER to continue...");
-                Console.ReadLine();
-
-                Console.WriteLine("Displaying prepended OR expression...");
-                PrependOrTest();
-                Console.WriteLine("Press ENTER to continue...");
-                Console.ReadLine();
-
-                Console.WriteLine("Displaying nested AND expression...");
-                DisplayNestedAndExpression();
-                Console.WriteLine("Press ENTER to continue...");
-                Console.ReadLine();
-
-                Console.WriteLine("Displaying nested OR expression...");
-                DisplayNestedOrExpression();
-                Console.WriteLine("Press ENTER to continue...");
-                Console.ReadLine();
+                //
+                // Uncomment the lines below for the functions you wish to test
+                //
+                // PrependAndTest();
+                // PrependOrTest();
+                // DisplayNestedAndExpression();
+                // DisplayNestedOrExpression();
+                //
 
                 // MsSql
                 // client = new DatabaseClient(DbTypes.MsSql, "localhost", 0, null, null, "SQLEXPRESS", "test");
@@ -66,6 +55,11 @@ namespace DatabaseWrapperTest
 
                 Console.WriteLine("Retrieving rows...");
                 RetrieveRows();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
+                Console.WriteLine("Retrieving rows by index...");
+                RetrieveRowsByIndex();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -228,7 +222,39 @@ namespace DatabaseWrapperTest
                 // is here to show how to build a nested expression
                 //
 
-                client.Select("person", 3, returnFields, e, null);
+                client.Select("person", null, 3, returnFields, e, null);
+            }
+        }
+
+        static void RetrieveRowsByIndex()
+        {
+            List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
+
+            for (int i = 10; i < 20; i++)
+            {
+                Expression e = new Expression
+                {
+                    LeftTerm = new Expression
+                    {
+                        LeftTerm = "personId",
+                        Operator = Operators.LessThan,
+                        RightTerm = i
+                    },
+                    Operator = Operators.And,
+                    RightTerm = new Expression
+                    {
+                        LeftTerm = "age",
+                        Operator = Operators.LessThan,
+                        RightTerm = 50
+                    }
+                };
+
+                // 
+                // Yes, personId and age should be the same, however, the example
+                // is here to show how to build a nested expression
+                //
+
+                client.Select("person", (i - 10), 5, returnFields, e, "ORDER BY age DESC");
             }
         }
 

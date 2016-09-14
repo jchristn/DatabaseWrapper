@@ -224,24 +224,25 @@ namespace DatabaseWrapper
                 RightTerm = value.ToString()
             };
 
-            return Select(tableName, 1, null, e, null);
+            return Select(tableName, null, 1, null, e, null);
         }
 
         /// <summary>
         /// Execute a SELECT query.
         /// </summary>
         /// <param name="tableName">The table from which you wish to SELECT.</param>
+        /// <param name="indexStart">The starting index for retrieval; used for pagination in conjunction with maxResults and orderByClause.  orderByClause example: ORDER BY created DESC.</param>
         /// <param name="maxResults">The maximum number of results to retrieve.</param>
         /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
         /// <param name="orderByClause">Specify an ORDER BY clause if desired.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public DataTable Select(string tableName, int maxResults, List<string> returnFields, Expression filter, string orderByClause)
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            if (maxResults < 0) throw new ArgumentOutOfRangeException(nameof(maxResults));
 
-            string query = "";
+            string innerQuery = "";
+            string outerQuery = "";
             string whereClause = "";
             DataTable result;
             List<Column> tableDetails = DescribeTable(tableName);
@@ -252,15 +253,23 @@ namespace DatabaseWrapper
                     #region MsSql
 
                     //
-                    // SELECT and TOP
+                    // select
                     //
-                    if (maxResults > 0) query += "SELECT TOP " + maxResults + " ";
-                    else query += "SELECT ";
-
+                    if (indexStart != null)
+                    {
+                        if (String.IsNullOrEmpty(orderByClause)) throw new ArgumentNullException(nameof(orderByClause));
+                        innerQuery = "SELECT ROW_NUMBER() OVER ( " + orderByClause + " ) AS __row_num__, ";
+                    }
+                    else
+                    {
+                        if (maxResults > 0) innerQuery += "SELECT TOP " + maxResults + " ";
+                        else innerQuery += "SELECT ";
+                    }
+                    
                     //
                     // fields
                     //
-                    if (returnFields == null || returnFields.Count < 1) query += "* ";
+                    if (returnFields == null || returnFields.Count < 1) outerQuery += "* ";
                     else
                     {
                         int fieldsAdded = 0;
@@ -268,22 +277,22 @@ namespace DatabaseWrapper
                         {
                             if (fieldsAdded == 0)
                             {
-                                query += SanitizeString(curr);
+                                innerQuery += SanitizeString(curr);
                                 fieldsAdded++;
                             }
                             else
                             {
-                                query += "," + SanitizeString(curr);
+                                innerQuery += "," + SanitizeString(curr);
                                 fieldsAdded++;
                             }
                         }
                     }
-                    query += " ";
+                    innerQuery += " ";
 
                     //
                     // table
                     //
-                    query += "FROM " + tableName + " ";
+                    innerQuery += "FROM " + tableName + " ";
 
                     //
                     // expressions
@@ -294,13 +303,39 @@ namespace DatabaseWrapper
                     }
                     if (!String.IsNullOrEmpty(whereClause))
                     {
-                        query += "WHERE " + whereClause + " ";
+                        innerQuery += "WHERE " + whereClause + " ";
                     }
 
                     // 
                     // order clause
                     //
-                    if (!String.IsNullOrEmpty(orderByClause)) query += orderByClause;
+                    if (indexStart == null)
+                    {
+                        if (!String.IsNullOrEmpty(orderByClause)) innerQuery += orderByClause + " ";
+                    }
+
+                    // 
+                    // wrap in outer query
+                    //
+                    if (indexStart != null)
+                    {
+                        if (indexStart == 0)
+                        {
+                            outerQuery = "SELECT * FROM (" + innerQuery + ") AS row_constrained_result WHERE __row_num__ > " + indexStart + " ";
+                            if (maxResults > 0) outerQuery += "AND __row_num__ <= " + (indexStart + maxResults) + " ";
+                            outerQuery += "ORDER BY __row_num__ ";
+                        }
+                        else
+                        {
+                            outerQuery = "SELECT * FROM (" + innerQuery + ") AS row_constrained_result WHERE __row_num__ >= " + indexStart + " ";
+                            if (maxResults > 0) outerQuery += "AND __row_num__ < " + (indexStart + maxResults) + " ";
+                            outerQuery += "ORDER BY __row_num__ ";
+                        }
+                    }
+                    else
+                    {
+                        outerQuery = innerQuery;
+                    }
                     break;
 
                     #endregion
@@ -311,12 +346,12 @@ namespace DatabaseWrapper
                     //
                     // SELECT
                     //
-                    query += "SELECT ";
+                    outerQuery += "SELECT ";
 
                     //
                     // fields
                     //
-                    if (returnFields == null || returnFields.Count < 1) query += "* ";
+                    if (returnFields == null || returnFields.Count < 1) outerQuery += "* ";
                     else
                     {
                         int fieldsAdded = 0;
@@ -324,22 +359,22 @@ namespace DatabaseWrapper
                         {
                             if (fieldsAdded == 0)
                             {
-                                query += SanitizeString(curr);
+                                outerQuery += SanitizeString(curr);
                                 fieldsAdded++;
                             }
                             else
                             {
-                                query += "," + SanitizeString(curr);
+                                outerQuery += "," + SanitizeString(curr);
                                 fieldsAdded++;
                             }
                         }
                     }
-                    query += " ";
+                    outerQuery += " ";
 
                     //
                     // table
                     //
-                    query += "FROM " + tableName + " ";
+                    outerQuery += "FROM " + tableName + " ";
 
                     //
                     // expressions
@@ -350,20 +385,27 @@ namespace DatabaseWrapper
                     }
                     if (!String.IsNullOrEmpty(whereClause))
                     {
-                        query += "WHERE " + whereClause + " ";
+                        outerQuery += "WHERE " + whereClause + " ";
                     }
 
                     // 
                     // order clause
                     //
-                    if (!String.IsNullOrEmpty(orderByClause)) query += orderByClause;
+                    if (!String.IsNullOrEmpty(orderByClause)) outerQuery += orderByClause + " ";
 
                     //
                     // limit
                     //
                     if (maxResults > 0)
                     {
-                        query += "LIMIT " + maxResults;
+                        if (indexStart != null && indexStart >= 0)
+                        {
+                            outerQuery += "LIMIT " + indexStart + "," + maxResults;
+                        }
+                        else
+                        {
+                            outerQuery += "LIMIT " + maxResults;
+                        }
                     }
 
                     break;
@@ -371,7 +413,7 @@ namespace DatabaseWrapper
                     #endregion
             }
 
-            result = RawQuery(query);
+            result = RawQuery(outerQuery);
             return result;
         }
 

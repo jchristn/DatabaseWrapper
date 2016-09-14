@@ -1,4 +1,6 @@
-﻿CREATE TABLE `person` (
+﻿CREATE DATABASE `test`;
+USE `test`;
+CREATE TABLE `person` (
   `personId` int(11) NOT NULL AUTO_INCREMENT,
   `firstName` varchar(32) NOT NULL,
   `lastName` varchar(32) NOT NULL,
