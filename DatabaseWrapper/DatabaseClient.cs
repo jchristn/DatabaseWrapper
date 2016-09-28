@@ -606,7 +606,7 @@ namespace DatabaseWrapper
 
             return result;
         }
-        
+
         /// <summary>
         /// Execute an UPDATE query.
         /// </summary>
@@ -740,7 +740,7 @@ namespace DatabaseWrapper
             result = RawQuery(query);
 
             #endregion
-
+            
             return result;
         }
 
@@ -791,10 +791,68 @@ namespace DatabaseWrapper
             return result;
         }
 
+        /// <summary>
+        /// Execute a query.
+        /// </summary>
+        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public DataTable RawQuery(string query)
+        {
+            if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
+            DataTable result = new DataTable();
+
+            if (DebugRawQuery) Console.WriteLine("RawQuery: " + query);
+
+            switch (DbType)
+            {
+                case DbTypes.MsSql:
+                    using (SqlConnection conn = new SqlConnection(ConnectionString))
+                    {
+                        conn.Open();
+                        SqlDataAdapter sda = new SqlDataAdapter(query, conn);
+                        sda.Fill(result);
+                        conn.Dispose();
+                        conn.Close();
+                    }
+                    break;
+
+                case DbTypes.MySql:
+                    using (MySqlConnection conn = new MySqlConnection(ConnectionString))
+                    {
+                        conn.Open();
+                        MySqlCommand cmd = new MySqlCommand();
+                        cmd.Connection = conn;
+                        cmd.CommandText = query;
+                        MySqlDataAdapter sda = new MySqlDataAdapter(cmd);
+                        DataSet ds = new DataSet();
+                        sda.Fill(ds);
+                        if (ds != null)
+                        {
+                            if (ds.Tables != null)
+                            {
+                                if (ds.Tables.Count > 0)
+                                {
+                                    result = ds.Tables[0];
+                                }
+                            }
+                        }
+                        conn.Close();
+                    }
+                    break;
+            }
+
+            if (DebugResultRowCount)
+            {
+                if (result != null) Console.WriteLine("RawQuery: returning " + result.Rows.Count + " row(s)");
+                else Console.WriteLine("RawQery: returning null");
+            }
+            return result;
+        }
+
         #endregion
 
         #region Private-Instance-Methods
-        
+
         private bool LoadTableNames()
         {
             lock (LoadingTablesLock)
@@ -1009,59 +1067,6 @@ namespace DatabaseWrapper
             }
 
             return true;
-        }
-
-        private DataTable RawQuery(string query)
-        {
-            if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
-            DataTable result = new DataTable();
-
-            if (DebugRawQuery) Console.WriteLine("RawQuery: " + query);
-
-            switch (DbType)
-            {
-                case DbTypes.MsSql:
-                    using (SqlConnection conn = new SqlConnection(ConnectionString))
-                    {
-                        conn.Open();
-                        SqlDataAdapter sda = new SqlDataAdapter(query, conn);
-                        sda.Fill(result);
-                        conn.Dispose();
-                        conn.Close();
-                    }
-                    break;
-
-                case DbTypes.MySql:
-                    using (MySqlConnection conn = new MySqlConnection(ConnectionString))
-                    {
-                        conn.Open();
-                        MySqlCommand cmd = new MySqlCommand();
-                        cmd.Connection = conn;
-                        cmd.CommandText = query;
-                        MySqlDataAdapter sda = new MySqlDataAdapter(cmd);
-                        DataSet ds = new DataSet();
-                        sda.Fill(ds);
-                        if (ds != null)
-                        {
-                            if (ds.Tables != null)
-                            {
-                                if (ds.Tables.Count > 0)
-                                {
-                                    result = ds.Tables[0];
-                                }
-                            }
-                        }
-                        conn.Close();
-                    }
-                    break;
-            }
-
-            if (DebugResultRowCount)
-            {
-                if (result != null) Console.WriteLine("RawQuery: returning " + result.Rows.Count + " row(s)");
-                else Console.WriteLine("RawQery: returning null");
-            }
-            return result;
         }
 
         private string SanitizeString(string s)

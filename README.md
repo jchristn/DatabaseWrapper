@@ -19,9 +19,8 @@ Core features:
 - support for SELECT, INSERT, UPDATE, and DELETE, or raw queries
 - built-in sanitization
 
-## New in v1.1.0
-- pagination support in SELECT queries: use indexStart, maxResults, and orderByClause (all are required)
-- numerous bugfixes
+## New in v1.1.1
+- raw query support
 
 ## A Note on Sanitization
 Use of parameterized queries vs building queries dynamically is a sensitive subject.  Proponents of parameterized queries have data on their side - that parameterization does the right thing to prevent SQL injection and other issues.  *I do not disagree with them*.  However, it is worth noting that with proper care, you CAN build systems that allow you to dynamically build queries, and you SHOULD do so as long as you build in the appropriate safeguards.
@@ -61,6 +60,9 @@ result = client.Select("person", 0, fields, e, null);
 // delete a record
 e = new Expression { LeftTerm = "firstName", Operator = Operators.Equals, RightTerm = "Joel" };
 result = client.Delete("person", e);
+
+// execute a raw query
+result = client.RawQuery("SELECT customer_id FROM customer WHERE customer_id > 10");
 ```
 
 ## Sample Compound Expression
@@ -105,3 +107,7 @@ There should be no issues running in Mono, however, this has not (yet) been test
 
 ## version history
 notes from previous versions (starting with v1.1.0) will be moved here.
+
+v1.1.0
+- pagination support in SELECT queries: use indexStart, maxResults, and orderByClause (all are required)
+- numerous bugfixes
