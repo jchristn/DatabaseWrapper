@@ -13,7 +13,7 @@ namespace DatabaseWrapper
 {
     public class DatabaseClient
     {
-        #region Constructor
+        #region Constructors
 
         /// <summary>
         /// Create an instance of the database client.
@@ -66,8 +66,73 @@ namespace DatabaseWrapper
             }
         }
 
+        /// <summary>
+        /// Create an instance of the database client.
+        /// </summary>
+        /// <param name="dbType">The type of database.</param>
+        /// <param name="serverIp">The IP address or hostname of the database server.</param>
+        /// <param name="serverPort">The TCP port of the database server.</param>
+        /// <param name="username">The username to use when authenticating with the database server.</param>
+        /// <param name="password">The password to use when authenticating with the database server.</param>
+        /// <param name="instance">The instance on the database server (for use with Microsoft SQL Server).</param>
+        /// <param name="database">The name of the database with which to connect.</param>
+        public DatabaseClient(
+            string dbType,
+            string serverIp,
+            int serverPort,
+            string username,
+            string password,
+            string instance,
+            string database)
+        {
+            //
+            // MsSql, MySql, and PostgreSql will use server IP, port, username, password, database
+            // Sqlite will use just database and it should refer to the database file
+            //
+            if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
+            if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
+            if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
+            if (String.IsNullOrEmpty(dbType)) throw new ArgumentNullException(nameof(dbType));
+
+            switch (dbType.ToLower())
+            {
+                case "mssql":
+                    DbType = DbTypes.MsSql;
+                    break;
+
+                case "mysql":
+                    DbType = DbTypes.MySql;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dbType));
+            }
+
+            ServerIp = serverIp;
+            ServerPort = serverPort;
+            Username = username;
+            Password = password;
+            Instance = instance;
+            Database = database;
+
+            if (!PopulateConnectionString())
+            {
+                throw new Exception("Unable to build connection string");
+            }
+
+            if (!LoadTableNames())
+            {
+                throw new Exception("Unable to load table names");
+            }
+
+            if (!LoadTableDetails())
+            {
+                throw new Exception("Unable to load table details from " + ServerIp + ":" + ServerPort + " " + Instance + " " + Database + " using username " + Username);
+            }
+        }
+
         #endregion
-        
+
         #region Public-Members
 
         /// <summary>
