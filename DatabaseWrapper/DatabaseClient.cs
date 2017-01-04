@@ -1257,6 +1257,28 @@ namespace DatabaseWrapper
             }
         }
 
+        /// <summary>
+        /// Convert a DateTime to a string formatted for the specified database type.
+        /// </summary>
+        /// <param name="dbType">The type of database.</param>
+        /// <param name="dt">The timestamp.</param>
+        /// <returns>A string formatted for use with the specified database.</returns>
+        public static string DbTimestamp(string dbType, DateTime ts)
+        {
+            if (String.IsNullOrEmpty(dbType)) throw new ArgumentNullException(nameof(dbType));
+            switch (dbType.ToLower())
+            {
+                case "mssql":
+                    return DbTimestamp(DbTypes.MsSql, ts);
+
+                case "mysql":
+                    return DbTimestamp(DbTypes.MySql, ts);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dbType));
+            }
+        }
+
         #endregion
     }
 }

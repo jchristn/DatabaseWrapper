@@ -37,18 +37,40 @@ namespace DatabaseWrapper
         /// The right term of the expression; can either be an object for comparison or a nested Expression.
         /// </summary>
         public object RightTerm;
-        
+
         #endregion
 
         #region Private-Members
-        
+
         #endregion
 
         #region Public-Methods
-        
+
         /// <summary>
         /// Converts an Expression to a string that is compatible for use in a WHERE clause.
         /// </summary>
+        /// <param name="dbType">The database type.</param>
+        /// <returns>String containing human-readable version of the Expression.</returns>
+        public string ToWhereClause(string dbType)
+        {
+            if (String.IsNullOrEmpty(dbType)) throw new ArgumentNullException(nameof(dbType));
+            switch (dbType.ToLower())
+            {
+                case "mssql":
+                    return ToWhereClause(DbTypes.MsSql);
+
+                case "mysql":
+                    return ToWhereClause(DbTypes.MySql);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dbType));
+            }
+        }
+
+        /// <summary>
+        /// Converts an Expression to a string that is compatible for use in a WHERE clause.
+        /// </summary>
+        /// <param name="dbType">The database type.</param>
         /// <returns>String containing human-readable version of the Expression.</returns>
         public string ToWhereClause(DbTypes dbType)
         {
