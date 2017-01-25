@@ -6,6 +6,6 @@ D:\code\misc\DatabaseWrapper\DatabaseWrapper\bin\Release\EntityFramework.SqlServ
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\bin\Release\MySql.Data.dll
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\bin\Release\EntityFramework.xml
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\bin\Release\EntityFramework.SqlServer.xml
+D:\code\misc\DatabaseWrapper\DatabaseWrapper\obj\Release\DatabaseWrapper.csprojResolveAssemblyReference.cache
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\obj\Release\DatabaseWrapper.dll
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\obj\Release\DatabaseWrapper.pdb
-D:\code\misc\DatabaseWrapper\DatabaseWrapper\obj\Release\DatabaseWrapper.csprojResolveAssemblyReference.cache

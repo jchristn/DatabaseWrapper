@@ -914,6 +914,26 @@ namespace DatabaseWrapper
             return result;
         }
 
+        /// <summary>
+        /// Create a string timestamp from the given DateTime for the database of the instance type.
+        /// </summary>
+        /// <param name="ts">DateTime.</param>
+        /// <returns>A string with timestamp formatted for the database of the instance type.</returns>
+        public string Timestamp(DateTime ts)
+        {
+            switch (DbType)
+            {
+                case DbTypes.MsSql:
+                    return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
+
+                case DbTypes.MySql:
+                    return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
+
+                default:
+                    return null;
+            }
+        }
+
         #endregion
 
         #region Private-Instance-Methods
