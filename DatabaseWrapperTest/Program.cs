@@ -85,21 +85,10 @@ namespace DatabaseWrapperTest
             {
                 LeftTerm = "key1",
                 Operator = Operators.Or,
-                RightTerm = new Expression
-                {
-                    LeftTerm = "key2",
-                    Operator = Operators.And,
-                    RightTerm = "val2"
-                }
+                RightTerm = new Expression("key2", Operators.And, "val2")
             };
 
-            Expression e2 = new Expression
-            {
-                LeftTerm = "something",
-                Operator = Operators.LessThan,
-                RightTerm = "22"
-            };
-
+            Expression e2 = new Expression("something", Operators.LessThan, "22");
             Expression e3 = Expression.PrependAndClause(e1, e2);
             Console.WriteLine(e3.ToWhereClause(DbTypes.MsSql));
         }
@@ -110,21 +99,10 @@ namespace DatabaseWrapperTest
             {
                 LeftTerm = "key1",
                 Operator = Operators.Or,
-                RightTerm = new Expression
-                {
-                    LeftTerm = "key2",
-                    Operator = Operators.And,
-                    RightTerm = "val2"
-                }
+                RightTerm = new Expression("key2", Operators.And, "val2")
             };
 
-            Expression e2 = new Expression
-            {
-                LeftTerm = "something",
-                Operator = Operators.LessThan,
-                RightTerm = "22"
-            };
-
+            Expression e2 = new Expression("something", Operators.LessThan, 22);
             Expression e3 = Expression.PrependOrClause(e1, e2);
             Console.WriteLine(e3.ToWhereClause(DbTypes.MsSql));
         }
@@ -183,13 +161,7 @@ namespace DatabaseWrapperTest
                 d.Add("age", i);
                 d.Add("notes", "This is updated person number " + i);
 
-                Expression e = new Expression
-                {
-                    LeftTerm = "personId",
-                    Operator = Operators.Equals,
-                    RightTerm = i
-                };
-
+                Expression e = new Expression("personId", Operators.Equals, i);
                 client.Update("person", d, e);
             }
         }
@@ -202,19 +174,9 @@ namespace DatabaseWrapperTest
             {
                 Expression e = new Expression
                 {
-                    LeftTerm = new Expression
-                    {
-                        LeftTerm = "personId",
-                        Operator = Operators.LessThan,
-                        RightTerm = i
-                    },
+                    LeftTerm = new Expression("personId", Operators.LessThan, i),
                     Operator = Operators.And,
-                    RightTerm = new Expression
-                    {
-                        LeftTerm = "age",
-                        Operator = Operators.LessThan,
-                        RightTerm = i
-                    }
+                    RightTerm = new Expression("age", Operators.LessThan, i)
                 };
 
                 // 
@@ -234,19 +196,9 @@ namespace DatabaseWrapperTest
             {
                 Expression e = new Expression
                 {
-                    LeftTerm = new Expression
-                    {
-                        LeftTerm = "personId",
-                        Operator = Operators.LessThan,
-                        RightTerm = i
-                    },
+                    LeftTerm = new Expression("personId", Operators.LessThan, 1),
                     Operator = Operators.And,
-                    RightTerm = new Expression
-                    {
-                        LeftTerm = "age",
-                        Operator = Operators.LessThan,
-                        RightTerm = 50
-                    }
+                    RightTerm = new Expression("age", Operators.LessThan, 50)
                 };
 
                 // 
@@ -258,17 +210,11 @@ namespace DatabaseWrapperTest
             }
         }
 
-        static void DeleteRows()
+        private static void DeleteRows()
         {
             for (int i = 20; i < 30; i++)
             {
-                Expression e = new Expression
-                {
-                    LeftTerm = "personId",
-                    Operator = Operators.Equals,
-                    RightTerm = i
-                };
-
+                Expression e = new Expression("personId", Operators.Equals, i);
                 client.Delete("person", e);
             }
         }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -117,6 +118,104 @@ namespace DatabaseWrapper
                 property.SetValue(item, r[property.Name], null);
             }
             return item;
+        }
+
+        /// <summary>
+        /// Converts a DataTable to a List of dynamic objects.
+        /// </summary>
+        /// <param name="dt">DataTable.</param>
+        /// <returns>A List of dynamic objects.</returns>
+        public static List<dynamic> DataTableToListDynamic(DataTable dt)
+        {
+            List<dynamic> ret = new List<dynamic>();
+            if (dt == null || dt.Rows.Count < 1) return ret;
+
+            foreach (DataRow curr in dt.Rows)
+            {
+                dynamic dyn = new ExpandoObject();
+                foreach (DataColumn col in dt.Columns)
+                {
+                    var dic = (IDictionary<string, object>)dyn;
+                    dic[col.ColumnName] = curr[col];
+                }
+                ret.Add(dyn);
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Converts a DataTable to a dynamic, assuming the DataTable has a single row.
+        /// </summary>
+        /// <param name="dt">DataTable.</param>
+        /// <returns>A dynamic object.</returns>
+        public static dynamic DataTableToDynamic(DataTable dt)
+        {
+            dynamic ret = new ExpandoObject();
+            if (dt == null || dt.Rows.Count < 1) return ret;
+            if (dt.Rows.Count != 1) throw new ArgumentException("DataTable must contain only one row.");
+
+            foreach (DataRow curr in dt.Rows)
+            {
+                foreach (DataColumn col in dt.Columns)
+                {
+                    var dic = (IDictionary<string, object>)ret;
+                    dic[col.ColumnName] = curr[col];
+                }
+
+                return ret;
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Converts a DataTable to a List of Dictionary objects with key of type string and value of type object.
+        /// </summary>
+        /// <param name="dt">DataTable.</param>
+        /// <returns>List of Dictionary objects.</returns>
+        public static List<Dictionary<string, object>> DataTableToListDictionary(DataTable dt)
+        {
+            List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
+            if (dt == null || dt.Rows.Count < 1) return ret;
+
+            foreach (DataRow curr in dt.Rows)
+            {
+                Dictionary<string, object> currDict = new Dictionary<string, object>();
+
+                foreach (DataColumn col in dt.Columns)
+                {
+                    currDict.Add(col.ColumnName, curr[col]);
+                }
+
+                ret.Add(currDict);
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Converts a DataTable to a Dictionary with key of type string and value of type object, assuming the DataTable has a single row.
+        /// </summary>
+        /// <param name="dt">DataTable.</param>
+        /// <returns>A Dictionary object.</returns>
+        public static Dictionary<string, object> DataTableToDictionary(DataTable dt)
+        {
+            Dictionary<string, object> ret = new Dictionary<string, object>();
+            if (dt == null || dt.Rows.Count < 1) return ret;
+            if (dt.Rows.Count != 1) throw new ArgumentException("DataTable must contain only one row.");
+
+            foreach (DataRow curr in dt.Rows)
+            {
+                foreach (DataColumn col in dt.Columns)
+                {
+                    ret.Add(col.ColumnName, curr[col]);
+                }
+
+                return ret;
+            }
+
+            return ret;
         }
 
         /// <summary>

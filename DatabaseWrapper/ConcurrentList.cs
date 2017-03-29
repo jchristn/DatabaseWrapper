@@ -12,7 +12,7 @@ namespace DatabaseWrapper
     /// </summary>
     /// <seealso cref="http://stackoverflow.com/questions/9995266/how-to-create-a-thread-safe-generic-list"/>
     /// <typeparam name="TValue"></typeparam>
-    public class ConcurrentList<TValue> : IList<TValue>
+    internal class ConcurrentList<TValue> : IList<TValue>
     {
         private object _lock = new object();
         private List<TValue> _storage = new List<TValue>();

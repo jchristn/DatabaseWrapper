@@ -19,6 +19,19 @@ namespace DatabaseWrapper
         {
         }
 
+        /// <summary>
+        /// A structure in the form of term-operator-term that defines a boolean operation within a WHERE clause.
+        /// </summary>
+        /// <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param>
+        /// <param name="oper">The operator.</param>
+        /// <param name="right">The right term of the expression; can either be an object for comparison or a nested Expression.</param>
+        public Expression(object left, Operators oper, object right)
+        {
+            LeftTerm = left;
+            Operator = oper;
+            RightTerm = right;
+        }
+
         #endregion
 
         #region Public-Members
@@ -29,7 +42,7 @@ namespace DatabaseWrapper
         public object LeftTerm;
 
         /// <summary>
-        /// The boolean operator.
+        /// The operator.
         /// </summary>
         public Operators Operator;
 
