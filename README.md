@@ -82,12 +82,14 @@ DataTable result = client.Select("person", 5, 10, null, e, "ORDER BY age DESC");
 ```
 
 ## Need a Timestamp?
-We added a simple static method for this which you can use when building expressions (or elsewhere).
+We added a simple static method for this which you can use when building expressions (or elsewhere).  An object method exists as well.
 ```
-string tsMssql = DatabaseClient.DbTimestamp(DbTypes.MsSql, DateTime.Now));
+string mssql1 = DatabaseClient.DbTimestamp(DbTypes.MsSql, DateTime.Now));
+string mssql2 = client.Timestamp(DateTime.Now);
 // 08/23/2016 05:34:32.4349034 PM
 
-string tsMysql = DatabaseClient.DbTimestamp(DbTypes.MySql, DateTime.Now));
+string mysql1 = DatabaseClient.DbTimestamp(DbTypes.MySql, DateTime.Now));
+string mssql2 = client.Timestamp(DateTime.Now);
 // 2016-08-23 17:34:32.446913 
 ```
 
