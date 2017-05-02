@@ -16,7 +16,7 @@ Core features:
 - dynamic query building using expression objects
 - support for nested queries within expressions
 - support for SQL server native vs Windows authentication
-- support for SELECT, INSERT, UPDATE, and DELETE, or raw queries
+- support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, or raw queries
 - built-in sanitization
 
 ## New in v1.1.6
@@ -99,7 +99,7 @@ MySQL does not like to return updated rows.  Sorry about that.  I thought about 
 ## Running in Mono
 There should be no issues running in Mono, however, this has not (yet) been tested.  
 
-## version history
+## Version history
 Notes from previous versions (starting with v1.1.0) will be moved here.
 
 v1.1.5
