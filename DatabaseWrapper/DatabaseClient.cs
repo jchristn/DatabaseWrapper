@@ -857,6 +857,41 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Empties a table completely.
+        /// </summary>
+        /// <param name="tableName">The table you wish to TRUNCATE.</param>
+        public void Truncate(string tableName)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName)); 
+
+            string query = "";
+            DataTable result;
+
+            switch (DbType)
+            {
+                case DbTypes.MsSql:
+                    #region MsSql
+
+                    query += "TRUNCATE TABLE " + tableName;
+                    break;
+
+                #endregion
+
+                case DbTypes.MySql:
+                    #region MySql
+
+                    query += "TRUNCATE TABLE " + tableName;
+                    break;
+
+                    #endregion
+            }
+
+            result = RawQuery(query);
+
+            return;
+        }
+
+        /// <summary>
         /// Execute a query.
         /// </summary>
         /// <param name="query">Database query defined outside of the database client.</param>
