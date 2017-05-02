@@ -89,7 +89,7 @@ string mssql2 = client.Timestamp(DateTime.Now);
 // 08/23/2016 05:34:32.4349034 PM
 
 string mysql1 = DatabaseClient.DbTimestamp(DbTypes.MySql, DateTime.Now));
-string mssql2 = client.Timestamp(DateTime.Now);
+string mysql2 = client.Timestamp(DateTime.Now);
 // 2016-08-23 17:34:32.446913 
 ```
 
