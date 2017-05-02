@@ -48,17 +48,17 @@ result = client.Insert("person", d);
 
 // update a record
 d = new Dictionary<string, object>();
-d.Add("notes", "THE author :)");
-e = new Expression { LeftTerm = "firstName", Operator = Operators.Equals, RightTerm = "Joel" };
+d.Add("notes", "The author :)");
+e = new Expression("firstName", Operators.Equals, "Joel"); 
 result = client.Update("person", d, e);
 
 // retrieve a record
 fields = new List<string> { "firstName", "lastName" }; // leave null for *
-e = new Expression { LeftTerm = "lastName", Operator = Operators.Equals, RightTerm = "Christner" };
+e = new Expression("lastName", Operators.Equals, "Christner"); 
 result = client.Select("person", 0, fields, e, null);
 
 // delete a record
-e = new Expression { LeftTerm = "firstName", Operator = Operators.Equals, RightTerm = "Joel" };
+e = new Expression("firstName", Operators.Equals, "Joel"); 
 result = client.Delete("person", e);
 
 // execute a raw query
@@ -69,17 +69,9 @@ result = client.RawQuery("SELECT customer_id FROM customer WHERE customer_id > 1
 Expressions can be nested in either the LeftTerm or RightTerm.  Conversion from Expression to a WHERE clause uses recursion, so you should have a good degree of flexibility in building your expressions in terms of depth.
 ```
 Expression e = new Expression {
-	LeftTerm = new Expression {
-		LeftTerm = "age",
-		Operator = Operators.GreaterThan,
-		RightTerm = 30
-	},
+	LeftTerm = new Expression("age", Operators.GreaterThan, 30),
 	Operator = Operators.And,
-	RightTerm = new Expression {
-		LeftTerm = "height",
-		Operator = Operators.LessThan,
-		RightTerm = 74
-	}
+	RightTerm = new Expression("height", Operators.LessThan, 74)
 };
 ```
 
