@@ -334,7 +334,7 @@ namespace DatabaseWrapper
                     //
                     // fields
                     //
-                    if (returnFields == null || returnFields.Count < 1) outerQuery += "* ";
+                    if (returnFields == null || returnFields.Count < 1) innerQuery += "* ";
                     else
                     {
                         int fieldsAdded = 0;
