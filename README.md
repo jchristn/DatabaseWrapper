@@ -19,8 +19,8 @@ Core features:
 - support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, or raw queries
 - built-in sanitization
 
-## New in v1.1.6
-- Added Trunate API
+## New in v1.1.7
+- Bugfixes
 
 ## A Note on Sanitization
 Use of parameterized queries vs building queries dynamically is a sensitive subject.  Proponents of parameterized queries have data on their side - that parameterization does the right thing to prevent SQL injection and other issues.  *I do not disagree with them*.  However, it is worth noting that with proper care, you CAN build systems that allow you to dynamically build queries, and you SHOULD do so as long as you build in the appropriate safeguards.
@@ -102,6 +102,9 @@ There should be no issues running in Mono, however, this has not (yet) been test
 ## Version history
 Notes from previous versions (starting with v1.1.0) will be moved here.
 
+v1.1.6
+- Added Trunate API
+
 v1.1.5
 - Simplified (new) constructor for Expression
 - Additional Helper static methods to convert DataTable to useful objects (List<Dictionary>, Dictionary, List<dynamic>, dynamic)
@@ -110,14 +113,14 @@ v1.1.4
 - Instance method to create timestamp for the given database type.
 
 v1.1.3
-- support for string for database type in timestamp and where clause builders
+- Support for string for database type in timestamp and where clause builders
 
 v1.1.2
-- new constructor using string for dbtype instead of enum
+- New constructor using string for dbtype instead of enum
 
 v1.1.1
-- raw query support
+- Raw query support
 
 v1.1.0
-- pagination support in SELECT queries: use indexStart, maxResults, and orderByClause (all are required)
-- numerous bugfixes
+- Pagination support in SELECT queries: use indexStart, maxResults, and orderByClause (all are required)
+- Numerous bugfixes

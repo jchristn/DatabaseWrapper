@@ -1057,11 +1057,14 @@ namespace DatabaseWrapper
                                 "  col.TABLE_NAME, col.COLUMN_NAME, col.IS_NULLABLE, col.DATA_TYPE, col.CHARACTER_MAXIMUM_LENGTH, con.CONSTRAINT_NAME " +
                                 "FROM INFORMATION_SCHEMA.COLUMNS col " +
                                 "LEFT JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE con ON con.COLUMN_NAME = col.COLUMN_NAME " +
-                                "WHERE col.TABLE_NAME='" + currTable + "'";
+                                "WHERE col.TABLE_NAME='" + currTable + "' " +
+                                "AND col.TABLE_CATALOG='" + Database + "'";
                             break;
 
                         case DbTypes.MySql:
-                            query = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='" + currTable + "'";
+                            query = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE " +
+                                "TABLE_NAME='" + currTable + "' " +
+                                "AND TABLE_SCHEMA='" + Database + "'";
                             break;
                     }
 

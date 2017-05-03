@@ -42,7 +42,7 @@ namespace DatabaseWrapperTest
 
                 client.DebugRawQuery = true;
                 client.DebugResultRowCount = true;
-
+                
                 Console.WriteLine("Loading rows...");
                 LoadRows();
                 Console.WriteLine("Press ENTER to continue...");
