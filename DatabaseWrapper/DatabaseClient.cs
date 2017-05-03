@@ -376,7 +376,7 @@ namespace DatabaseWrapper
                     //
                     if (indexStart == null)
                     {
-                        if (!String.IsNullOrEmpty(orderByClause)) innerQuery += orderByClause + " ";
+                        if (!String.IsNullOrEmpty(orderByClause)) innerQuery += SanitizeString(orderByClause) + " ";
                     }
 
                     // 
@@ -456,7 +456,7 @@ namespace DatabaseWrapper
                     // 
                     // order clause
                     //
-                    if (!String.IsNullOrEmpty(orderByClause)) outerQuery += orderByClause + " ";
+                    if (!String.IsNullOrEmpty(orderByClause)) outerQuery += SanitizeString(orderByClause) + " ";
 
                     //
                     // limit
