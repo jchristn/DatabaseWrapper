@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MySql;
 using MySql.Data.MySqlClient;
+using Npgsql;
 
 namespace DatabaseWrapper
 {
@@ -50,20 +51,9 @@ namespace DatabaseWrapper
             Instance = instance;
             Database = database;
 
-            if (!PopulateConnectionString())
-            {
-                throw new Exception("Unable to build connection string");
-            }
-
-            if (!LoadTableNames())
-            {
-                throw new Exception("Unable to load table names");
-            }
-
-            if (!LoadTableDetails())
-            {
-                throw new Exception("Unable to load table details from " + ServerIp + ":" + ServerPort + " " + Instance + " " + Database + " using username " + Username);
-            }
+            PopulateConnectionString();
+            LoadTableNames();
+            LoadTableDetails();
         }
 
         /// <summary>
@@ -115,20 +105,9 @@ namespace DatabaseWrapper
             Instance = instance;
             Database = database;
 
-            if (!PopulateConnectionString())
-            {
-                throw new Exception("Unable to build connection string");
-            }
-
-            if (!LoadTableNames())
-            {
-                throw new Exception("Unable to load table names");
-            }
-
-            if (!LoadTableDetails())
-            {
-                throw new Exception("Unable to load table details from " + ServerIp + ":" + ServerPort + " " + Instance + " " + Database + " using username " + Username);
-            }
+            PopulateConnectionString();
+            LoadTableNames();
+            LoadTableDetails();
         }
 
         #endregion
@@ -175,7 +154,7 @@ namespace DatabaseWrapper
         /// <summary>
         /// List all tables in the database.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of strings, each being a table name.</returns>
         public List<string> ListTables()
         {
             List<string> ret = new List<string>();
@@ -305,180 +284,27 @@ namespace DatabaseWrapper
         public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-
-            string innerQuery = "";
-            string outerQuery = "";
-            string whereClause = "";
+             
+            string query = "";
             DataTable result;
             List<Column> tableDetails = DescribeTable(tableName);
 
             switch (DbType)
             {
                 case DbTypes.MsSql:
-                    #region MsSql
-
-                    //
-                    // select
-                    //
-                    if (indexStart != null)
-                    {
-                        if (String.IsNullOrEmpty(orderByClause)) throw new ArgumentNullException(nameof(orderByClause));
-                        innerQuery = "SELECT ROW_NUMBER() OVER ( " + orderByClause + " ) AS __row_num__, ";
-                    }
-                    else
-                    {
-                        if (maxResults > 0) innerQuery += "SELECT TOP " + maxResults + " ";
-                        else innerQuery += "SELECT ";
-                    }
-                    
-                    //
-                    // fields
-                    //
-                    if (returnFields == null || returnFields.Count < 1) innerQuery += "* ";
-                    else
-                    {
-                        int fieldsAdded = 0;
-                        foreach (string curr in returnFields)
-                        {
-                            if (fieldsAdded == 0)
-                            {
-                                innerQuery += SanitizeString(curr);
-                                fieldsAdded++;
-                            }
-                            else
-                            {
-                                innerQuery += "," + SanitizeString(curr);
-                                fieldsAdded++;
-                            }
-                        }
-                    }
-                    innerQuery += " ";
-
-                    //
-                    // table
-                    //
-                    innerQuery += "FROM " + tableName + " ";
-
-                    //
-                    // expressions
-                    //
-                    if (filter != null)
-                    {
-                        whereClause = filter.ToWhereClause(DbType);
-                    }
-                    if (!String.IsNullOrEmpty(whereClause))
-                    {
-                        innerQuery += "WHERE " + whereClause + " ";
-                    }
-
-                    // 
-                    // order clause
-                    //
-                    if (indexStart == null)
-                    {
-                        if (!String.IsNullOrEmpty(orderByClause)) innerQuery += SanitizeString(orderByClause) + " ";
-                    }
-
-                    // 
-                    // wrap in outer query
-                    //
-                    if (indexStart != null)
-                    {
-                        if (indexStart == 0)
-                        {
-                            outerQuery = "SELECT * FROM (" + innerQuery + ") AS row_constrained_result WHERE __row_num__ > " + indexStart + " ";
-                            if (maxResults > 0) outerQuery += "AND __row_num__ <= " + (indexStart + maxResults) + " ";
-                            outerQuery += "ORDER BY __row_num__ ";
-                        }
-                        else
-                        {
-                            outerQuery = "SELECT * FROM (" + innerQuery + ") AS row_constrained_result WHERE __row_num__ >= " + indexStart + " ";
-                            if (maxResults > 0) outerQuery += "AND __row_num__ < " + (indexStart + maxResults) + " ";
-                            outerQuery += "ORDER BY __row_num__ ";
-                        }
-                    }
-                    else
-                    {
-                        outerQuery = innerQuery;
-                    }
+                    query = MssqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
                     break;
-
-                    #endregion
 
                 case DbTypes.MySql:
-                    #region MySql
-
-                    //
-                    // SELECT
-                    //
-                    outerQuery += "SELECT ";
-
-                    //
-                    // fields
-                    //
-                    if (returnFields == null || returnFields.Count < 1) outerQuery += "* ";
-                    else
-                    {
-                        int fieldsAdded = 0;
-                        foreach (string curr in returnFields)
-                        {
-                            if (fieldsAdded == 0)
-                            {
-                                outerQuery += SanitizeString(curr);
-                                fieldsAdded++;
-                            }
-                            else
-                            {
-                                outerQuery += "," + SanitizeString(curr);
-                                fieldsAdded++;
-                            }
-                        }
-                    }
-                    outerQuery += " ";
-
-                    //
-                    // table
-                    //
-                    outerQuery += "FROM " + tableName + " ";
-
-                    //
-                    // expressions
-                    //
-                    if (filter != null)
-                    {
-                        whereClause = filter.ToWhereClause(DbType);
-                    }
-                    if (!String.IsNullOrEmpty(whereClause))
-                    {
-                        outerQuery += "WHERE " + whereClause + " ";
-                    }
-
-                    // 
-                    // order clause
-                    //
-                    if (!String.IsNullOrEmpty(orderByClause)) outerQuery += SanitizeString(orderByClause) + " ";
-
-                    //
-                    // limit
-                    //
-                    if (maxResults > 0)
-                    {
-                        if (indexStart != null && indexStart >= 0)
-                        {
-                            outerQuery += "LIMIT " + indexStart + "," + maxResults;
-                        }
-                        else
-                        {
-                            outerQuery += "LIMIT " + maxResults;
-                        }
-                    }
-
+                    query = MysqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
                     break;
-
-                    #endregion
+                     
+                case DbTypes.PgSql:
+                    query = PgsqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
+                    break;
             }
 
-            result = RawQuery(outerQuery);
+            result = RawQuery(query);
             return result;
         }
 
@@ -493,6 +319,8 @@ namespace DatabaseWrapper
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (keyValuePairs == null || keyValuePairs.Count < 1) throw new ArgumentNullException(nameof(keyValuePairs));
 
+            #region Variables
+
             string keys = "";
             string values = "";
             string query = "";
@@ -502,6 +330,8 @@ namespace DatabaseWrapper
             List<Column> tableDetails = DescribeTable(tableName);
             List<string> columnNames = GetColumnNames(tableName);
             string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
+
+            #endregion
 
             #region Build-Key-Value-Pairs
 
@@ -516,69 +346,74 @@ namespace DatabaseWrapper
 
                 if (added == 0)
                 {
-                    keys += curr.Key;
+                    #region First
+
+                    keys += PreparedFieldname(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            switch (DbType)
-                            {
-                                case DbTypes.MsSql:
-                                    values += "'" + DbTimestamp(DbTypes.MsSql, (DateTime)curr.Value) + "'";
-                                    break;
-
-                                case DbTypes.MySql:
-                                    values += "'" + DbTimestamp(DbTypes.MySql, (DateTime)curr.Value) + "'";
-                                    break;
-                            }
+                            values += "'" + DbTimestamp(DbType, (DateTime)curr.Value) + "'";
+                        }
+                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                        {
+                            values += curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                values += "N'" + SanitizeString(curr.Value.ToString()) + "'";
+                                values += PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                values += "'" + SanitizeString(curr.Value.ToString()) + "'";
+                                values += PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
-                    else values += "null";
+                    else
+                    {
+                        values += "null";
+                    }
+
+                    #endregion
                 }
                 else
                 {
-                    keys += "," + curr.Key;
+                    #region Subsequent
+
+                    keys += "," + PreparedFieldname(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            switch (DbType)
-                            {
-                                case DbTypes.MsSql:
-                                    values += ",'" + DbTimestamp(DbTypes.MsSql, (DateTime)curr.Value) + "'";
-                                    break;
-
-                                case DbTypes.MySql:
-                                    values += ",'" + DbTimestamp(DbTypes.MySql, (DateTime)curr.Value) + "'";
-                                    break;
-                            }
+                            values += ",'" + DbTimestamp(DbType, (DateTime)curr.Value) + "'";
+                        }
+                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                        {
+                            values += "," + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                values += ",N'" + SanitizeString(curr.Value.ToString()) + "'";
+                                values += "," + PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                values += ",'" + SanitizeString(curr.Value.ToString()) + "'";
+                                values += "," + PreparedStringValue(curr.Value.ToString());
                             }
                         }
 
                     }
-                    else values += ",null";
+                    else
+                    {
+                        values += ",null";
+                    }
+
+                    #endregion
                 }
+
                 added++;
             }
 
@@ -589,33 +424,16 @@ namespace DatabaseWrapper
             switch (DbType)
             {
                 case DbTypes.MsSql:
-                    #region MsSql
-
-                    query += "INSERT INTO " + tableName + " WITH (ROWLOCK) ";
-                    query += "(" + keys + ") ";
-                    query += "OUTPUT INSERTED.* ";
-                    query += "VALUES ";
-                    query += "(" + values + ") ";
+                    query = MssqlHelper.InsertQuery(tableName, keys, values);
                     break;
-
-                    #endregion
 
                 case DbTypes.MySql:
-                    #region MySql
-
-                    //
-                    // insert into
-                    //
-                    query += "START TRANSACTION; ";
-                    query += "INSERT INTO " + tableName + " ";
-                    query += "(" + keys + ") ";
-                    query += "VALUES ";
-                    query += "(" + values + "); ";
-                    query += "SELECT LAST_INSERT_ID() AS id; ";
-                    query += "COMMIT; ";
+                    query = MysqlHelper.InsertQuery(tableName, keys, values);
                     break;
 
-                    #endregion
+                case DbTypes.PgSql:
+                    query = PgsqlHelper.InsertQuery(tableName, keys, values);
+                    break;
             }
 
             result = RawQuery(query);
@@ -664,6 +482,16 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
+                case DbTypes.PgSql:
+                    #region PgSql
+
+                    //
+                    // built into the query
+                    //
+                    break;
+
                     #endregion
             }
 
@@ -684,12 +512,16 @@ namespace DatabaseWrapper
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (keyValuePairs == null || keyValuePairs.Count < 1) throw new ArgumentNullException(nameof(keyValuePairs));
 
+            #region Variables
+
             string query = "";
             string keyValueClause = "";
             DataTable result;
             List<Column> tableDetails = DescribeTable(tableName);
             List<string> columnNames = GetColumnNames(tableName);
             string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
+
+            #endregion
 
             #region Build-Key-Value-Clause
 
@@ -708,32 +540,27 @@ namespace DatabaseWrapper
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            switch (DbType)
-                            {
-                                case DbTypes.MsSql:
-                                    keyValueClause += curr.Key + "='" + DbTimestamp(DbTypes.MsSql, (DateTime)curr.Value) + "'";
-                                    break;
-
-                                case DbTypes.MySql:
-                                    keyValueClause += curr.Key + "='" + DbTimestamp(DbTypes.MySql, (DateTime)curr.Value) + "'";
-                                    break;
-                            }
+                            keyValueClause += PreparedFieldname(curr.Key) + "='" + DbTimestamp(DbType, (DateTime)curr.Value) + "'";
+                        }
+                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                        {
+                            keyValueClause += PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += curr.Key + "=N'" + SanitizeString(curr.Value.ToString()) + "'";
+                                keyValueClause += PreparedFieldname(curr.Key) + "=" + PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
+                                keyValueClause += PreparedFieldname(curr.Key) + "=" + PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += curr.Key + "= null";
+                        keyValueClause += PreparedFieldname(curr.Key) + "= null";
                     }
                 }
                 else
@@ -742,32 +569,27 @@ namespace DatabaseWrapper
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            switch (DbType)
-                            {
-                                case DbTypes.MsSql:
-                                    keyValueClause += "," + curr.Key + "='" + DbTimestamp(DbTypes.MsSql, (DateTime)curr.Value) + "'";
-                                    break;
-
-                                case DbTypes.MySql:
-                                    keyValueClause += "," + curr.Key + "='" + DbTimestamp(DbTypes.MySql, (DateTime)curr.Value) + "'";
-                                    break;
-                            }
+                            keyValueClause += "," + PreparedFieldname(curr.Key) + "='" + DbTimestamp(DbType, (DateTime)curr.Value) + "'";
+                        }
+                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                        {
+                            keyValueClause += "," + PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += "," + curr.Key + "=N'" + SanitizeString(curr.Value.ToString()) + "'";
+                                keyValueClause += "," + PreparedFieldname(curr.Key) + "=" + PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += "," + curr.Key + "='" + SanitizeString(curr.Value.ToString()) + "'";
+                                keyValueClause += "," + PreparedFieldname(curr.Key) + "=" + PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += "," + curr.Key + "= null";
+                        keyValueClause += "," + PreparedFieldname(curr.Key) + "= null";
                     }
                 }
                 added++;
@@ -780,26 +602,16 @@ namespace DatabaseWrapper
             switch (DbType)
             {
                 case DbTypes.MsSql:
-                    #region MsSql
-
-                    query += "UPDATE " + tableName + " WITH (ROWLOCK) SET ";
-                    query += keyValueClause + " ";
-                    query += "OUTPUT INSERTED.* ";
-                    if (filter != null) query += "WHERE " + filter.ToWhereClause(DbType) + " ";
+                    query = MssqlHelper.UpdateQuery(tableName, keyValueClause, filter);
+                    break;
                     
-                    break;
-
-                    #endregion
-
                 case DbTypes.MySql:
-                    #region MySql
-
-                    query += "UPDATE " + tableName + " SET ";
-                    query += keyValueClause + " ";
-                    if (filter != null) query += "WHERE " + filter.ToWhereClause(DbType) + " ";
+                    query = MysqlHelper.UpdateQuery(tableName, keyValueClause, filter);
                     break;
 
-                    #endregion
+                case DbTypes.PgSql:
+                    query = PgsqlHelper.UpdateQuery(tableName, keyValueClause, filter);
+                    break;
             }
 
             result = RawQuery(query);
@@ -820,33 +632,31 @@ namespace DatabaseWrapper
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (filter == null) throw new ArgumentNullException(nameof(filter));
 
+            #region Variables
+
             string query = "";
             DataTable result;
             List<Column> tableDetails = DescribeTable(tableName);
             List<string> columnNames = GetColumnNames(tableName);
             string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
-            
+
+            #endregion
+
             #region Build-DELETE-Query-and-Submit
 
             switch (DbType)
             {
                 case DbTypes.MsSql:
-                    #region MsSql
-
-                    query += "DELETE FROM " + tableName + " WITH (ROWLOCK) ";
-                    if (filter != null) query += "WHERE " + filter.ToWhereClause(DbType) + " ";
+                    query = MssqlHelper.DeleteQuery(tableName, filter);
                     break;
-
-                #endregion
-
+                     
                 case DbTypes.MySql:
-                    #region MySql
-
-                    query += "DELETE FROM " + tableName + " ";
-                    if (filter != null) query += "WHERE " + filter.ToWhereClause(DbType) + " ";
+                    query = MysqlHelper.DeleteQuery(tableName, filter);
                     break;
 
-                    #endregion
+                case DbTypes.PgSql:
+                    query = PgsqlHelper.DeleteQuery(tableName, filter);
+                    break;
             }
 
             result = RawQuery(query);
@@ -864,29 +674,8 @@ namespace DatabaseWrapper
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName)); 
 
-            string query = "";
-            DataTable result;
-
-            switch (DbType)
-            {
-                case DbTypes.MsSql:
-                    #region MsSql
-
-                    query += "TRUNCATE TABLE " + tableName;
-                    break;
-
-                #endregion
-
-                case DbTypes.MySql:
-                    #region MySql
-
-                    query += "TRUNCATE TABLE " + tableName;
-                    break;
-
-                    #endregion
-            }
-
-            result = RawQuery(query);
+            string query = "TRUNCATE TABLE " + tableName;
+            DataTable result = RawQuery(query);
 
             return;
         }
@@ -906,6 +695,8 @@ namespace DatabaseWrapper
             switch (DbType)
             {
                 case DbTypes.MsSql:
+                    #region Mssql
+
                     using (SqlConnection conn = new SqlConnection(ConnectionString))
                     {
                         conn.Open();
@@ -914,9 +705,14 @@ namespace DatabaseWrapper
                         conn.Dispose();
                         conn.Close();
                     }
+
                     break;
 
+                #endregion
+
                 case DbTypes.MySql:
+                    #region Mysql
+
                     using (MySqlConnection conn = new MySqlConnection(ConnectionString))
                     {
                         conn.Open();
@@ -936,9 +732,35 @@ namespace DatabaseWrapper
                                 }
                             }
                         }
+
                         conn.Close();
                     }
+
                     break;
+
+                #endregion
+
+                case DbTypes.PgSql:
+                    #region Pgsql
+
+                    using (NpgsqlConnection conn = new NpgsqlConnection(ConnectionString))
+                    {
+                        conn.Open();
+                        NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn);
+                        DataSet ds = new DataSet();
+                        da.Fill(ds);
+
+                        if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
+                        {
+                            result = ds.Tables[0];
+                        }
+
+                        conn.Close();
+                    }
+
+                    break;
+
+                    #endregion
             }
 
             if (DebugResultRowCount)
@@ -946,6 +768,7 @@ namespace DatabaseWrapper
                 if (result != null) Console.WriteLine("RawQuery: returning " + result.Rows.Count + " row(s)");
                 else Console.WriteLine("RawQery: returning null");
             }
+
             return result;
         }
 
@@ -964,6 +787,9 @@ namespace DatabaseWrapper
                 case DbTypes.MySql:
                     return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
 
+                case DbTypes.PgSql:
+                    return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
+
                 default:
                     return null;
             }
@@ -973,7 +799,29 @@ namespace DatabaseWrapper
 
         #region Private-Instance-Methods
 
-        private bool LoadTableNames()
+        private void PopulateConnectionString()
+        {
+            ConnectionString = "";
+
+            switch (DbType)
+            {
+                case DbTypes.MsSql:
+                    ConnectionString = MssqlHelper.ConnectionString(ServerIp, ServerPort, Username, Password, Instance, Database);
+                    break;
+
+                case DbTypes.MySql:
+                    ConnectionString = MysqlHelper.ConnectionString(ServerIp, ServerPort, Username, Password, Database);
+                    break;
+
+                case DbTypes.PgSql:
+                    ConnectionString = PgsqlHelper.ConnectionString(ServerIp, ServerPort, Username, Password, Database);
+                    break;
+            }
+
+            return;
+        }
+
+        private void LoadTableNames()
         {
             lock (LoadingTablesLock)
             {
@@ -985,11 +833,15 @@ namespace DatabaseWrapper
                 switch (DbType)
                 {
                     case DbTypes.MsSql:
-                        query = "SELECT TABLE_NAME FROM " + Database + ".INFORMATION_SCHEMA.Tables WHERE TABLE_TYPE = 'BASE TABLE'";
+                        query = MssqlHelper.LoadTableNamesQuery(Database);
                         break;
 
                     case DbTypes.MySql:
-                        query = "SHOW TABLES";
+                        query = MysqlHelper.LoadTableNamesQuery();
+                        break;
+
+                    case DbTypes.PgSql:
+                        query = PgsqlHelper.LoadTableNamesQuery();
                         break;
                 }
 
@@ -1017,6 +869,13 @@ namespace DatabaseWrapper
                                 tableNames.Add(curr["Tables_in_" + Database].ToString());
                             }
                             break;
+
+                        case DbTypes.PgSql:
+                            foreach (DataRow curr in result.Rows)
+                            {
+                                tableNames.Add(curr["tablename"].ToString());
+                            }
+                            break;
                     }
                 }
 
@@ -1031,11 +890,11 @@ namespace DatabaseWrapper
 
                 #endregion
 
-                return true;
+                return;
             }
         }
 
-        private bool LoadTableDetails()
+        private void LoadTableDetails()
         {
             lock (LoadingTablesLock)
             {
@@ -1052,19 +911,15 @@ namespace DatabaseWrapper
                     switch (DbType)
                     {
                         case DbTypes.MsSql:
-                            query =
-                                "SELECT " +
-                                "  col.TABLE_NAME, col.COLUMN_NAME, col.IS_NULLABLE, col.DATA_TYPE, col.CHARACTER_MAXIMUM_LENGTH, con.CONSTRAINT_NAME " +
-                                "FROM INFORMATION_SCHEMA.COLUMNS col " +
-                                "LEFT JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE con ON con.COLUMN_NAME = col.COLUMN_NAME " +
-                                "WHERE col.TABLE_NAME='" + currTable + "' " +
-                                "AND col.TABLE_CATALOG='" + Database + "'";
+                            query = MssqlHelper.LoadTableColumnsQuery(Database, currTable);
                             break;
 
                         case DbTypes.MySql:
-                            query = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE " +
-                                "TABLE_NAME='" + currTable + "' " +
-                                "AND TABLE_SCHEMA='" + Database + "'";
+                            query = MysqlHelper.LoadTableColumnsQuery(Database, currTable);
+                            break;
+
+                        case DbTypes.PgSql:
+                            query = PgsqlHelper.LoadTableColumnsQuery(Database, currTable);
                             break;
                     }
 
@@ -1092,6 +947,8 @@ namespace DatabaseWrapper
                             switch (DbType)
                             {
                                 case DbTypes.MsSql:
+                                    #region Mssql
+
                                     tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
                                     if (currColumn["CONSTRAINT_NAME"].ToString().StartsWith("PK_")) tempColumn.IsPrimaryKey = true;
                                     else tempColumn.IsPrimaryKey = false;
@@ -1102,7 +959,11 @@ namespace DatabaseWrapper
                                     else tempColumn.Nullable = false;
                                     break;
 
+                                #endregion
+
                                 case DbTypes.MySql:
+                                    #region Mysql
+
                                     tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
                                     if (String.Compare(currColumn["COLUMN_KEY"].ToString(), "PRI") == 0) tempColumn.IsPrimaryKey = true;
                                     else tempColumn.IsPrimaryKey = false;
@@ -1112,6 +973,23 @@ namespace DatabaseWrapper
                                     if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
                                     else tempColumn.Nullable = false;
                                     break;
+
+                                #endregion
+
+                                case DbTypes.PgSql:
+                                    #region Pgsql
+
+                                    tempColumn.Name = currColumn["column_name"].ToString();
+                                    if (String.Compare(currColumn["is_primary_key"].ToString(), "YES") == 0) tempColumn.IsPrimaryKey = true;
+                                    else tempColumn.IsPrimaryKey = false;
+                                    tempColumn.DataType = currColumn["DATA_TYPE"].ToString();
+                                    if (!Int32.TryParse(currColumn["max_len"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
+                                    else tempColumn.MaxLength = maxLength;
+                                    if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
+                                    else tempColumn.Nullable = false;
+                                    break;
+
+                                    #endregion
                             }
 
                             columns.Add(tempColumn);
@@ -1135,159 +1013,83 @@ namespace DatabaseWrapper
 
                 #endregion
 
-                return true;
+                return;
             }
-        }
-
-        private bool PopulateConnectionString()
-        {
-            ConnectionString = "";
-
-            switch (DbType)
-            {
-                case DbTypes.MsSql:
-                    //
-                    // http://www.connectionstrings.com/sql-server/
-                    //
-                    if (String.IsNullOrEmpty(Username) && String.IsNullOrEmpty(Password))
-                    {
-                        ConnectionString += "Data Source=" + ServerIp;
-                        if (!String.IsNullOrEmpty(Instance)) ConnectionString += "\\" + Instance + "; ";
-                        else ConnectionString += "; ";
-                        ConnectionString += "Integrated Security=SSPI; ";
-                        ConnectionString += "Initial Catalog=" + Database + "; ";                            
-                    }
-                    else
-                    {
-                        if (ServerPort > 0)
-                        {
-                            if (String.IsNullOrEmpty(Instance)) ConnectionString += "Server=" + ServerIp + "," + ServerPort + "; ";
-                            else ConnectionString += "Server=" + ServerIp + "\\" + Instance + "," + ServerPort + "; ";
-                        }
-                        else
-                        {
-                            if (String.IsNullOrEmpty(Instance)) ConnectionString += "Server=" + ServerIp + "; ";
-                            else ConnectionString += "Server=" + ServerIp + "\\" + Instance + "; ";
-                        }
-
-                        ConnectionString += "Database=" + Database + "; ";
-                        if (!String.IsNullOrEmpty(Username)) ConnectionString += "User ID=" + Username + "; ";
-                        if (!String.IsNullOrEmpty(Password)) ConnectionString += "Password=" + Password + "; ";
-                    }
-                    break;
-
-                case DbTypes.MySql:
-                    //
-                    // http://www.connectionstrings.com/mysql/
-                    //
-                    // MySQL does not use 'Instance'
-                    ConnectionString += "Server=" + ServerIp + "; ";
-                    if (ServerPort > 0) ConnectionString += "Port=" + ServerPort + "; ";
-                    ConnectionString += "Database=" + Database + "; ";
-                    if (!String.IsNullOrEmpty(Username)) ConnectionString += "Uid=" + Username + "; ";
-                    if (!String.IsNullOrEmpty(Password)) ConnectionString += "Pwd=" + Password + "; ";
-                    break;
-            }
-
-            return true;
         }
 
         private string SanitizeString(string s)
         {
             if (String.IsNullOrEmpty(s)) return String.Empty;
-            string ret = "";
-            int doubleDash = 0;
-            int openComment = 0;
-            int closeComment = 0;
+            string ret = ""; 
 
             switch (DbType)
             {
                 case DbTypes.MsSql:
-                    #region MsSql
-
-                    //
-                    // null, below ASCII range, above ASCII range
-                    //
-                    for (int i = 0; i < s.Length; i++)
-                    {
-                        if (((int)(s[i]) == 10) ||      // Preserve carriage return
-                            ((int)(s[i]) == 13))        // and line feed
-                        {
-                            ret += s[i];
-                        }
-                        else if ((int)(s[i]) < 32)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            ret += s[i];
-                        }
-                    }
-
-                    //
-                    // double dash
-                    //
-                    doubleDash = 0;
-                    while (true)
-                    {
-                        doubleDash = ret.IndexOf("--");
-                        if (doubleDash < 0)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            ret = ret.Remove(doubleDash, 2);
-                        }
-                    }
-
-                    //
-                    // open comment
-                    // 
-                    openComment = 0;
-                    while (true)
-                    {
-                        openComment = ret.IndexOf("/*");
-                        if (openComment < 0) break;
-                        else 
-                        {
-                            ret = ret.Remove(openComment, 2);
-                        }
-                    }
-
-                    //
-                    // close comment
-                    //
-                    closeComment = 0;
-                    while (true)
-                    {
-                        closeComment = ret.IndexOf("*/");
-                        if (closeComment < 0) break;
-                        else
-                        {
-                            ret = ret.Remove(closeComment, 2);
-                        }
-                    }
-
-                    //
-                    // in-string replacement
-                    //
-                    ret = ret.Replace("'", "''");
+                    ret = MssqlHelper.SanitizeString(s);
                     break;
-
-                    #endregion
-
+                    
                 case DbTypes.MySql:
-                    #region MySql
-
-                    ret = MySqlHelper.EscapeString(s);
+                    ret = MysqlHelper.SanitizeString(s);
                     break;
-
-                    #endregion
+                     
+                case DbTypes.PgSql:
+                    ret = PgsqlHelper.SanitizeString(s);
+                    break;
             }
 
             return ret;
+        }
+
+        private string PreparedFieldname(string s)
+        {
+            switch (DbType)
+            {
+                case DbTypes.MsSql:
+                    return s;
+
+                case DbTypes.MySql:
+                    return s;
+
+                case DbTypes.PgSql:
+                    return "\"" + s + "\"";
+            }
+
+            return null;
+        }
+
+        private string PreparedStringValue(string s)
+        {
+            switch (DbType)
+            {
+                case DbTypes.MsSql:
+                    return "'" + MssqlHelper.SanitizeString(s) + "'";
+
+                case DbTypes.MySql:
+                    return "'" + MysqlHelper.SanitizeString(s) + "'";
+
+                case DbTypes.PgSql:
+                    // uses $xx$ escaping
+                    return PgsqlHelper.SanitizeString(s);
+            }
+
+            return null;
+        }
+
+        private string PreparedUnicodeValue(string s)
+        {
+            switch (DbType)
+            {
+                case DbTypes.MsSql:
+                    return "N" + PreparedStringValue(s);
+
+                case DbTypes.MySql:
+                    return "N" + PreparedStringValue(s);
+
+                case DbTypes.PgSql:
+                    return "U&" + PreparedStringValue(s);
+            }
+
+            return null;
         }
 
         #endregion
@@ -1305,6 +1107,7 @@ namespace DatabaseWrapper
             switch (dbType)
             {
                 case DbTypes.MsSql:
+                case DbTypes.PgSql:
                     return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
 
                 case DbTypes.MySql:
@@ -1331,6 +1134,9 @@ namespace DatabaseWrapper
 
                 case "mysql":
                     return DbTimestamp(DbTypes.MySql, ts);
+
+                case "pgsql":
+                    return DbTimestamp(DbTypes.PgSql, ts);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbType));

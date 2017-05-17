@@ -35,10 +35,13 @@ namespace DatabaseWrapperTest
                 //
 
                 // MsSql
-                // client = new DatabaseClient(DbTypes.MsSql, "localhost", 0, null, null, "SQLEXPRESS", "test");
+                client = new DatabaseClient(DbTypes.MsSql, "localhost", 0, null, null, "SQLEXPRESS", "test");
 
                 // MySql
-                client = new DatabaseClient(DbTypes.MySql, "127.0.0.1", 3306, "root", "password", null, "test");
+                // client = new DatabaseClient(DbTypes.MySql, "127.0.0.1", 3306, "root", "password", null, "test");
+
+                // PgSql
+                // client = new DatabaseClient(DbTypes.PgSql, "127.0.0.1", 5432, "postgres", "password", null, "test");
 
                 client.DebugRawQuery = true;
                 client.DebugResultRowCount = true;
@@ -196,7 +199,7 @@ namespace DatabaseWrapperTest
             {
                 Expression e = new Expression
                 {
-                    LeftTerm = new Expression("personId", Operators.LessThan, 1),
+                    LeftTerm = new Expression("personId", Operators.GreaterThan, 1),
                     Operator = Operators.And,
                     RightTerm = new Expression("age", Operators.LessThan, 50)
                 };

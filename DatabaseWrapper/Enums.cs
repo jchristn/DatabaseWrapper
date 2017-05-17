@@ -12,7 +12,8 @@ namespace DatabaseWrapper
     public enum DbTypes
     {
         MsSql,
-        MySql
+        MySql,
+        PgSql
     }
 
     /// <summary>

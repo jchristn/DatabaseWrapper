@@ -75,6 +75,9 @@ namespace DatabaseWrapper
                 case "mysql":
                     return ToWhereClause(DbTypes.MySql);
 
+                case "pgsql":
+                    return ToWhereClause(DbTypes.PgSql);
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbType));
             }
@@ -111,7 +114,7 @@ namespace DatabaseWrapper
                     //
                     // These operators will add the left term
                     //
-                    clause += SanitizeString(LeftTerm.ToString()) + " ";
+                    clause += PreparedFieldname(dbType, LeftTerm.ToString()) + " ";
                 }
             }
 
@@ -132,9 +135,13 @@ namespace DatabaseWrapper
                         {
                             clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
                         }
+                        else if (RightTerm is int || RightTerm is long || RightTerm is decimal)
+                        {
+                            clause += RightTerm.ToString();
+                        }
                         else
                         {
-                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                            clause += PreparedStringValue(dbType, RightTerm.ToString());
                         }
                     }
                     break;
@@ -152,9 +159,13 @@ namespace DatabaseWrapper
                         {
                             clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
                         }
+                        else if (RightTerm is int || RightTerm is long || RightTerm is decimal)
+                        {
+                            clause += RightTerm.ToString();
+                        }
                         else
                         {
-                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                            clause += PreparedStringValue(dbType, RightTerm.ToString());
                         }
                     }
                     break;
@@ -172,9 +183,13 @@ namespace DatabaseWrapper
                         {
                             clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
                         }
+                        else if (RightTerm is int || RightTerm is long || RightTerm is decimal)
+                        {
+                            clause += RightTerm.ToString();
+                        }
                         else
                         {
-                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                            clause += PreparedStringValue(dbType, RightTerm.ToString());
                         }
                     }
                     break;
@@ -192,9 +207,13 @@ namespace DatabaseWrapper
                         {
                             clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
                         }
+                        else if (RightTerm is int || RightTerm is long || RightTerm is decimal)
+                        {
+                            clause += RightTerm.ToString();
+                        }
                         else
                         {
-                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                            clause += PreparedStringValue(dbType, RightTerm.ToString());
                         }
                     }
                     break;
@@ -214,30 +233,20 @@ namespace DatabaseWrapper
                         clause += "(";
                         foreach (object currObj in inTempList)
                         {
-                            if (inAdded == 0)
+                            if (inAdded > 0) clause += ",";
+                            if (currObj is DateTime || currObj is DateTime?)
                             {
-                                if (currObj is DateTime || currObj is DateTime?)
-                                {
-                                    clause += "'" + DbTimestamp(dbType, currObj) + "'";
-                                }
-                                else
-                                {
-                                    clause += "'" + SanitizeString(currObj.ToString()) + "'";
-                                }
-                                inAdded++;
+                                clause += "'" + DbTimestamp(dbType, currObj) + "'";
+                            }
+                            else if (currObj is int || currObj is long || currObj is decimal)
+                            {
+                                clause += currObj.ToString();
                             }
                             else
                             {
-                                if (currObj is DateTime || currObj is DateTime?)
-                                {
-                                    clause += "'" + DbTimestamp(dbType, currObj) + "'";
-                                }
-                                else
-                                {
-                                    clause += ",'" + SanitizeString(currObj.ToString()) + "'";
-                                }
-                                inAdded++;
+                                clause += PreparedStringValue(dbType, currObj.ToString());
                             }
+                            inAdded++;
                         }
                         clause += ")";
                     }
@@ -258,30 +267,20 @@ namespace DatabaseWrapper
                         clause += "(";
                         foreach (object currObj in notInTempList)
                         {
-                            if (notInAdded == 0)
+                            if (notInAdded > 0) clause += ",";
+                            if (currObj is DateTime || currObj is DateTime?)
                             {
-                                if (currObj is DateTime || currObj is DateTime?)
-                                {
-                                    clause += "'" + DbTimestamp(dbType, currObj) + "'";
-                                }
-                                else
-                                {
-                                    clause += "'" + SanitizeString(currObj.ToString()) + "'";
-                                }
-                                notInAdded++;
+                                clause += "'" + DbTimestamp(dbType, currObj) + "'";
+                            }
+                            else if (currObj is int || currObj is long || currObj is decimal)
+                            {
+                                clause += currObj.ToString();
                             }
                             else
                             {
-                                if (currObj is DateTime || currObj is DateTime?)
-                                {
-                                    clause += "'" + DbTimestamp(dbType, currObj) + "'";
-                                }
-                                else
-                                {
-                                    clause += ",'" + SanitizeString(currObj.ToString()) + "'";
-                                }
-                                notInAdded++;
+                                clause += PreparedStringValue(dbType, currObj.ToString());
                             }
+                            notInAdded++;
                         }
                         clause += ")";
                     }
@@ -292,9 +291,9 @@ namespace DatabaseWrapper
                     if (RightTerm is string)
                     {
                         clause +=
-                            "(" + SanitizeString(LeftTerm.ToString()) + " LIKE '" + SanitizeString(RightTerm.ToString()) + "%'" +
-                            "OR " + SanitizeString(LeftTerm.ToString()) + " LIKE '%" + SanitizeString(RightTerm.ToString()) + "%'" +
-                            "OR " + SanitizeString(LeftTerm.ToString()) + " LIKE '%" + SanitizeString(RightTerm.ToString()) + "')";
+                            "(" + PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString()) +
+                            "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + PreparedStringValue(dbType, RightTerm.ToString() + "%") + ")";
                     }
                     else
                     {
@@ -305,11 +304,11 @@ namespace DatabaseWrapper
                 case Operators.ContainsNot:
                     if (RightTerm == null) return null;
                     if (RightTerm is string)
-                    {
+                    { 
                         clause +=
-                            "(" + SanitizeString(LeftTerm.ToString()) + " NOT LIKE '" + SanitizeString(RightTerm.ToString()) + "%'" +
-                            "OR " + SanitizeString(LeftTerm.ToString()) + " NOT LIKE '%" + SanitizeString(RightTerm.ToString()) + "%'" +
-                            "OR " + SanitizeString(LeftTerm.ToString()) + " NOT LIKE '%" + SanitizeString(RightTerm.ToString()) + "')";
+                            "(" + PreparedFieldname(dbType, LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString()) +
+                            "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(dbType, RightTerm.ToString() + "%") + ")";
                     }
                     else
                     {
@@ -330,9 +329,13 @@ namespace DatabaseWrapper
                         {
                             clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
                         }
+                        else if (RightTerm is int || RightTerm is long || RightTerm is decimal)
+                        {
+                            clause += RightTerm.ToString();
+                        }
                         else
                         {
-                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                            clause += PreparedStringValue(dbType, RightTerm.ToString());
                         }
                     }
                     break;
@@ -350,9 +353,13 @@ namespace DatabaseWrapper
                         {
                             clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
                         }
+                        else if (RightTerm is int || RightTerm is long || RightTerm is decimal)
+                        {
+                            clause += RightTerm.ToString();
+                        }
                         else
                         {
-                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                            clause += PreparedStringValue(dbType, RightTerm.ToString());
                         }
                     }
                     break;
@@ -370,9 +377,13 @@ namespace DatabaseWrapper
                         {
                             clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
                         }
+                        else if (RightTerm is int || RightTerm is long || RightTerm is decimal)
+                        {
+                            clause += RightTerm.ToString();
+                        }
                         else
                         {
-                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                            clause += PreparedStringValue(dbType, RightTerm.ToString());
                         }
                     }
                     break;
@@ -390,9 +401,13 @@ namespace DatabaseWrapper
                         {
                             clause += "'" + DbTimestamp(dbType, RightTerm) + "'";
                         }
+                        else if (RightTerm is int || RightTerm is long || RightTerm is decimal)
+                        {
+                            clause += RightTerm.ToString();
+                        }
                         else
                         {
-                            clause += "'" + SanitizeString(RightTerm.ToString()) + "'";
+                            clause += PreparedStringValue(dbType, RightTerm.ToString());
                         }
                     }
                     break;
@@ -432,6 +447,38 @@ namespace DatabaseWrapper
 
             ret += ")";
             return ret;        
+        }
+
+        /// <summary>
+        /// Prepends the Expression with the supplied Expression using an AND clause.
+        /// </summary>
+        /// <param name="prepend">The Expression to prepend.</param> 
+        public void PrependAnd(Expression prepend)
+        {
+            if (prepend == null) throw new ArgumentNullException(nameof(prepend));
+
+            Expression e = PrependAndClause(prepend, this);
+            LeftTerm = e.LeftTerm;
+            Operator = e.Operator;
+            RightTerm = e.RightTerm;
+
+            return;
+        }
+
+        /// <summary>
+        /// Prepends the Expression with the supplied Expression using an OR clause.
+        /// </summary>
+        /// <param name="prepend">The Expression to prepend.</param> 
+        public void PrependOr(Expression prepend)
+        {
+            if (prepend == null) throw new ArgumentNullException(nameof(prepend));
+
+            Expression e = PrependOrClause(prepend, this);
+            LeftTerm = e.LeftTerm;
+            Operator = e.Operator;
+            RightTerm = e.RightTerm;
+
+            return;
         }
 
         /// <summary>
@@ -584,82 +631,79 @@ namespace DatabaseWrapper
 
         #region Private-Methods
 
-        private string SanitizeString(string s)
+        private string SanitizeString(DbTypes dbType, string s)
         {
             if (String.IsNullOrEmpty(s)) return String.Empty;
             string ret = "";
-            int doubleDash = 0;
-            int openComment = 0;
-            int closeComment = 0;
-            
-            //
-            // null, below ASCII range, above ASCII range
-            //
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (
-                    ((int)(s[i]) == 0) || // null
-                    ((int)(s[i]) < 32)
-                    )
-                {
-                    continue;
-                }
-                else
-                {
-                    ret += s[i];
-                }
-            }
 
-            //
-            // double dash
-            //
-            doubleDash = 0;
-            while (true)
+            switch (dbType)
             {
-                doubleDash = ret.IndexOf("--");
-                if (doubleDash < 0)
-                {
+                case DbTypes.MsSql:
+                    ret = MssqlHelper.SanitizeString(s);
                     break;
-                }
-                else
-                {
-                    ret = ret.Remove(doubleDash, 2);
-                }
+
+                case DbTypes.MySql:
+                    ret = MysqlHelper.SanitizeString(s);
+                    break;
+
+                case DbTypes.PgSql:
+                    ret = PgsqlHelper.SanitizeString(s);
+                    break;
             }
 
-            //
-            // open comment
-            // 
-            openComment = 0;
-            while (true)
-            {
-                openComment = ret.IndexOf("/*");
-                if (openComment < 0) break;
-                else
-                {
-                    ret = ret.Remove(openComment, 2);
-                }
-            }
-
-            //
-            // close comment
-            //
-            closeComment = 0;
-            while (true)
-            {
-                closeComment = ret.IndexOf("*/");
-                if (closeComment < 0) break;
-                else
-                {
-                    ret = ret.Remove(closeComment, 2);
-                }
-            }
-
-            //
-            // in-string replacement
-            //
-            ret = ret.Replace("'", "''");
             return ret;
+        }
+
+        private string PreparedFieldname(DbTypes dbType, string s)
+        {
+            switch (dbType)
+            {
+                case DbTypes.MsSql:
+                    return s;
+
+                case DbTypes.MySql:
+                    return s;
+
+                case DbTypes.PgSql:
+                    return "\"" + s + "\"";
+            }
+
+            return null;
+        }
+
+        private string PreparedStringValue(DbTypes dbType, string s)
+        {
+            switch (dbType)
+            {
+                case DbTypes.MsSql:
+                    return "'" + MssqlHelper.SanitizeString(s) + "'";
+
+                case DbTypes.MySql:
+                    return "'" + MysqlHelper.SanitizeString(s) + "'";
+
+                case DbTypes.PgSql:
+                    // uses $xx$ escaping
+                    return PgsqlHelper.SanitizeString(s);
+            }
+
+            return null;
+        }
+
+        private string PreparedUnicodeValue(DbTypes dbType, string s)
+        {
+            switch (dbType)
+            {
+                case DbTypes.MsSql:
+                    return "N" + PreparedStringValue(dbType, s);
+
+                case DbTypes.MySql:
+                    return "N" + PreparedStringValue(dbType, s);
+
+                case DbTypes.PgSql:
+                    return "U&" + PreparedStringValue(dbType, s);
+            }
+
+            return null;
         }
 
         private string DbTimestamp(DbTypes dbType, object ts)
@@ -676,6 +720,9 @@ namespace DatabaseWrapper
 
                 case DbTypes.MySql:
                     return dt.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
+
+                case DbTypes.PgSql:
+                    return dt.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
 
                 default:
                     return null;

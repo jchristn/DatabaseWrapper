@@ -5,12 +5,12 @@
 [nuget]:     https://www.nuget.org/packages/DatabaseWrapper/
 [nuget-img]: https://badge.fury.io/nu/Object.svg
 
-Simple database wrapper for Microsoft SQL Server and MySQL written in C#.  
+Simple database wrapper for Microsoft SQL Server, MySQL, and PostgreSQL written in C#.  
 
 For a sample app exercising this library, refer to the test project contained within the solution.
 
 ## Description
-DatabaseWrapper is a simple database wrapper for Microsoft SQL Server nad MySQL databases written in C#.   
+DatabaseWrapper is a simple database wrapper for Microsoft SQL Server, MySQL, and PostgreSQL databases written in C#.   
 
 Core features:
 - dynamic query building using expression objects
@@ -19,8 +19,9 @@ Core features:
 - support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, or raw queries
 - built-in sanitization
 
-## New in v1.1.7
-- Bugfixes
+## New in v1.2.0
+- PostgreSQL support
+- Minor refactor
 
 ## A Note on Sanitization
 Use of parameterized queries vs building queries dynamically is a sensitive subject.  Proponents of parameterized queries have data on their side - that parameterization does the right thing to prevent SQL injection and other issues.  *I do not disagree with them*.  However, it is worth noting that with proper care, you CAN build systems that allow you to dynamically build queries, and you SHOULD do so as long as you build in the appropriate safeguards.
@@ -28,7 +29,7 @@ Use of parameterized queries vs building queries dynamically is a sensitive subj
 If you find an injection attack that will defeat the sanitization layer built into this project, please let me know!
 
 ## Simple Example
-Refer to the test project for a more complete example.
+Refer to the test project for a more complete example with sample table setup scripts.
 ```
 using DatabaseWrapper;
 DatabaseClient client = new DatabaseClient(DbTypes.MsSql, "localhost", 0, null, null, "SQLEXPRESS", "test");
@@ -94,7 +95,8 @@ string mysql2 = client.Timestamp(DateTime.Now);
 ```
 
 ## Other Notes
-MySQL does not like to return updated rows.  Sorry about that.  I thought about making the UPDATE clause require that you supply the ID field and the ID value so that I could retrieve it after the fact, but that approach is just too limiting.
+- MySQL does not like to return updated rows.  Sorry about that.  I thought about making the UPDATE clause require that you supply the ID field and the ID value so that I could retrieve it after the fact, but that approach is just too limiting.
+- Cleansing of strings in PostgreSQL uses the dollar-quote style.  Fieldnames are always encapsulated in double-quotes for PostgreSQL.
 
 ## Running in Mono
 There should be no issues running in Mono, however, this has not (yet) been tested.  
@@ -102,25 +104,13 @@ There should be no issues running in Mono, however, this has not (yet) been test
 ## Version history
 Notes from previous versions (starting with v1.1.0) will be moved here.
 
-v1.1.6
+v1.1.x
 - Added Trunate API
-
-v1.1.5
 - Simplified (new) constructor for Expression
 - Additional Helper static methods to convert DataTable to useful objects (List<Dictionary>, Dictionary, List<dynamic>, dynamic)
-
-v1.1.4
 - Instance method to create timestamp for the given database type.
-
-v1.1.3
 - Support for string for database type in timestamp and where clause builders
-
-v1.1.2
 - New constructor using string for dbtype instead of enum
-
-v1.1.1
 - Raw query support
-
-v1.1.0
 - Pagination support in SELECT queries: use indexStart, maxResults, and orderByClause (all are required)
 - Numerous bugfixes
