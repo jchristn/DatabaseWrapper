@@ -24,3 +24,7 @@ D:\Code\Misc\DatabaseWrapperPgsql\DatabaseWrapper\bin\Release\System.Threading.T
 D:\Code\Misc\DatabaseWrapperPgsql\DatabaseWrapper\obj\Release\DatabaseWrapper.csprojResolveAssemblyReference.cache
 D:\Code\Misc\DatabaseWrapperPgsql\DatabaseWrapper\obj\Release\DatabaseWrapper.dll
 D:\Code\Misc\DatabaseWrapperPgsql\DatabaseWrapper\obj\Release\DatabaseWrapper.pdb
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Release\Npgsql.dll
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Release\System.Threading.Tasks.Extensions.dll
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Release\Npgsql.xml
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\bin\Release\System.Threading.Tasks.Extensions.xml

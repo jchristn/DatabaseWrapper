@@ -94,6 +94,10 @@ namespace DatabaseWrapper
                     DbType = DbTypes.MySql;
                     break;
 
+                case "pgsql":
+                    DbType = DbTypes.PgSql;
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbType));
             }

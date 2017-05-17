@@ -22,3 +22,7 @@ D:\code\misc\DatabaseWrapperPgsql\DatabaseWrapperTest\bin\Debug\Npgsql.dll
 D:\code\misc\DatabaseWrapperPgsql\DatabaseWrapperTest\bin\Debug\System.Threading.Tasks.Extensions.dll
 D:\code\misc\DatabaseWrapperPgsql\DatabaseWrapperTest\bin\Debug\Npgsql.xml
 D:\code\misc\DatabaseWrapperPgsql\DatabaseWrapperTest\bin\Debug\System.Threading.Tasks.Extensions.xml
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapperTest\bin\Debug\Npgsql.dll
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapperTest\bin\Debug\System.Threading.Tasks.Extensions.dll
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapperTest\bin\Debug\Npgsql.xml
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapperTest\bin\Debug\System.Threading.Tasks.Extensions.xml
