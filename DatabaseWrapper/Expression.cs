@@ -457,7 +457,8 @@ namespace DatabaseWrapper
         {
             if (prepend == null) throw new ArgumentNullException(nameof(prepend));
 
-            Expression e = PrependAndClause(prepend, this);
+            Expression orig = new Expression(this.LeftTerm, this.Operator, this.RightTerm);
+            Expression e = PrependAndClause(prepend, orig);
             LeftTerm = e.LeftTerm;
             Operator = e.Operator;
             RightTerm = e.RightTerm;
@@ -473,7 +474,8 @@ namespace DatabaseWrapper
         {
             if (prepend == null) throw new ArgumentNullException(nameof(prepend));
 
-            Expression e = PrependOrClause(prepend, this);
+            Expression orig = new Expression(this.LeftTerm, this.Operator, this.RightTerm);
+            Expression e = PrependOrClause(prepend, orig);
             LeftTerm = e.LeftTerm;
             Operator = e.Operator;
             RightTerm = e.RightTerm;
