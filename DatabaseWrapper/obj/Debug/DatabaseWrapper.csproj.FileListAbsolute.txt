@@ -27,3 +27,4 @@ D:\code\misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\Npgsql.xml
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\bin\Debug\System.Threading.Tasks.Extensions.xml
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\obj\Debug\DatabaseWrapper.dll
 D:\code\misc\DatabaseWrapper\DatabaseWrapper\obj\Debug\DatabaseWrapper.pdb
+D:\Code\Misc\DatabaseWrapper\DatabaseWrapper\obj\Debug\DatabaseWrapper.csprojResolveAssemblyReference.cache

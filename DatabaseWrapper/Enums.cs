@@ -29,6 +29,8 @@ namespace DatabaseWrapper
         NotIn,
         Contains,
         ContainsNot,
+        StartsWith,
+        EndsWith,
         GreaterThan,
         GreaterThanOrEqualTo,
         LessThan,

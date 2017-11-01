@@ -104,12 +104,13 @@ namespace DatabaseWrapper
             {
                 if (!(LeftTerm is string))
                 {
-                    Console.WriteLine("ToWhereClause LeftTerm is not string (" + LeftTerm.GetType() + ")");
-                    return null;
+                    throw new ArgumentException("Left term must be of type Expression or String");
                 }
 
                 if (Operator != Operators.Contains
-                    && Operator != Operators.ContainsNot)
+                    && Operator != Operators.ContainsNot
+                    && Operator != Operators.StartsWith
+                    && Operator != Operators.EndsWith)
                 {
                     //
                     // These operators will add the left term
@@ -123,6 +124,8 @@ namespace DatabaseWrapper
                 #region Process-By-Operators
 
                 case Operators.And:
+                    #region And
+
                     if (RightTerm == null) return null;
                     clause += "AND ";
                     if (RightTerm is Expression)
@@ -146,7 +149,11 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
                 case Operators.Or:
+                    #region Or
+
                     if (RightTerm == null) return null;
                     clause += "OR ";
                     if (RightTerm is Expression)
@@ -169,8 +176,12 @@ namespace DatabaseWrapper
                         }
                     }
                     break;
-                    
+
+                #endregion
+
                 case Operators.Equals:
+                    #region Equals
+
                     if (RightTerm == null) return null;
                     clause += "= ";
                     if (RightTerm is Expression)
@@ -194,7 +205,11 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
                 case Operators.NotEquals:
+                    #region NotEquals
+
                     if (RightTerm == null) return null;
                     clause += "<> ";
                     if (RightTerm is Expression)
@@ -218,7 +233,11 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
                 case Operators.In:
+                    #region In
+
                     if (RightTerm == null) return null;
                     int inAdded = 0;
                     if (!Helper.IsList(RightTerm)) return null;
@@ -252,7 +271,11 @@ namespace DatabaseWrapper
                     }
                     break;
 
-                case Operators.NotIn:
+                #endregion
+
+                case Operators.NotIn: 
+                    #region NotIn
+
                     if (RightTerm == null) return null;
                     int notInAdded = 0;
                     if (!Helper.IsList(RightTerm)) return null;
@@ -286,14 +309,20 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
                 case Operators.Contains:
+                    #region Contains
+
                     if (RightTerm == null) return null;
                     if (RightTerm is string)
                     {
                         clause +=
-                            "(" + PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString()) +
+                            "(" +
+                            PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString()) +
                             "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + PreparedStringValue(dbType, RightTerm.ToString() + "%") + ")";
+                            "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + PreparedStringValue(dbType, RightTerm.ToString() + "%") +
+                            ")";
                     }
                     else
                     {
@@ -301,14 +330,20 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
                 case Operators.ContainsNot:
+                    #region ContainsNot
+
                     if (RightTerm == null) return null;
                     if (RightTerm is string)
                     { 
                         clause +=
-                            "(" + PreparedFieldname(dbType, LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString()) +
+                            "(" + 
+                            PreparedFieldname(dbType, LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString()) +
                             "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(dbType, "%" + RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(dbType, RightTerm.ToString() + "%") + ")";
+                            "OR " + PreparedFieldname(dbType, LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(dbType, RightTerm.ToString() + "%") + 
+                            ")";
                     }
                     else
                     {
@@ -316,7 +351,49 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
+                case Operators.StartsWith:
+                    #region StartsWith
+
+                    if (RightTerm == null) return null;
+                    if (RightTerm is string)
+                    {
+                        clause +=
+                            "(" +
+                            PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + PreparedStringValue(dbType, RightTerm.ToString() + "%") +
+                            ")";
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                    break;
+
+                #endregion
+
+                case Operators.EndsWith:
+                    #region EndsWith
+
+                    if (RightTerm == null) return null;
+                    if (RightTerm is string)
+                    {
+                        clause +=
+                            "(" +
+                            PreparedFieldname(dbType, LeftTerm.ToString()) + " LIKE " + "%" + PreparedStringValue(dbType, RightTerm.ToString()) +
+                            ")";
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                    break;
+
+                #endregion
+
                 case Operators.GreaterThan:
+                    #region GreaterThan
+
                     if (RightTerm == null) return null;
                     clause += "> ";
                     if (RightTerm is Expression)
@@ -340,7 +417,11 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
                 case Operators.GreaterThanOrEqualTo:
+                    #region GreaterThanOrEqualTo
+
                     if (RightTerm == null) return null;
                     clause += ">= ";
                     if (RightTerm is Expression)
@@ -364,7 +445,11 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
                 case Operators.LessThan:
+                    #region LessThan
+
                     if (RightTerm == null) return null;
                     clause += "< ";
                     if (RightTerm is Expression)
@@ -388,7 +473,11 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
                 case Operators.LessThanOrEqualTo:
+                    #region LessThanOrEqualTo
+
                     if (RightTerm == null) return null;
                     clause += "<= ";
                     if (RightTerm is Expression)
@@ -412,14 +501,24 @@ namespace DatabaseWrapper
                     }
                     break;
 
+                #endregion
+
                 case Operators.IsNull:
+                    #region IsNull
+
                     clause += " IS NULL";
                     break;
 
+                    #endregion
+
                 case Operators.IsNotNull:
+                    #region IsNotNull
+
                     clause += " IS NOT NULL";
                     break;
-                    
+
+                    #endregion
+
                 #endregion
             }
 
