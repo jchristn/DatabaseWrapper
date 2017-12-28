@@ -19,9 +19,8 @@ Core features:
 - support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, or raw queries
 - built-in sanitization
 
-## New in v1.2.0
-- PostgreSQL support
-- Minor refactor
+## New in v1.2.4
+- New signatures for PrependAnd and PrependOr to make use easier
 
 ## A Note on Sanitization
 Use of parameterized queries vs building queries dynamically is a sensitive subject.  Proponents of parameterized queries have data on their side - that parameterization does the right thing to prevent SQL injection and other issues.  *I do not disagree with them*.  However, it is worth noting that with proper care, you CAN build systems that allow you to dynamically build queries, and you SHOULD do so as long as you build in the appropriate safeguards.
@@ -103,6 +102,10 @@ There should be no issues running in Mono, however, this has not (yet) been test
 
 ## Version history
 Notes from previous versions (starting with v1.1.0) will be moved here.
+
+v1.2.x
+- PostgreSQL support
+- Minor refactor
 
 v1.1.x
 - Added Trunate API
