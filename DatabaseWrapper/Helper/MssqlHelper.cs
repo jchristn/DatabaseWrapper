@@ -211,8 +211,8 @@ namespace DatabaseWrapper
                 }
                 else
                 {
-                    outerQuery = "SELECT * FROM (" + innerQuery + ") AS row_constrained_result WHERE __row_num__ >= " + indexStart + " ";
-                    if (maxResults > 0) outerQuery += "AND __row_num__ < " + (indexStart + maxResults) + " ";
+                    outerQuery = "SELECT * FROM (" + innerQuery + ") AS row_constrained_result WHERE __row_num__ >= " + (indexStart + 1) + " ";
+                    if (maxResults > 0) outerQuery += "AND __row_num__ <= " + (indexStart + maxResults) + " ";
                     outerQuery += "ORDER BY __row_num__ ";
                 }
             }
