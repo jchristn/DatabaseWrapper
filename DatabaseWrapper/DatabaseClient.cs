@@ -799,6 +799,30 @@ namespace DatabaseWrapper
             }
         }
 
+        /// <summary>
+        /// Sanitize an input string.
+        /// </summary>
+        /// <param name="val">The value to sanitize.</param>
+        /// <returns>A sanitized string.</returns>
+        public string SanitizeString(string val)
+        {
+            if (String.IsNullOrEmpty(val)) return val;
+
+            switch (DbType)
+            {
+                case DbTypes.MsSql:
+                    return MssqlHelper.SanitizeString(val);
+                    
+                case DbTypes.MySql:
+                    return MysqlHelper.SanitizeString(val);
+
+                case DbTypes.PgSql:
+                    return PgsqlHelper.SanitizeString(val);
+            }
+
+            throw new Exception("Unknown database type");
+        }
+
         #endregion
 
         #region Private-Instance-Methods
@@ -1020,30 +1044,7 @@ namespace DatabaseWrapper
                 return;
             }
         }
-
-        private string SanitizeString(string s)
-        {
-            if (String.IsNullOrEmpty(s)) return String.Empty;
-            string ret = ""; 
-
-            switch (DbType)
-            {
-                case DbTypes.MsSql:
-                    ret = MssqlHelper.SanitizeString(s);
-                    break;
-                    
-                case DbTypes.MySql:
-                    ret = MysqlHelper.SanitizeString(s);
-                    break;
-                     
-                case DbTypes.PgSql:
-                    ret = PgsqlHelper.SanitizeString(s);
-                    break;
-            }
-
-            return ret;
-        }
-
+         
         private string PreparedFieldname(string s)
         {
             switch (DbType)
