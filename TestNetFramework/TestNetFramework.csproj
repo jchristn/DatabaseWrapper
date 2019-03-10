@@ -22,7 +22,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>DatabaseWrapperTest.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -32,7 +33,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>DatabaseWrapperTest.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -50,15 +52,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="DatabaseWrapperTest.ruleset" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DatabaseWrapper\DatabaseWrapper.csproj">
-      <Project>{cb56d6d6-ee56-46d8-a9cc-2146d2ce9b4c}</Project>
+      <Project>{95c16d74-8f0a-421c-8f30-5dbdadd8a364}</Project>
       <Name>DatabaseWrapper</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Content Include="Samples\MsSqlSample.txt" />
     <Content Include="Samples\MySqlSample.txt" />

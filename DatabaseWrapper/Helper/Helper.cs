@@ -7,7 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DatabaseWrapper
 {
@@ -71,37 +72,7 @@ namespace DatabaseWrapper
             }
             return default(T);
         }
-
-        /// <summary>
-        /// Converts a DataTable to a List of objects of a given type.
-        /// </summary>
-        /// <typeparam name="T">The type of object to which each DataRow within the DataTable should be converted.</typeparam>
-        /// <param name="t">A DataTable.</param>
-        /// <returns>A list of objects of type T containing values from each DataRow within the DataTable.</returns>
-        public static List<T> DataTableToListObject<T>(DataTable t)
-        {
-            if (t == null) throw new ArgumentNullException(nameof(t));
-            if (t.Rows.Count < 1) throw new ArgumentException("No rows in DataTable");
-
-            var columnNames = t.Columns.Cast<DataColumn>()
-                    .Select(c => c.ColumnName)
-                    .ToList();
-            var properties = typeof(T).GetProperties();
-            return t.AsEnumerable().Select(row =>
-            {
-                var objT = Activator.CreateInstance<T>();
-                foreach (var pro in properties)
-                {
-                    if (columnNames.Contains(pro.Name))
-                    {
-                        PropertyInfo pI = objT.GetType().GetProperty(pro.Name);
-                        pro.SetValue(objT, row[pro.Name] == DBNull.Value ? null : Convert.ChangeType(row[pro.Name], pI.PropertyType));
-                    }
-                }
-                return objT;
-            }).ToList();
-        }
-
+         
         /// <summary>
         /// Convert a DataRow to an object of type T.
         /// </summary>
@@ -226,9 +197,8 @@ namespace DatabaseWrapper
         /// <returns>An object of type T built using data from the JSON string.</returns>
         public static T DeserializeJson<T>(string json)
         {
-            JavaScriptSerializer ser = new JavaScriptSerializer();
-            ser.MaxJsonLength = Int32.MaxValue;
-            return (T)ser.Deserialize<T>(json);
+            if (String.IsNullOrEmpty(json)) throw new ArgumentNullException(nameof(json));
+            return JsonConvert.DeserializeObject<T>(json);
         }
 
         /// <summary>
@@ -239,21 +209,42 @@ namespace DatabaseWrapper
         /// <returns>An object of type T built using data from the JSON byte data.</returns>
         public static T DeserializeJson<T>(byte[] bytes)
         {
-            JavaScriptSerializer ser = new JavaScriptSerializer();
-            ser.MaxJsonLength = Int32.MaxValue;
-            return (T)ser.Deserialize<T>(Encoding.UTF8.GetString(bytes));
+            if (bytes == null || bytes.Length < 1) throw new ArgumentNullException(nameof(bytes));
+            return DeserializeJson<T>(Encoding.UTF8.GetString(bytes));
         }
 
         /// <summary>
         /// Serialize an object to a JSON string.
         /// </summary>
         /// <param name="obj">An object.</param>
+        /// <param name="pretty">Enable pretty printing.</param>
         /// <returns>A string containing JSON built from the supplied object.</returns>
-        public static string SerializeJson(object obj)
+        public static string SerializeJson(object obj, bool pretty)
         {
-            JavaScriptSerializer ser = new JavaScriptSerializer();
-            ser.MaxJsonLength = Int32.MaxValue;
-            string json = ser.Serialize(obj);
+            if (obj == null) return null;
+            string json;
+
+            if (pretty)
+            {
+                json = JsonConvert.SerializeObject(
+                  obj,
+                  Newtonsoft.Json.Formatting.Indented,
+                  new JsonSerializerSettings
+                  {
+                      NullValueHandling = NullValueHandling.Ignore,
+                      DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                  });
+            }
+            else
+            {
+                json = JsonConvert.SerializeObject(obj,
+                  new JsonSerializerSettings
+                  {
+                      NullValueHandling = NullValueHandling.Ignore,
+                      DateTimeZoneHandling = DateTimeZoneHandling.Utc
+                  });
+            }
+
             return json;
         }
 
