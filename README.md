@@ -59,10 +59,10 @@ d.Add("notes", "The author :)");
 e = new Expression("firstName", Operators.Equals, "Joel"); 
 result = client.Update("person", d, e);
 
-// retrieve a record
+// retrieve 10 records
 fields = new List<string> { "firstName", "lastName" }; // leave null for *
 e = new Expression("lastName", Operators.Equals, "Christner"); 
-result = client.Select("person", 0, fields, e, null);
+result = client.Select("person", 0, 10, fields, e, "ORDER BY personId ASC");
 
 // delete a record
 e = new Expression("firstName", Operators.Equals, "Joel"); 
@@ -86,6 +86,8 @@ Expression e = new Expression {
 ## Select with Pagination
 
 Use indexStart, maxResults, and orderByClause to retrieve paginated results.  The query will retrieve maxResults records starting at row number indexStart using an ordering based on orderByClause.  See the example in the DatabaseWrapperTest project.
+
+IMPORTANT: When doing pagination, you MUST specify an ```orderByClause```.
 ```
 DataTable result = client.Select("person", 5, 10, null, e, "ORDER BY age DESC");
 ```
@@ -117,6 +119,7 @@ There should be no issues running in Mono, however, this has not (yet) been test
 Notes from previous versions (starting with v1.1.0) will be moved here.
 
 v1.2.x
+
 - Retarget to support both .NET Core 2.0 and .NET Framework 4.5.2.
 - Exposed SanitizeString through DatabaseClient
 - New signatures for PrependAnd and PrependOr to make use easier
@@ -124,6 +127,7 @@ v1.2.x
 - Minor refactor
 
 v1.1.x
+
 - Added Trunate API
 - Simplified (new) constructor for Expression
 - Additional Helper static methods to convert DataTable to useful objects (List<Dictionary>, Dictionary, List<dynamic>, dynamic)
