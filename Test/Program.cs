@@ -187,7 +187,7 @@ namespace DatabaseWrapperTest
                 // is here to show how to build a nested expression
                 //
 
-                client.Select("person", null, 3, returnFields, e, null);
+                client.Select("person", 0, 3, returnFields, e, "ORDER BY personId ASC");
             }
         }
 

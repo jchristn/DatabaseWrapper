@@ -5,9 +5,7 @@
 [nuget]:     https://www.nuget.org/packages/DatabaseWrapper/
 [nuget-img]: https://badge.fury.io/nu/Object.svg
 
-Simple database wrapper for Microsoft SQL Server, MySQL, and PostgreSQL written in C#.  
-
-Effective v1.2.7, DatabaseWrapper now targets both .NET Core 2.0 and .NET Framework 4.5.2.
+Simple database wrapper for Microsoft SQL Server, MySQL, and PostgreSQL written in C#, targeting both .NET Core and .NET Framework.
 
 For a sample app exercising this library, refer to the test project contained within the solution.
 
@@ -17,15 +15,17 @@ DatabaseWrapper is a simple database wrapper for Microsoft SQL Server, MySQL, an
 
 Core features:
 
-- dynamic query building using expression objects
-- support for nested queries within expressions
-- support for SQL server native vs Windows authentication
-- support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, or raw queries
-- built-in sanitization
+- Dynamic query building using expression objects
+- Support for nested queries within expressions
+- Support for SQL server native vs Windows authentication
+- Support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, or raw queries
+- Built-in sanitization
 
-## New in v1.2.7
+## New in v1.3.x
 
-- Retarget to support both .NET Core 2.0 and .NET Framework 4.5.2.
+- Rework of MSSQL SELECT with pagination, now requires ORDER BY clause to be set (breaking change)
+- Long-lived connections (rather than re-opening per query)
+- IDisposable support
 
 ## A Note on Sanitization
 
@@ -117,6 +117,7 @@ There should be no issues running in Mono, however, this has not (yet) been test
 Notes from previous versions (starting with v1.1.0) will be moved here.
 
 v1.2.x
+- Retarget to support both .NET Core 2.0 and .NET Framework 4.5.2.
 - Exposed SanitizeString through DatabaseClient
 - New signatures for PrependAnd and PrependOr to make use easier
 - PostgreSQL support

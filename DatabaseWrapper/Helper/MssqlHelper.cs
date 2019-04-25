@@ -135,28 +135,23 @@ namespace DatabaseWrapper
 
         public static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         {
-            string innerQuery = "";
-            string outerQuery = "";
+            string query = "";
             string whereClause = "";
-             
+
+            if (indexStart != null || maxResults != null)
+            {
+                if (String.IsNullOrEmpty(orderByClause)) throw new ArgumentNullException(nameof(orderByClause));
+            }
+
             //
             // select
             //
-            if (indexStart != null)
-            {
-                if (String.IsNullOrEmpty(orderByClause)) throw new ArgumentNullException(nameof(orderByClause));
-                innerQuery = "SELECT ROW_NUMBER() OVER ( " + orderByClause + " ) AS __row_num__, ";
-            }
-            else
-            {
-                if (maxResults > 0) innerQuery += "SELECT TOP " + maxResults + " ";
-                else innerQuery += "SELECT ";
-            }
+            query = "SELECT ";
 
             //
             // fields
             //
-            if (returnFields == null || returnFields.Count < 1) innerQuery += "* ";
+            if (returnFields == null || returnFields.Count < 1) query += "* ";
             else
             {
                 int fieldsAdded = 0;
@@ -164,22 +159,22 @@ namespace DatabaseWrapper
                 {
                     if (fieldsAdded == 0)
                     {
-                        innerQuery += SanitizeString(curr);
+                        query += SanitizeString(curr);
                         fieldsAdded++;
                     }
                     else
                     {
-                        innerQuery += "," + SanitizeString(curr);
+                        query += "," + SanitizeString(curr);
                         fieldsAdded++;
                     }
                 }
             }
-            innerQuery += " ";
+            query += " ";
 
             //
             // table
             //
-            innerQuery += "FROM " + tableName + " ";
+            query += "FROM " + SanitizeString(tableName) + " ";
 
             //
             // expressions
@@ -187,41 +182,31 @@ namespace DatabaseWrapper
             if (filter != null) whereClause = filter.ToWhereClause(DbTypes.MsSql);
             if (!String.IsNullOrEmpty(whereClause))
             {
-                innerQuery += "WHERE " + whereClause + " ";
+                query += "WHERE " + whereClause + " ";
             }
 
             // 
             // order clause
-            //
-            if (indexStart == null)
-            {
-                if (!String.IsNullOrEmpty(orderByClause)) innerQuery += SanitizeString(orderByClause) + " ";
-            }
-
             // 
-            // wrap in outer query
-            //
-            if (indexStart != null)
+            if (!String.IsNullOrEmpty(orderByClause))
             {
-                if (indexStart == 0)
-                {
-                    outerQuery = "SELECT * FROM (" + innerQuery + ") AS row_constrained_result WHERE __row_num__ > " + indexStart + " ";
-                    if (maxResults > 0) outerQuery += "AND __row_num__ <= " + (indexStart + maxResults) + " ";
-                    outerQuery += "ORDER BY __row_num__ ";
-                }
-                else
-                {
-                    outerQuery = "SELECT * FROM (" + innerQuery + ") AS row_constrained_result WHERE __row_num__ >= " + (indexStart + 1) + " ";
-                    if (maxResults > 0) outerQuery += "AND __row_num__ <= " + (indexStart + maxResults) + " ";
-                    outerQuery += "ORDER BY __row_num__ ";
-                }
+                query += SanitizeString(orderByClause) + " ";
             }
-            else
+            
+            //
+            // pagination
+            //
+            if (indexStart != null && maxResults != null)
             {
-                outerQuery = innerQuery;
+                query += "OFFSET " + indexStart + " ROWS ";
+                query += "FETCH NEXT " + maxResults + " ROWS ONLY ";
+            }
+            else if (indexStart != null)
+            {
+                query += "OFFSET " + indexStart + " ROWS ";
             }
 
-            return outerQuery;
+            return query;
         }
 
         public static string InsertQuery(string tableName, string keys, string values)
