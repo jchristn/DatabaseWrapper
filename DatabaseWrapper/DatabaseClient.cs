@@ -53,11 +53,7 @@ namespace DatabaseWrapper
         private ConcurrentDictionary<string, List<Column>> _TableDetails = new ConcurrentDictionary<string, List<Column>>();
 
         private Random _Random = new Random();
-
-        private SqlConnection _MssqlConnection = null;
-        private MySqlConnection _MysqlConnection = null;
-        private NpgsqlConnection _PgsqlConnection = null;
-
+         
         #endregion
 
         #region Constructors-and-Factories
@@ -97,8 +93,7 @@ namespace DatabaseWrapper
             _Instance = instance;
             _DatabaseName = database;
 
-            PopulateConnectionString();
-            InitializeConnections();
+            PopulateConnectionString(); 
             LoadTableNames();
             LoadTableDetails();
         }
@@ -156,8 +151,7 @@ namespace DatabaseWrapper
             _Instance = instance;
             _DatabaseName = database;
 
-            PopulateConnectionString();
-            InitializeConnections();
+            PopulateConnectionString(); 
             LoadTableNames();
             LoadTableDetails();
         }
@@ -719,33 +713,72 @@ namespace DatabaseWrapper
             switch (_DbType)
             {
                 case DbTypes.MsSql:
-                    SqlDataAdapter mssqlSda = new SqlDataAdapter(query, _MssqlConnection);
-                    mssqlSda.Fill(result);
-                    break; 
-                case DbTypes.MySql: 
-                    MySqlCommand cmd = new MySqlCommand();
-                    cmd.Connection = _MysqlConnection;
-                    cmd.CommandText = query;
-                    MySqlDataAdapter mysqlSda = new MySqlDataAdapter(cmd);
-                    DataSet mysqlDs = new DataSet();
-                    mysqlSda.Fill(mysqlDs);
-                    if (mysqlDs != null)
+                    #region Mssql
+
+                    using (SqlConnection conn = new SqlConnection(ConnectionString))
                     {
-                        if (mysqlDs.Tables != null && mysqlDs.Tables.Count > 0)
+                        conn.Open();
+                        SqlDataAdapter sda = new SqlDataAdapter(query, conn);
+                        sda.Fill(result);
+                        conn.Dispose();
+                        conn.Close();
+                    }
+
+                    break;
+
+                #endregion
+
+                case DbTypes.MySql:
+                    #region Mysql
+
+                    using (MySqlConnection conn = new MySqlConnection(ConnectionString))
+                    {
+                        conn.Open();
+                        MySqlCommand cmd = new MySqlCommand();
+                        cmd.Connection = conn;
+                        cmd.CommandText = query;
+                        MySqlDataAdapter sda = new MySqlDataAdapter(cmd);
+                        DataSet ds = new DataSet();
+                        sda.Fill(ds);
+                        if (ds != null)
                         {
-                            result = mysqlDs.Tables[0];
+                            if (ds.Tables != null)
+                            {
+                                if (ds.Tables.Count > 0)
+                                {
+                                    result = ds.Tables[0];
+                                }
+                            }
                         }
+
+                        conn.Close();
                     }
-                    break; 
-                case DbTypes.PgSql: 
-                    NpgsqlDataAdapter pgsqlSda = new NpgsqlDataAdapter(query, _PgsqlConnection);
-                    DataSet pgsqlDs = new DataSet();
-                    pgsqlSda.Fill(pgsqlDs); 
-                    if (pgsqlDs != null && pgsqlDs.Tables != null && pgsqlDs.Tables.Count > 0)
+
+                    break;
+
+                #endregion
+
+                case DbTypes.PgSql:
+                    #region Pgsql
+
+                    using (NpgsqlConnection conn = new NpgsqlConnection(ConnectionString))
                     {
-                        result = pgsqlDs.Tables[0];
+                        conn.Open();
+                        NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn);
+                        DataSet ds = new DataSet();
+                        da.Fill(ds);
+
+                        if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
+                        {
+                            result = ds.Tables[0];
+                        }
+
+                        conn.Close();
                     }
-                    break; 
+
+                    break;
+
+                    #endregion
             }
 
             if (DebugResultRowCount)
@@ -817,30 +850,7 @@ namespace DatabaseWrapper
 
             if (disposing)
             { 
-                try
-                {
-                    if (_MssqlConnection != null)
-                    {
-                        _MssqlConnection.Close();
-                        _MssqlConnection.Dispose();
-                    }
-
-                    if (_MysqlConnection != null)
-                    {
-                        _MysqlConnection.Close();
-                        _MysqlConnection.Dispose();
-                    }
-
-                    if (_PgsqlConnection != null)
-                    {
-                        _PgsqlConnection.Close();
-                        _PgsqlConnection.Dispose();
-                    }
-                }
-                catch (Exception)
-                {
-
-                }
+                // placeholder
             }
 
             _Disposed = true;
@@ -867,26 +877,7 @@ namespace DatabaseWrapper
 
             return;
         }
-
-        private void InitializeConnections()
-        {
-            switch (_DbType)
-            {
-                case DbTypes.MsSql:
-                    _MssqlConnection = new SqlConnection(ConnectionString);
-                    _MssqlConnection.Open();
-                    break; 
-                case DbTypes.MySql:
-                    _MysqlConnection = new MySqlConnection(ConnectionString);
-                    _MysqlConnection.Open();
-                    break;
-                case DbTypes.PgSql:
-                    _PgsqlConnection = new NpgsqlConnection(ConnectionString);
-                    _PgsqlConnection.Open();
-                    break;
-            }
-        }
-
+         
         private void LoadTableNames()
         {
             lock (_LoadingTablesLock)
