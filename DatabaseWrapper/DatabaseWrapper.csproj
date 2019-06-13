@@ -14,7 +14,7 @@
     <PackageLicenseUrl>https://github.com/jchristn/DatabaseWrapper/blob/master/LICENSE.txt</PackageLicenseUrl>
     <PackageReleaseNotes>Breaking change: rework Mssql SELECT pagination (no longer using an inner and outer query), requires ORDER BY clause be set now.</PackageReleaseNotes>
     <PackageTags>database sql mysql mssql pgsql postgresql dynamic query builder datarow datatable</PackageTags>
-    <PackageIconUrl>https://raw.githubusercontent.com/kvpbase/storage-server/master/assets/icon.ico</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/jchristn/databasewrapper/master/assets/icon.ico</PackageIconUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
