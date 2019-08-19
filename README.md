@@ -18,15 +18,22 @@ Core features:
 - Dynamic query building using expression objects
 - Support for nested queries within expressions
 - Support for SQL server native vs Windows authentication
-- Support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, or raw queries
+- Support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, CREATE, DROP or raw queries
+- Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v1.3.x
+## New in v1.4.x
 
-- Rework of MSSQL SELECT with pagination, now requires ORDER BY clause to be set (breaking change)
-- Long-lived connections (rather than re-opening per query)
-- IDisposable support
-
+- Add support for CreateTable and DropTable operations, please note the following constraints:
+  - For PostgreSQL, automatically uses ```SERIAL PRIMARY KEY``` for primary keys
+  - For Microsoft SQL, automatically creates a constraint and assumes primary key type is ```int```
+  - For Microsoft SQL, DateTime types are created as ```datetime2```
+  - For MySQL, automatically applies ```AUTO_INCREMENT``` to primary keys
+  - For MySQL, assumes ```Engine=InnoDB``` and ```AUTO_INCREMENT=1```
+  - For a full list of supported data types and how they are cast, please refer to:
+    - ```DataType.cs```, and 
+    - ```DataTypeFromString``` method in ```DatabaseClient.cs```
+ 
 ## A Note on Sanitization
 
 Use of parameterized queries vs building queries dynamically is a sensitive subject.  Proponents of parameterized queries have data on their side - that parameterization does the right thing to prevent SQL injection and other issues.  *I do not disagree with them*.  However, it is worth noting that with proper care, you CAN build systems that allow you to dynamically build queries, and you SHOULD do so as long as you build in the appropriate safeguards.
@@ -110,13 +117,15 @@ string mysql2 = client.Timestamp(DateTime.Now);
 - MySQL does not like to return updated rows.  Sorry about that.  I thought about making the UPDATE clause require that you supply the ID field and the ID value so that I could retrieve it after the fact, but that approach is just too limiting.
 - Cleansing of strings in PostgreSQL uses the dollar-quote style.  Fieldnames are always encapsulated in double-quotes for PostgreSQL.
 
-## Running in Mono
-
-There should be no issues running in Mono, however, this has not (yet) been tested.  
-
 ## Version history
 
 Notes from previous versions (starting with v1.1.0) will be moved here.
+
+v1.3.x
+
+- Rework of MSSQL SELECT with pagination, now requires ORDER BY clause to be set (breaking change)
+- Long-lived connections (rather than re-opening per query)
+- IDisposable support
 
 v1.2.x
 

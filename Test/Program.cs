@@ -11,41 +11,63 @@ namespace DatabaseWrapperTest
 {
     class Program
     { 
-        //
-        //
-        // Before attempting to run this program, be sure to create the person table in a database
-        // named 'test' per the scripts found in the samples folder, and set the constructor with
-        // the appropriate parameters!
-        //
-        //
-
-        static DatabaseClient client;
+        static DatabaseClient client; 
 
         static void Main(string[] args)
-        {
+        { 
             try
             {
-                //
-                // Uncomment the lines below for the functions you wish to test
-                //
-                // PrependAndTest();
-                // PrependOrTest();
-                // DisplayNestedAndExpression();
-                // DisplayNestedOrExpression();
-                //
+                #region Select-Database-Type
 
-                // MsSql
-                client = new DatabaseClient(DbTypes.MsSql, "localhost", 0, null, null, "SQLEXPRESS", "test");
+                /*
+                 * 
+                 * 
+                 * Create the database 'test' before proceeding
+                 * 
+                 * 
+                 */
 
-                // MySql
-                // client = new DatabaseClient(DbTypes.MySql, "127.0.0.1", 3306, "root", "password", null, "test");
+                Console.Write("DB type [mssql|mysql|pgsql]: ");
+                string dbType = Console.ReadLine();
+                if (String.IsNullOrEmpty(dbType)) return;
 
-                // PgSql
-                // client = new DatabaseClient(DbTypes.PgSql, "127.0.0.1", 5432, "postgres", "password", null, "test");
+                switch (dbType)
+                {
+                    case "mssql":
+                        client = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, "sa", "null", null, "test");
+                        break;
+                    case "mysql":
+                        client = new DatabaseClient(DbTypes.MySql, "localhost", 3306, "root", "null", null, "test");
+                        break;
+                    case "pgsql":
+                        client = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, "postgres", "null", null, "test");
+                        break;
+                    default:
+                        return;
+                }
 
                 client.DebugRawQuery = true;
                 client.DebugResultRowCount = true;
-                
+
+                #endregion
+
+                #region Drop-and-Create-Table
+
+                client.DropTable("person");
+
+                List<Column> columns = new List<Column>();
+                columns.Add(new Column("id", true, DataType.Int, 11, null, false));
+                columns.Add(new Column("firstName", false, DataType.Nvarchar, 30, null, false));
+                columns.Add(new Column("lastName", false, DataType.Nvarchar, 30, null, false));
+                columns.Add(new Column("age", false, DataType.Int, 11, null, true));
+                columns.Add(new Column("value", false, DataType.Long, 12, null, true));
+                columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
+                columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
+
+                client.CreateTable("person", columns);
+
+                #endregion 
+                 
                 Console.WriteLine("Loading rows...");
                 LoadRows();
                 Console.WriteLine("Press ENTER to continue...");
@@ -69,6 +91,10 @@ namespace DatabaseWrapperTest
                 Console.WriteLine("Deleting rows...");
                 DeleteRows();
                 Console.WriteLine("Press ENTER to continue");
+                Console.ReadLine();
+
+                Console.WriteLine("Dropping table...");
+                client.DropTable("person");
                 Console.ReadLine();
             }
             catch (Exception e)
@@ -148,7 +174,9 @@ namespace DatabaseWrapperTest
                 d.Add("firstName", "first" + i);
                 d.Add("lastName", "last" + i);
                 d.Add("age", i);
-                d.Add("notes", "This is person number " + i);
+                d.Add("value", i * 1000);
+                d.Add("birthday", DateTime.Now);
+                d.Add("hourly", 123.456);
 
                 client.Insert("person", d);
             }
@@ -161,10 +189,9 @@ namespace DatabaseWrapperTest
                 Dictionary<string, object> d = new Dictionary<string, object>();
                 d.Add("firstName", "first" + i + "-updated");
                 d.Add("lastName", "last" + i + "-updated");
-                d.Add("age", i);
-                d.Add("notes", "This is updated person number " + i);
+                d.Add("age", i); 
 
-                Expression e = new Expression("personId", Operators.Equals, i);
+                Expression e = new Expression("id", Operators.Equals, i);
                 client.Update("person", d, e);
             }
         }
@@ -177,7 +204,7 @@ namespace DatabaseWrapperTest
             {
                 Expression e = new Expression
                 {
-                    LeftTerm = new Expression("personId", Operators.LessThan, i),
+                    LeftTerm = new Expression("id", Operators.LessThan, i),
                     Operator = Operators.And,
                     RightTerm = new Expression("age", Operators.LessThan, i)
                 };
@@ -187,7 +214,7 @@ namespace DatabaseWrapperTest
                 // is here to show how to build a nested expression
                 //
 
-                client.Select("person", 0, 3, returnFields, e, "ORDER BY personId ASC");
+                client.Select("person", 0, 3, returnFields, e, "ORDER BY id ASC");
             }
         }
 
@@ -199,7 +226,7 @@ namespace DatabaseWrapperTest
             {
                 Expression e = new Expression
                 {
-                    LeftTerm = new Expression("personId", Operators.GreaterThan, 1),
+                    LeftTerm = new Expression("id", Operators.GreaterThan, 1),
                     Operator = Operators.And,
                     RightTerm = new Expression("age", Operators.LessThan, 50)
                 };
@@ -217,7 +244,7 @@ namespace DatabaseWrapperTest
         {
             for (int i = 20; i < 30; i++)
             {
-                Expression e = new Expression("personId", Operators.Equals, i);
+                Expression e = new Expression("id", Operators.Equals, i);
                 client.Delete("person", e);
             }
         }

@@ -117,10 +117,6 @@ namespace DatabaseWrapper
             string instance,
             string database)
         {
-            //
-            // MsSql, MySql, and PostgreSql will use server IP, port, username, password, database
-            // Sqlite will use just database and it should refer to the database file
-            //
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
             if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
             if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
@@ -202,8 +198,72 @@ namespace DatabaseWrapper
             }
             else
             {
-                throw new Exception("Table " + tableName + " is not in the tables list");
+                throw new KeyNotFoundException("Table " + tableName + " is not in the tables list");
             }
+        }
+
+        /// <summary>
+        /// Create a table with a specified name.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="columns">Columns.</param>
+        public void CreateTable(string tableName, List<Column> columns)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+            if (columns == null || columns.Count < 1) throw new ArgumentNullException(nameof(columns));
+
+            string query = null;
+
+            switch (_DbType)
+            {
+                case DbTypes.MsSql:
+                    query = MssqlHelper.CreateTableQuery(tableName, columns);
+                    break;
+
+                case DbTypes.MySql:
+                    query = MysqlHelper.CreateTableQuery(tableName, columns);
+                    break;
+
+                case DbTypes.PgSql:
+                    query = PgsqlHelper.CreateTableQuery(tableName, columns);
+                    break;
+            }
+
+            DataTable result = Query(query);
+
+            LoadTableNames();
+            LoadTableDetails();
+        }
+
+        /// <summary>
+        /// Drop the specified table.  
+        /// </summary>
+        /// <param name="tableName">The table to drop.</param>
+        public void DropTable(string tableName)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+
+            string query = null;
+
+            switch (_DbType)
+            {
+                case DbTypes.MsSql:
+                    query = MssqlHelper.DropTableQuery(tableName);
+                    break;
+
+                case DbTypes.MySql:
+                    query = MysqlHelper.DropTableQuery(tableName);
+                    break;
+
+                case DbTypes.PgSql:
+                    query = PgsqlHelper.DropTableQuery(tableName);
+                    break;
+            }
+
+            DataTable result = Query(query);
+
+            LoadTableNames();
+            LoadTableDetails();
         }
 
         /// <summary>
@@ -222,7 +282,7 @@ namespace DatabaseWrapper
                 {
                     foreach (Column c in details)
                     {
-                        if (c.IsPrimaryKey) return c.Name;
+                        if (c.PrimaryKey) return c.Name;
                     }
                 }
 
@@ -230,7 +290,7 @@ namespace DatabaseWrapper
             }
             else
             {
-                throw new Exception("Table " + tableName + " is not in the tables list");
+                throw new KeyNotFoundException("Table " + tableName + " is not in the tables list");
             }
         }
 
@@ -262,7 +322,7 @@ namespace DatabaseWrapper
             }
             else
             {
-                throw new Exception("Table " + tableName + " is not in the tables list");
+                throw new KeyNotFoundException("Table " + tableName + " is not in the tables list");
             }
         }
 
@@ -837,6 +897,73 @@ namespace DatabaseWrapper
             throw new Exception("Unknown database type");
         }
 
+        /// <summary>
+        /// Retrieve a DataType based on a supplied string.
+        /// </summary>
+        /// <param name="s">String.</param>
+        /// <returns>DataType.</returns>
+        public DataType DataTypeFromString(string s)
+        {
+            if (String.IsNullOrEmpty(s)) throw new ArgumentNullException(nameof(s));
+
+            s = s.ToLower();
+
+            switch (s)
+            {
+                case "bigserial":               // pgsql
+                case "bigint":                  // mssql
+                    return DataType.Long;
+
+                case "smallserial":             // pgsql
+                case "smallest":                // pgsql
+                case "tinyint":                 // mssql, mysql
+                case "integer":                 // pgsql
+                case "int":                     // mssql, mysql
+                case "smallint":                // mssql, mysql
+                case "mediumint":               // mysql
+                case "serial":                  // pgsql
+                    return DataType.Int;
+
+                case "double precision":        // pgsql
+                case "real":                    // pgsql
+                case "float":                   // mysql
+                case "double":                  // mysql
+                case "decimal":                 // mssql
+                case "numeric":                 // mssql
+                    return DataType.Decimal;
+
+                case "timestamp without timezone":      // pgsql
+                case "timestamp without time zone":     // pgsql
+                case "timestamp with timezone":         // pgsql
+                case "timestamp with time zone":        // pgsql
+                case "time without timezone":           // pgsql
+                case "time without time zone":          // pgsql
+                case "time with timezone":              // pgsql
+                case "time with time zone":             // pgsql
+                case "time":                    // mssql, mysql
+                case "date":                    // mssql, mysql
+                case "datetime":                // mssql, mysql
+                case "datetime2":               // mssql
+                case "timestamp":               // mysql
+                    return DataType.DateTime;
+
+                case "character":               // pgsql
+                case "char":                    // mssql, mysql, pgsql
+                case "text":                    // mssql, mysql, pgsql
+                case "varchar":                 // mssql, mysql, pgsql
+                    return DataType.Varchar;
+
+                case "character varying":       // pgsql
+                case "nchar":
+                case "ntext":
+                case "nvarchar":
+                    return DataType.Nvarchar;   // mssql
+
+                default:
+                    throw new ArgumentException("Unknown DataType: " + s);
+            }
+        }
+
         #endregion
 
         #region Private-Methods
@@ -936,9 +1063,10 @@ namespace DatabaseWrapper
                     }
                 }
 
+                _TableNames = new ConcurrentList<string>();
+
                 if (tableNames != null && tableNames.Count > 0)
                 {
-                    _TableNames = new ConcurrentList<string>();
                     foreach (string curr in tableNames)
                     {
                         _TableNames.Add(curr);
@@ -1007,9 +1135,9 @@ namespace DatabaseWrapper
                                     #region Mssql
 
                                     tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
-                                    if (currColumn["CONSTRAINT_NAME"].ToString().StartsWith("PK_")) tempColumn.IsPrimaryKey = true;
-                                    else tempColumn.IsPrimaryKey = false;
-                                    tempColumn.DataType = currColumn["DATA_TYPE"].ToString();
+                                    if (currColumn["CONSTRAINT_NAME"].ToString().StartsWith("PK_")) tempColumn.PrimaryKey = true;
+                                    else tempColumn.PrimaryKey = false;
+                                    tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
                                     if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
                                     else tempColumn.MaxLength = maxLength;
                                     if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
@@ -1022,9 +1150,9 @@ namespace DatabaseWrapper
                                     #region Mysql
 
                                     tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
-                                    if (String.Compare(currColumn["COLUMN_KEY"].ToString(), "PRI") == 0) tempColumn.IsPrimaryKey = true;
-                                    else tempColumn.IsPrimaryKey = false;
-                                    tempColumn.DataType = currColumn["DATA_TYPE"].ToString();
+                                    if (String.Compare(currColumn["COLUMN_KEY"].ToString(), "PRI") == 0) tempColumn.PrimaryKey = true;
+                                    else tempColumn.PrimaryKey = false;
+                                    tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
                                     if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
                                     else tempColumn.MaxLength = maxLength;
                                     if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
@@ -1037,9 +1165,9 @@ namespace DatabaseWrapper
                                     #region Pgsql
 
                                     tempColumn.Name = currColumn["column_name"].ToString();
-                                    if (String.Compare(currColumn["is_primary_key"].ToString(), "YES") == 0) tempColumn.IsPrimaryKey = true;
-                                    else tempColumn.IsPrimaryKey = false;
-                                    tempColumn.DataType = currColumn["DATA_TYPE"].ToString();
+                                    if (String.Compare(currColumn["is_primary_key"].ToString(), "YES") == 0) tempColumn.PrimaryKey = true;
+                                    else tempColumn.PrimaryKey = false;
+                                    tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
                                     if (!Int32.TryParse(currColumn["max_len"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
                                     else tempColumn.MaxLength = maxLength;
                                     if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;

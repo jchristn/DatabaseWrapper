@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Npgsql;
 
 namespace DatabaseWrapper
 {
@@ -162,6 +163,82 @@ namespace DatabaseWrapper
             //
             ret = ret.Replace("'", "''");
             return ret;
+        }
+
+        private static string ColumnToCreateString(string tableName, Column col)
+        {
+            string ret =
+                "\"" + SanitizeFieldname(col.Name) + "\" ";
+
+            if (col.PrimaryKey)
+            {
+                ret += "SERIAL PRIMARY KEY ";
+                return ret;
+            }
+
+            switch (col.Type)
+            {
+                case DataType.Varchar:
+                case DataType.Nvarchar:
+                    ret += "character varying(" + col.MaxLength + ") ";
+                    break;
+                case DataType.Int:
+                    ret += "integer ";
+                    break;
+                case DataType.Long:
+                    ret += "bigint ";
+                    break;
+                case DataType.Decimal:
+                    ret += "numeric(" + col.MaxLength + "," + col.Precision + ") ";
+                    break;
+                case DataType.DateTime:
+                    ret += "timestamp with time zone ";
+                    break;
+                default:
+                    throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
+            }
+
+            if (col.Nullable) ret += "NULL ";
+            else ret += "NOT NULL ";
+             
+            return ret;
+        }
+
+        private static Column GetPrimaryKeyColumn(List<Column> columns)
+        {
+            Column c = columns.FirstOrDefault(d => d.PrimaryKey);
+            if (c == null || c == default(Column)) return null;
+            return c;
+        }
+
+        public static string CreateTableQuery(string tableName, List<Column> columns)
+        {
+            string query =
+                "CREATE TABLE " + SanitizeFieldname(tableName) + " " +
+                "(";
+
+            int added = 0;
+            foreach (Column curr in columns)
+            {
+                if (added > 0) query += ", ";
+                query += ColumnToCreateString(tableName, curr);
+                added++;
+            }
+             
+            query +=
+                ") " +
+                "WITH " +
+                "(" +
+                "  OIDS = FALSE" +
+                ")";
+
+            return query; 
+        }
+
+        public static string DropTableQuery(string tableName)
+        {
+            string query = "DROP TABLE IF EXISTS " + SanitizeFieldname(tableName);
+            return query;
         }
 
         public static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)

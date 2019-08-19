@@ -47,6 +47,84 @@ namespace DatabaseWrapper
             return ret;
         }
 
+        private static string ColumnToCreateString(Column col)
+        { 
+            string ret =
+                "`" + SanitizeString(col.Name) + "` ";
+
+            switch (col.Type)
+            {
+                case DataType.Varchar:
+                case DataType.Nvarchar:
+                    ret += "varchar(" + col.MaxLength + ") ";
+                    break;
+                case DataType.Int:
+                case DataType.Long:
+                    ret += "int(" + col.MaxLength + ") ";
+                    break;
+                case DataType.Decimal:
+                    ret += "decimal(" + col.MaxLength + "," + col.Precision + ") ";
+                    break;
+                case DataType.DateTime:
+                    ret += "datetime ";
+                    break;
+                default:
+                    throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
+            }
+
+            if (col.Nullable) ret += "NULL ";
+            else ret += "NOT NULL ";
+
+            if (col.PrimaryKey) ret += "AUTO_INCREMENT ";
+
+            return ret;
+        }
+
+        private static Column GetPrimaryKeyColumn(List<Column> columns)
+        {
+            Column c = columns.FirstOrDefault(d => d.PrimaryKey);
+            if (c == null || c == default(Column)) return null;
+            return c;
+        }
+
+        public static string CreateTableQuery(string tableName, List<Column> columns)
+        {
+            string query =
+                "CREATE TABLE `" + SanitizeString(tableName) + "` " +
+                "(";
+
+            int added = 0;
+            foreach (Column curr in columns)
+            {
+                if (added > 0) query += ", ";
+                query += ColumnToCreateString(curr);
+                added++;
+            }
+
+            Column primaryKey = GetPrimaryKeyColumn(columns);
+            if (primaryKey != null)
+            {
+                query +=
+                    "," +
+                    "PRIMARY KEY (`" + SanitizeString(primaryKey.Name) + "`)";
+            }
+
+            query +=
+                ") " +
+                "ENGINE=InnoDB " +
+                "AUTO_INCREMENT=1 " +
+                "DEFAULT CHARSET=utf8mb4 " +
+                "COLLATE=utf8mb4_0900_ai_ci";
+
+            return query;
+        }
+
+        public static string DropTableQuery(string tableName)
+        {
+            string query = "DROP TABLE IF EXISTS " + SanitizeString(tableName);
+            return query;
+        }
+
         public static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         { 
             string outerQuery = "";

@@ -133,6 +133,97 @@ namespace DatabaseWrapper
             return ret;
         }
 
+        private static string ColumnToCreateString(Column col)
+        {
+            string ret =
+                "[" + SanitizeString(col.Name) + "] ";
+
+            switch (col.Type)
+            {
+                case DataType.Varchar:
+                    ret += "[varchar](" + col.MaxLength + ") ";
+                    break;
+                case DataType.Nvarchar:
+                    ret += "[nvarchar](" + col.MaxLength + ") ";
+                    break;
+                case DataType.Int:
+                    ret += "[int] ";
+                    break;
+                case DataType.Long:
+                    ret += "[bigint] ";
+                    break;
+                case DataType.Decimal:
+                    ret += "[decimal](" + col.MaxLength + "," + col.Precision + ") ";
+                    break;
+                case DataType.DateTime:
+                    ret += "[datetime2] ";
+                    break;
+                default:
+                    throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
+            }
+
+            if (col.PrimaryKey) ret += "IDENTITY(1,1) ";
+
+            if (col.Nullable) ret += "NULL ";
+            else ret += "NOT NULL ";
+
+            return ret;
+        }
+
+        private static Column GetPrimaryKeyColumn(List<Column> columns)
+        {
+            Column c = columns.FirstOrDefault(d => d.PrimaryKey);
+            if (c == null || c == default(Column)) return null;
+            return c;
+        }
+
+        public static string CreateTableQuery(string tableName, List<Column> columns)
+        {
+            string query =
+                "CREATE TABLE " + SanitizeString(tableName) +
+                "(";
+
+            int added = 0;
+            foreach (Column curr in columns)
+            {
+                if (added > 0) query += ", ";
+                query += ColumnToCreateString(curr); 
+                added++;
+            }
+
+            Column primaryKey = GetPrimaryKeyColumn(columns);
+            if (primaryKey != null)
+            {
+                query +=
+                    ", " +
+                    "CONSTRAINT [PK_" + SanitizeString(tableName) + "] PRIMARY KEY CLUSTERED " +
+                    "(" +
+                    "  [" + SanitizeString(primaryKey.Name) + "] ASC " +
+                    ") " +
+                    "WITH " +
+                    "(" +
+                    "  PAD_INDEX = OFF, " +
+                    "  STATISTICS_NORECOMPUTE = OFF, " +
+                    "  IGNORE_DUP_KEY = OFF, " +
+                    "  ALLOW_ROW_LOCKS = ON, " +
+                    "  ALLOW_PAGE_LOCKS = ON " +
+                    ") " +
+                    "ON [PRIMARY] ";
+            } 
+
+            query +=
+                ") " +
+                "ON [PRIMARY] ";
+
+            return query;
+        }
+
+        public static string DropTableQuery(string tableName)
+        {
+            string query = "IF OBJECT_ID('dbo." + SanitizeString(tableName) + "', 'U') IS NOT NULL DROP TABLE dbo." + SanitizeString(tableName);
+            return query;
+        }
+
         public static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         {
             string query = "";
