@@ -23,6 +23,7 @@ namespace DatabaseWrapperTest
                  * 
                  * 
                  * Create the database 'test' before proceeding
+                 * Update the 'client' initializer with your credentials
                  * 
                  * 
                  */
@@ -34,13 +35,13 @@ namespace DatabaseWrapperTest
                 switch (dbType)
                 {
                     case "mssql":
-                        client = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, "sa", "null", null, "test");
+                        client = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, "sa", "<password>", null, "test");
                         break;
                     case "mysql":
-                        client = new DatabaseClient(DbTypes.MySql, "localhost", 3306, "root", "null", null, "test");
+                        client = new DatabaseClient(DbTypes.MySql, "localhost", 3306, "root", "<password>", null, "test");
                         break;
                     case "pgsql":
-                        client = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, "postgres", "null", null, "test");
+                        client = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, "postgres", "<password>", null, "test");
                         break;
                     default:
                         return;
@@ -51,10 +52,18 @@ namespace DatabaseWrapperTest
 
                 #endregion
 
-                #region Drop-and-Create-Table
+                #region Drop-Table
 
+                Console.WriteLine("Dropping table 'person'...");
                 client.DropTable("person");
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
 
+                #endregion
+
+                #region Create-Table
+
+                Console.WriteLine("Creating table 'person'...");
                 List<Column> columns = new List<Column>();
                 columns.Add(new Column("id", true, DataType.Int, 11, null, false));
                 columns.Add(new Column("firstName", false, DataType.Nvarchar, 30, null, false));
@@ -65,9 +74,27 @@ namespace DatabaseWrapperTest
                 columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
 
                 client.CreateTable("person", columns);
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
 
-                #endregion 
-                 
+                #endregion
+
+                #region Check-Existence-and-Describe
+
+                Console.WriteLine("Table 'person' exists: " + client.TableExists("person"));
+                Console.WriteLine("Table 'person' configuration:");
+                columns = client.DescribeTable("person");
+                foreach (Column col in columns)
+                {
+                    Console.WriteLine("  " + col.Name + " " + col.Type.ToString() + " null:" + col.Nullable);
+                }
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
+                #endregion
+
+                #region Load-Update-Retrieve-Delete
+
                 Console.WriteLine("Loading rows...");
                 LoadRows();
                 Console.WriteLine("Press ENTER to continue...");
@@ -93,19 +120,20 @@ namespace DatabaseWrapperTest
                 Console.WriteLine("Press ENTER to continue");
                 Console.ReadLine();
 
+                #endregion
+
+                #region Drop-Table
+
                 Console.WriteLine("Dropping table...");
                 client.DropTable("person");
                 Console.ReadLine();
+
+                #endregion
             }
             catch (Exception e)
             {
                 ExceptionConsole("Main", "Outer exception", e);
-            }
-            finally
-            {
-                Console.WriteLine("Press ENTER to exit");
-                Console.ReadLine();
-            }
+            } 
         }
 
         static void PrependAndTest()

@@ -47,11 +47,7 @@ namespace DatabaseWrapper
         private string _Password;
         private string _Instance;
         private string _DatabaseName;
-
-        private readonly object _LoadingTablesLock = new object();
-        private ConcurrentList<string> _TableNames = new ConcurrentList<string>();
-        private ConcurrentDictionary<string, List<Column>> _TableDetails = new ConcurrentDictionary<string, List<Column>>();
-
+          
         private Random _Random = new Random();
          
         #endregion
@@ -93,9 +89,7 @@ namespace DatabaseWrapper
             _Instance = instance;
             _DatabaseName = database;
 
-            PopulateConnectionString(); 
-            LoadTableNames();
-            LoadTableDetails();
+            PopulateConnectionString();  
         }
 
         /// <summary>
@@ -147,9 +141,7 @@ namespace DatabaseWrapper
             _Instance = instance;
             _DatabaseName = database;
 
-            PopulateConnectionString(); 
-            LoadTableNames();
-            LoadTableDetails();
+            PopulateConnectionString();  
         }
 
         #endregion
@@ -171,15 +163,67 @@ namespace DatabaseWrapper
         /// <returns>List of strings, each being a table name.</returns>
         public List<string> ListTables()
         {
-            List<string> ret = new List<string>();
-            if (_TableNames != null && _TableNames.Count > 0)
+            string query = null;
+            DataTable result = null;
+            List<string> tableNames = new List<string>();
+
+            switch (_DbType)
             {
-                foreach (string curr in _TableNames)
+                case DbTypes.MsSql:
+                    query = MssqlHelper.LoadTableNamesQuery(_DatabaseName);
+                    break;
+
+                case DbTypes.MySql:
+                    query = MysqlHelper.LoadTableNamesQuery();
+                    break;
+
+                case DbTypes.PgSql:
+                    query = PgsqlHelper.LoadTableNamesQuery();
+                    break;
+            }
+
+            result = Query(query);
+
+            if (result != null && result.Rows.Count > 0)
+            {
+                switch (_DbType)
                 {
-                    ret.Add(curr);
+                    case DbTypes.MsSql:
+                        foreach (DataRow curr in result.Rows)
+                        {
+                            tableNames.Add(curr["TABLE_NAME"].ToString());
+                        }
+                        break;
+
+                    case DbTypes.MySql:
+                        foreach (DataRow curr in result.Rows)
+                        {
+                            tableNames.Add(curr["Tables_in_" + _DatabaseName].ToString());
+                        }
+                        break;
+
+                    case DbTypes.PgSql:
+                        foreach (DataRow curr in result.Rows)
+                        {
+                            tableNames.Add(curr["tablename"].ToString());
+                        }
+                        break;
                 }
             }
-            return ret;
+
+            return tableNames;
+        }
+
+        /// <summary>
+        /// Check if a table exists in the database.
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public bool TableExists(string tableName)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+
+            return ListTables().Contains(tableName);
         }
 
         /// <summary>
@@ -191,15 +235,119 @@ namespace DatabaseWrapper
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
 
-            List<Column> details;
-            if (_TableDetails.TryGetValue(tableName, out details))
+            string query = null;
+            DataTable result = null;
+            List<Column> columns = new List<Column>();
+
+            switch (_DbType)
             {
-                return details;
+                case DbTypes.MsSql:
+                    query = MssqlHelper.LoadTableColumnsQuery(_DatabaseName, tableName);
+                    break;
+
+                case DbTypes.MySql:
+                    query = MysqlHelper.LoadTableColumnsQuery(_DatabaseName, tableName);
+                    break;
+
+                case DbTypes.PgSql:
+                    query = PgsqlHelper.LoadTableColumnsQuery(_DatabaseName, tableName);
+                    break;
             }
-            else
+             
+            result = Query(query);
+            if (result != null && result.Rows.Count > 0)
             {
-                throw new KeyNotFoundException("Table " + tableName + " is not in the tables list");
+                foreach (DataRow currColumn in result.Rows)
+                {
+                    #region Process-Each-Column
+
+                    /*
+                    public bool IsPrimaryKey;
+                    public string Name;
+                    public string DataType;
+                    public int? MaxLength;
+                    public bool Nullable;
+                    */
+
+                    Column tempColumn = new Column();
+                    int maxLength = 0;
+
+                    switch (_DbType)
+                    {
+                        case DbTypes.MsSql:
+                            #region Mssql
+
+                            tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
+                            if (currColumn["CONSTRAINT_NAME"].ToString().StartsWith("PK_")) tempColumn.PrimaryKey = true;
+                            else tempColumn.PrimaryKey = false;
+                            tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
+                            if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
+                            else tempColumn.MaxLength = maxLength;
+                            if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
+                            else tempColumn.Nullable = false;
+                            break;
+
+                        #endregion
+
+                        case DbTypes.MySql:
+                            #region Mysql
+
+                            tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
+                            if (String.Compare(currColumn["COLUMN_KEY"].ToString(), "PRI") == 0) tempColumn.PrimaryKey = true;
+                            else tempColumn.PrimaryKey = false;
+                            tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
+                            if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
+                            else tempColumn.MaxLength = maxLength;
+                            if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
+                            else tempColumn.Nullable = false;
+                            break;
+
+                        #endregion
+
+                        case DbTypes.PgSql:
+                            #region Pgsql
+
+                            tempColumn.Name = currColumn["column_name"].ToString();
+                            if (String.Compare(currColumn["is_primary_key"].ToString(), "YES") == 0) tempColumn.PrimaryKey = true;
+                            else tempColumn.PrimaryKey = false;
+                            tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
+                            if (!Int32.TryParse(currColumn["max_len"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
+                            else tempColumn.MaxLength = maxLength;
+                            if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
+                            else tempColumn.Nullable = false;
+                            break;
+
+                            #endregion
+                    }
+
+                    columns.Add(tempColumn);
+
+                    #endregion
+                } 
             }
+
+            return columns; 
+        }
+
+        /// <summary>
+        /// Describe each of the tables in the database.
+        /// </summary>
+        /// <returns>Dictionary.  Key is table name, value is List of Column objects.</returns>
+        public Dictionary<string, List<Column>> DescribeDatabase()
+        { 
+            DataTable result = new DataTable();
+            Dictionary<string, List<Column>> ret = new Dictionary<string, List<Column>>();
+            List<string> tableNames = ListTables();
+
+            if (tableNames != null && tableNames.Count > 0)
+            {
+                foreach (string tableName in tableNames)
+                {
+                    ret.Add(tableName, DescribeTable(tableName));
+                }
+            }
+
+            return ret; 
         }
 
         /// <summary>
@@ -229,10 +377,7 @@ namespace DatabaseWrapper
                     break;
             }
 
-            DataTable result = Query(query);
-
-            LoadTableNames();
-            LoadTableDetails();
+            DataTable result = Query(query); 
         }
 
         /// <summary>
@@ -260,10 +405,7 @@ namespace DatabaseWrapper
                     break;
             }
 
-            DataTable result = Query(query);
-
-            LoadTableNames();
-            LoadTableDetails();
+            DataTable result = Query(query); 
         }
 
         /// <summary>
@@ -275,23 +417,16 @@ namespace DatabaseWrapper
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
 
-            List<Column> details;
-            if (_TableDetails.TryGetValue(tableName, out details))
+            List<Column> details = DescribeTable(tableName);
+            if (details != null && details.Count > 0)
             {
-                if (details != null && details.Count > 0)
+                foreach (Column c in details)
                 {
-                    foreach (Column c in details)
-                    {
-                        if (c.PrimaryKey) return c.Name;
-                    }
+                    if (c.PrimaryKey) return c.Name;
                 }
+            }
 
-                throw new Exception("Unable to find primary key for table " + tableName);
-            }
-            else
-            {
-                throw new KeyNotFoundException("Table " + tableName + " is not in the tables list");
-            }
+            return null;
         }
 
         /// <summary>
@@ -303,27 +438,18 @@ namespace DatabaseWrapper
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
 
-            List<Column> details;
+            List<Column> details = DescribeTable(tableName);
             List<string> columnNames = new List<string>();
 
-            if (_TableDetails.TryGetValue(tableName, out details))
+            if (details != null && details.Count > 0)
             {
-                if (details != null && details.Count > 0)
+                foreach (Column c in details)
                 {
-                    foreach (Column c in details)
-                    {
-                        columnNames.Add(c.Name);
-                    }
-
-                    return columnNames;
+                    columnNames.Add(c.Name);
                 }
+            }
 
-                throw new Exception("Unable to find primary key for table " + tableName);
-            }
-            else
-            {
-                throw new KeyNotFoundException("Table " + tableName + " is not in the tables list");
-            }
+            return columnNames;
         }
 
         /// <summary>
@@ -364,8 +490,7 @@ namespace DatabaseWrapper
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
              
             string query = "";
-            DataTable result;
-            List<Column> tableDetails = DescribeTable(tableName);
+            DataTable result; 
 
             switch (_DbType)
             {
@@ -405,9 +530,6 @@ namespace DatabaseWrapper
             int insertedId = 0;
             string retrievalQuery = "";
             DataTable result;
-            List<Column> tableDetails = DescribeTable(tableName);
-            List<string> columnNames = GetColumnNames(tableName);
-            string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
 
             #endregion
 
@@ -416,11 +538,7 @@ namespace DatabaseWrapper
             int added = 0;
             foreach (KeyValuePair<string, object> curr in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue;
-                if (!columnNames.Contains(curr.Key))
-                {
-                    throw new ArgumentException("Column " + curr.Key + " does not exist in table " + tableName);
-                }
+                if (String.IsNullOrEmpty(curr.Key)) continue; 
 
                 if (added == 0)
                 {
@@ -539,6 +657,8 @@ namespace DatabaseWrapper
                     {
                         bool idFound = false;
 
+                        string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
+
                         foreach (DataRow curr in result.Rows)
                         {
                             if (Int32.TryParse(curr["id"].ToString(), out insertedId))
@@ -594,10 +714,7 @@ namespace DatabaseWrapper
 
             string query = "";
             string keyValueClause = "";
-            DataTable result;
-            List<Column> tableDetails = DescribeTable(tableName);
-            List<string> columnNames = GetColumnNames(tableName);
-            string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
+            DataTable result;  
 
             #endregion
 
@@ -606,11 +723,7 @@ namespace DatabaseWrapper
             int added = 0;
             foreach (KeyValuePair<string, object> curr in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue;
-                if (!columnNames.Contains(curr.Key))
-                {
-                    throw new ArgumentException("Column " + curr.Key + " does not exist in table " + tableName);
-                }
+                if (String.IsNullOrEmpty(curr.Key)) continue; 
 
                 if (added == 0)
                 {
@@ -713,10 +826,7 @@ namespace DatabaseWrapper
             #region Variables
 
             string query = "";
-            DataTable result;
-            List<Column> tableDetails = DescribeTable(tableName);
-            List<string> columnNames = GetColumnNames(tableName);
-            string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
+            DataTable result; 
 
             #endregion
 
@@ -1004,204 +1114,7 @@ namespace DatabaseWrapper
 
             return;
         }
-         
-        private void LoadTableNames()
-        {
-            lock (_LoadingTablesLock)
-            {
-                string query = "";
-                DataTable result = new DataTable();
-
-                #region Build-Query
-
-                switch (_DbType)
-                {
-                    case DbTypes.MsSql:
-                        query = MssqlHelper.LoadTableNamesQuery(_DatabaseName);
-                        break;
-
-                    case DbTypes.MySql:
-                        query = MysqlHelper.LoadTableNamesQuery();
-                        break;
-
-                    case DbTypes.PgSql:
-                        query = PgsqlHelper.LoadTableNamesQuery();
-                        break;
-                }
-
-                #endregion
-
-                #region Process-Results
-
-                result = Query(query);
-                List<string> tableNames = new List<string>();
-
-                if (result != null && result.Rows.Count > 0)
-                {
-                    switch (_DbType)
-                    {
-                        case DbTypes.MsSql:
-                            foreach (DataRow curr in result.Rows)
-                            {
-                                tableNames.Add(curr["TABLE_NAME"].ToString());
-                            }
-                            break;
-
-                        case DbTypes.MySql:
-                            foreach (DataRow curr in result.Rows)
-                            {
-                                tableNames.Add(curr["Tables_in_" + _DatabaseName].ToString());
-                            }
-                            break;
-
-                        case DbTypes.PgSql:
-                            foreach (DataRow curr in result.Rows)
-                            {
-                                tableNames.Add(curr["tablename"].ToString());
-                            }
-                            break;
-                    }
-                }
-
-                _TableNames = new ConcurrentList<string>();
-
-                if (tableNames != null && tableNames.Count > 0)
-                {
-                    foreach (string curr in tableNames)
-                    {
-                        _TableNames.Add(curr);
-                    }
-                }
-
-                #endregion
-
-                return;
-            }
-        }
-
-        private void LoadTableDetails()
-        {
-            lock (_LoadingTablesLock)
-            {
-                string query = "";
-                DataTable result = new DataTable();
-                Dictionary<string, List<Column>> tableDetails = new Dictionary<string, List<Column>>();
-
-                foreach (string currTable in _TableNames)
-                {
-                    #region Gather-Schema
-
-                    List<Column> columns = new List<Column>();
-
-                    switch (_DbType)
-                    {
-                        case DbTypes.MsSql:
-                            query = MssqlHelper.LoadTableColumnsQuery(_DatabaseName, currTable);
-                            break;
-
-                        case DbTypes.MySql:
-                            query = MysqlHelper.LoadTableColumnsQuery(_DatabaseName, currTable);
-                            break;
-
-                        case DbTypes.PgSql:
-                            query = PgsqlHelper.LoadTableColumnsQuery(_DatabaseName, currTable);
-                            break;
-                    }
-
-                    #endregion
-
-                    #region Process-Schema
-
-                    result = Query(query);
-                    if (result != null && result.Rows.Count > 0)
-                    {
-                        foreach (DataRow currColumn in result.Rows)
-                        {
-                            #region Process-Each-Column
-
-                            /*
-                            public bool IsPrimaryKey;
-                            public string Name;
-                            public string DataType;
-                            public int? MaxLength;
-                            public bool Nullable;
-                            */
-                            Column tempColumn = new Column();
-                            int maxLength = 0;
-
-                            switch (_DbType)
-                            {
-                                case DbTypes.MsSql:
-                                    #region Mssql
-
-                                    tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
-                                    if (currColumn["CONSTRAINT_NAME"].ToString().StartsWith("PK_")) tempColumn.PrimaryKey = true;
-                                    else tempColumn.PrimaryKey = false;
-                                    tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
-                                    if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
-                                    else tempColumn.MaxLength = maxLength;
-                                    if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
-                                    else tempColumn.Nullable = false;
-                                    break;
-
-                                #endregion
-
-                                case DbTypes.MySql:
-                                    #region Mysql
-
-                                    tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
-                                    if (String.Compare(currColumn["COLUMN_KEY"].ToString(), "PRI") == 0) tempColumn.PrimaryKey = true;
-                                    else tempColumn.PrimaryKey = false;
-                                    tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
-                                    if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
-                                    else tempColumn.MaxLength = maxLength;
-                                    if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
-                                    else tempColumn.Nullable = false;
-                                    break;
-
-                                #endregion
-
-                                case DbTypes.PgSql:
-                                    #region Pgsql
-
-                                    tempColumn.Name = currColumn["column_name"].ToString();
-                                    if (String.Compare(currColumn["is_primary_key"].ToString(), "YES") == 0) tempColumn.PrimaryKey = true;
-                                    else tempColumn.PrimaryKey = false;
-                                    tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
-                                    if (!Int32.TryParse(currColumn["max_len"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
-                                    else tempColumn.MaxLength = maxLength;
-                                    if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
-                                    else tempColumn.Nullable = false;
-                                    break;
-
-                                    #endregion
-                            }
-
-                            columns.Add(tempColumn);
-
-                            #endregion
-                        }
-
-                        tableDetails.Add(currTable, columns);
-                    }
-
-                    #endregion
-                }
-
-                #region Replace-Table-Details
-
-                _TableDetails = new ConcurrentDictionary<string, List<Column>>();
-                foreach (KeyValuePair<string, List<Column>> curr in tableDetails)
-                {
-                    _TableDetails.TryAdd(curr.Key, curr.Value);
-                }
-
-                #endregion
-
-                return;
-            }
-        }
-         
+          
         private string PreparedFieldname(string s)
         {
             switch (_DbType)
