@@ -180,7 +180,7 @@ namespace DatabaseWrapper
         public static string CreateTableQuery(string tableName, List<Column> columns)
         {
             string query =
-                "CREATE TABLE " + SanitizeString(tableName) +
+                "CREATE TABLE [" + SanitizeString(tableName) + "] " +
                 "(";
 
             int added = 0;
@@ -220,7 +220,7 @@ namespace DatabaseWrapper
 
         public static string DropTableQuery(string tableName)
         {
-            string query = "IF OBJECT_ID('dbo." + SanitizeString(tableName) + "', 'U') IS NOT NULL DROP TABLE dbo." + SanitizeString(tableName);
+            string query = "IF OBJECT_ID('dbo." + SanitizeString(tableName) + "', 'U') IS NOT NULL DROP TABLE [" + SanitizeString(tableName) + "]";
             return query;
         }
 
@@ -265,7 +265,7 @@ namespace DatabaseWrapper
             //
             // table
             //
-            query += "FROM " + SanitizeString(tableName) + " ";
+            query += "FROM [" + SanitizeString(tableName) + "] ";
 
             //
             // expressions
@@ -303,7 +303,7 @@ namespace DatabaseWrapper
         public static string InsertQuery(string tableName, string keys, string values)
         {
             string ret = 
-                "INSERT INTO " + tableName + " WITH (ROWLOCK) " + 
+                "INSERT INTO [" + tableName + "] WITH (ROWLOCK) " + 
                 "(" + keys + ") " + 
                 "OUTPUT INSERTED.* " + 
                 "VALUES " + 
@@ -315,7 +315,7 @@ namespace DatabaseWrapper
         public static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
-                "UPDATE " + tableName + " WITH (ROWLOCK) SET " +
+                "UPDATE [" + tableName + "] WITH (ROWLOCK) SET " +
                 keyValueClause + " " +
                 "OUTPUT INSERTED.* ";
 
@@ -327,7 +327,7 @@ namespace DatabaseWrapper
         public static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
-                "DELETE FROM " + tableName + " WITH (ROWLOCK) ";
+                "DELETE FROM [" + tableName + "] WITH (ROWLOCK) ";
 
             if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.MsSql) + " ";
 

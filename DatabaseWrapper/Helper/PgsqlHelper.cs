@@ -214,7 +214,7 @@ namespace DatabaseWrapper
         public static string CreateTableQuery(string tableName, List<Column> columns)
         {
             string query =
-                "CREATE TABLE " + SanitizeFieldname(tableName) + " " +
+                "CREATE TABLE \"" + SanitizeFieldname(tableName) + "\" " +
                 "(";
 
             int added = 0;
@@ -237,7 +237,7 @@ namespace DatabaseWrapper
 
         public static string DropTableQuery(string tableName)
         {
-            string query = "DROP TABLE IF EXISTS " + SanitizeFieldname(tableName);
+            string query = "DROP TABLE IF EXISTS \"" + SanitizeFieldname(tableName) + "\"";
             return query;
         }
 
@@ -277,7 +277,7 @@ namespace DatabaseWrapper
             //
             // table
             //
-            outerQuery += "FROM " + tableName + " ";
+            outerQuery += "FROM \"" + tableName + "\" ";
 
             //
             // expressions
@@ -390,7 +390,7 @@ namespace DatabaseWrapper
         public static string InsertQuery(string tableName, string keys, string values)
         {
             string ret =
-                "INSERT INTO " + tableName + " " +
+                "INSERT INTO \"" + tableName + "\" " +
                 "(" + keys + ") " +
                 "VALUES " +
                 "(" + values + ") " +
@@ -401,7 +401,7 @@ namespace DatabaseWrapper
         public static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
-                "UPDATE " + tableName + " SET " +
+                "UPDATE \"" + tableName + "\" SET " +
                 keyValueClause + " ";
 
             if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.PgSql) + " ";
@@ -413,7 +413,7 @@ namespace DatabaseWrapper
         public static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
-                "DELETE FROM " + tableName + " ";
+                "DELETE FROM \"" + tableName + "\" ";
 
             if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.PgSql) + " ";
 

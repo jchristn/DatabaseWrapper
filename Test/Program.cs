@@ -32,16 +32,19 @@ namespace DatabaseWrapperTest
                 string dbType = Console.ReadLine();
                 if (String.IsNullOrEmpty(dbType)) return;
 
+                Console.Write("Password: ");
+                string password = Console.ReadLine();
+
                 switch (dbType)
                 {
                     case "mssql":
-                        client = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, "sa", "<password>", null, "test");
+                        client = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, "sa", password, null, "test");
                         break;
                     case "mysql":
-                        client = new DatabaseClient(DbTypes.MySql, "localhost", 3306, "root", "<password>", null, "test");
+                        client = new DatabaseClient(DbTypes.MySql, "localhost", 3306, "root", password, null, "test");
                         break;
                     case "pgsql":
-                        client = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, "postgres", "<password>", null, "test");
+                        client = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, "postgres", password, null, "test");
                         break;
                     default:
                         return;
