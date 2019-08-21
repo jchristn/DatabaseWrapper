@@ -26,7 +26,7 @@ Core features:
 
 - Encapsulate table names in queries with the appropriate characters
   - Microsoft SQL: ```[tablename]```
-  - MySQL: ````[tablename]````
+  - MySQL: ```\`tablename\````
   - PostgreSQL: ```"tablename"```
 - Add support for CreateTable and DropTable operations, please note the following constraints:
   - For PostgreSQL, automatically uses ```SERIAL PRIMARY KEY``` for primary keys
