@@ -20,6 +20,17 @@ namespace DatabaseWrapper
         #region Public-Members
 
         /// <summary>
+        /// The type of database.
+        /// </summary>
+        public DbTypes Type
+        {
+            get
+            {
+                return _DbType;
+            }
+        }
+
+        /// <summary>
         /// The connection string used to connect to the database server.
         /// </summary>
         public string ConnectionString { get; private set; }

@@ -24,6 +24,7 @@ Core features:
 
 ## New in v1.4.x
 
+- Expose ```Type``` property in ```DatabaseClient```
 - Encapsulate table names in queries with the appropriate characters
   - Microsoft SQL: ``` [tablename] ```
   - MySQL: ``` `tablename` ```
