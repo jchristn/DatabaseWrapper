@@ -250,12 +250,12 @@ namespace DatabaseWrapper
                 {
                     if (fieldsAdded == 0)
                     {
-                        query += SanitizeString(curr);
+                        query += "[" + SanitizeString(curr) + "]";
                         fieldsAdded++;
                     }
                     else
                     {
-                        query += "," + SanitizeString(curr);
+                        query += ",[" + SanitizeString(curr) + "]";
                         fieldsAdded++;
                     }
                 }

@@ -873,7 +873,7 @@ namespace DatabaseWrapper
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName)); 
 
-            string query = "TRUNCATE TABLE " + tableName;
+            string query = "TRUNCATE TABLE " + PreparedFieldname(tableName);
             DataTable result = Query(query);
 
             return;
@@ -1131,10 +1131,10 @@ namespace DatabaseWrapper
             switch (_DbType)
             {
                 case DbTypes.MsSql:
-                    return s;
+                    return "[" + s + "]";
 
                 case DbTypes.MySql:
-                    return s;
+                    return "`" + s + "`";
 
                 case DbTypes.PgSql:
                     return "\"" + s + "\"";

@@ -784,10 +784,10 @@ namespace DatabaseWrapper
             switch (dbType)
             {
                 case DbTypes.MsSql:
-                    return s;
+                    return "[" + s + "]";
 
                 case DbTypes.MySql:
-                    return s;
+                    return "`" + s + "`";
 
                 case DbTypes.PgSql:
                     return "\"" + s + "\"";
