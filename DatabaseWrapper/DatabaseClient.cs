@@ -1089,6 +1089,10 @@ namespace DatabaseWrapper
 
         #region Private-Methods
 
+        /// <summary>
+        /// Dispose of the object.
+        /// </summary>
+        /// <param name="disposing">Disposing of resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (_Disposed)
@@ -1186,7 +1190,7 @@ namespace DatabaseWrapper
         /// Convert a DateTime to a string formatted for the specified database type.
         /// </summary>
         /// <param name="dbType">The type of database.</param>
-        /// <param name="dt">The timestamp.</param>
+        /// <param name="ts">The timestamp.</param>
         /// <returns>A string formatted for use with the specified database.</returns>
         public static string DbTimestamp(DbTypes dbType, DateTime ts)
         {
@@ -1208,7 +1212,7 @@ namespace DatabaseWrapper
         /// Convert a DateTime to a string formatted for the specified database type.
         /// </summary>
         /// <param name="dbType">The type of database.</param>
-        /// <param name="dt">The timestamp.</param>
+        /// <param name="ts">The timestamp.</param>
         /// <returns>A string formatted for use with the specified database.</returns>
         public static string DbTimestamp(string dbType, DateTime ts)
         {

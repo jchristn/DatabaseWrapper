@@ -22,23 +22,10 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v1.4.x
+## New in v1.4.5
 
-- Expose ```Type``` property in ```DatabaseClient```
-- Encapsulate table names in queries with the appropriate characters
-  - Microsoft SQL: ``` [tablename] ```
-  - MySQL: ``` `tablename` ```
-  - PostgreSQL: ``` "tablename" ```
-- Add support for CreateTable and DropTable operations, please note the following constraints:
-  - For PostgreSQL, automatically uses ```SERIAL PRIMARY KEY``` for primary keys
-  - For Microsoft SQL, automatically creates a constraint and assumes primary key type is ```int```
-  - For Microsoft SQL, DateTime types are created as ```datetime2```
-  - For MySQL, automatically applies ```AUTO_INCREMENT``` to primary keys
-  - For MySQL, assumes ```Engine=InnoDB``` and ```AUTO_INCREMENT=1```
-  - For a full list of supported data types and how they are cast, please refer to:
-    - ```DataType.cs```, and 
-    - ```DataTypeFromString``` method in ```DatabaseClient.cs```
- 
+- XML documentation
+
 ## A Note on Sanitization
 
 Use of parameterized queries vs building queries dynamically is a sensitive subject.  Proponents of parameterized queries have data on their side - that parameterization does the right thing to prevent SQL injection and other issues.  *I do not disagree with them*.  However, it is worth noting that with proper care, you CAN build systems that allow you to dynamically build queries, and you SHOULD do so as long as you build in the appropriate safeguards.
@@ -124,30 +111,4 @@ string mysql2 = client.Timestamp(DateTime.Now);
 
 ## Version history
 
-Notes from previous versions (starting with v1.1.0) will be moved here.
-
-v1.3.x
-
-- Rework of MSSQL SELECT with pagination, now requires ORDER BY clause to be set (breaking change)
-- Long-lived connections (rather than re-opening per query)
-- IDisposable support
-
-v1.2.x
-
-- Retarget to support both .NET Core 2.0 and .NET Framework 4.5.2.
-- Exposed SanitizeString through DatabaseClient
-- New signatures for PrependAnd and PrependOr to make use easier
-- PostgreSQL support
-- Minor refactor
-
-v1.1.x
-
-- Added Trunate API
-- Simplified (new) constructor for Expression
-- Additional Helper static methods to convert DataTable to useful objects (List<Dictionary>, Dictionary, List<dynamic>, dynamic)
-- Instance method to create timestamp for the given database type.
-- Support for string for database type in timestamp and where clause builders
-- New constructor using string for dbtype instead of enum
-- Raw query support
-- Pagination support in SELECT queries: use indexStart, maxResults, and orderByClause (all are required)
-- Numerous bugfixes
+Refer to CHANGELOG.md.

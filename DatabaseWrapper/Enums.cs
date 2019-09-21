@@ -11,8 +11,17 @@ namespace DatabaseWrapper
     /// </summary>
     public enum DbTypes
     {
+        /// <summary>
+        /// Microsoft SQL Server
+        /// </summary>
         MsSql,
+        /// <summary>
+        /// MySQL
+        /// </summary>
         MySql,
+        /// <summary>
+        /// PostgreSQL
+        /// </summary>
         PgSql
     }
 
@@ -21,21 +30,69 @@ namespace DatabaseWrapper
     /// </summary>
     public enum Operators
     {
+        /// <summary>
+        /// Boolean AND
+        /// </summary>
         And,
+        /// <summary>
+        /// Boolean OR
+        /// </summary>
         Or,
+        /// <summary>
+        /// Values are equal to one another
+        /// </summary>
         Equals,
+        /// <summary>
+        /// Values are not equal to one another
+        /// </summary>
         NotEquals,
+        /// <summary>
+        /// Value is contained within a list
+        /// </summary>
         In,
+        /// <summary>
+        /// Value is not contained within a list
+        /// </summary>
         NotIn,
+        /// <summary>
+        /// Value contains the specified value
+        /// </summary>
         Contains,
+        /// <summary>
+        /// Value does not contain the specified value
+        /// </summary>
         ContainsNot,
+        /// <summary>
+        /// Value starts with the specified value
+        /// </summary>
         StartsWith,
+        /// <summary>
+        /// Value ends with the specified value
+        /// </summary>
         EndsWith,
+        /// <summary>
+        /// Value is greater than the specified value
+        /// </summary>
         GreaterThan,
+        /// <summary>
+        /// Value is greater than or equal to the specified value
+        /// </summary>
         GreaterThanOrEqualTo,
+        /// <summary>
+        /// Value is less than the specified value
+        /// </summary>
         LessThan,
+        /// <summary>
+        /// Value is less than or equal to the specified value
+        /// </summary>
         LessThanOrEqualTo,
+        /// <summary>
+        /// Value is null
+        /// </summary>
         IsNull,
+        /// <summary>
+        /// Value is not null
+        /// </summary>
         IsNotNull
     }
 }

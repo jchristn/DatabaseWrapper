@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace DatabaseWrapper
 {
+    /// <summary>
+    /// Database table column.
+    /// </summary>
     public class Column
     {
         #region Public-Members

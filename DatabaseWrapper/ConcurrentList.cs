@@ -8,9 +8,8 @@ namespace DatabaseWrapper
     /// A thread-safe list with support for:
     /// 1) negative indexes (read from end).  "myList[-1]" gets the last value
     /// 2) modification while enumerating: enumerates a copy of the collection.
-    /// Taken from StackOverflow (see link in seealso).
-    /// </summary>
-    /// <seealso cref="http://stackoverflow.com/questions/9995266/how-to-create-a-thread-safe-generic-list"/>
+    /// Taken from StackOverflow http://stackoverflow.com/questions/9995266/how-to-create-a-thread-safe-generic-list
+    /// </summary> 
     /// <typeparam name="TValue"></typeparam>
     internal class ConcurrentList<TValue> : IList<TValue>
     {

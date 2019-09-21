@@ -12,14 +12,14 @@ using Newtonsoft.Json.Linq;
 
 namespace DatabaseWrapper
 {
-    public class Helper
+    internal class Helper
     {
         /// <summary>
         /// Determines if an object is a list.
         /// </summary>
         /// <param name="o">An object.</param>
         /// <returns>Boolean indicating if the object is a list.</returns>
-        public static bool IsList(object o)
+        internal static bool IsList(object o)
         {
             if (o == null) return false;
             return o is IList &&
@@ -32,7 +32,7 @@ namespace DatabaseWrapper
         /// </summary>
         /// <param name="o">An object.</param>
         /// <returns>A List object.</returns>
-        public static List<object> ObjectToList(object o)
+        internal static List<object> ObjectToList(object o)
         {
             if (o == null) return null;
             List<object> ret = new List<object>();
@@ -49,7 +49,7 @@ namespace DatabaseWrapper
         /// </summary>
         /// <param name="t">A DataTable.</param>
         /// <returns>Boolean indicating if the DataTable is null or empty.</returns>
-        public static bool DataTableIsNullOrEmpty(DataTable t)
+        internal static bool DataTableIsNullOrEmpty(DataTable t)
         {
             if (t == null) return true;
             if (t.Rows.Count < 1) return true;
@@ -62,7 +62,7 @@ namespace DatabaseWrapper
         /// <typeparam name="T">The type of object to which the DataTable should be converted.</typeparam>
         /// <param name="t">A DataTable.</param>
         /// <returns>An object of type T containing values from the DataTable.</returns>
-        public static T DataTableToObject<T>(DataTable t) where T : new()
+        internal static T DataTableToObject<T>(DataTable t) where T : new()
         {
             if (t == null) throw new ArgumentNullException(nameof(t));
             if (t.Rows.Count < 1) throw new ArgumentException("No rows in DataTable");
@@ -72,14 +72,14 @@ namespace DatabaseWrapper
             }
             return default(T);
         }
-         
+
         /// <summary>
         /// Convert a DataRow to an object of type T.
         /// </summary>
         /// <typeparam name="T">The type of object to which the DataRow should be converted.</typeparam>
         /// <param name="r">A DataRow.</param>
         /// <returns>An object of type T containing values from the DataRow.</returns>
-        public static T DataRowToObject<T>(DataRow r) where T : new()
+        internal static T DataRowToObject<T>(DataRow r) where T : new()
         {
             if (r == null) throw new ArgumentNullException(nameof(r));
             T item = new T();
@@ -96,7 +96,7 @@ namespace DatabaseWrapper
         /// </summary>
         /// <param name="dt">DataTable.</param>
         /// <returns>A List of dynamic objects.</returns>
-        public static List<dynamic> DataTableToListDynamic(DataTable dt)
+        internal static List<dynamic> DataTableToListDynamic(DataTable dt)
         {
             List<dynamic> ret = new List<dynamic>();
             if (dt == null || dt.Rows.Count < 1) return ret;
@@ -120,7 +120,7 @@ namespace DatabaseWrapper
         /// </summary>
         /// <param name="dt">DataTable.</param>
         /// <returns>A dynamic object.</returns>
-        public static dynamic DataTableToDynamic(DataTable dt)
+        internal static dynamic DataTableToDynamic(DataTable dt)
         {
             dynamic ret = new ExpandoObject();
             if (dt == null || dt.Rows.Count < 1) return ret;
@@ -145,7 +145,7 @@ namespace DatabaseWrapper
         /// </summary>
         /// <param name="dt">DataTable.</param>
         /// <returns>List of Dictionary objects.</returns>
-        public static List<Dictionary<string, object>> DataTableToListDictionary(DataTable dt)
+        internal static List<Dictionary<string, object>> DataTableToListDictionary(DataTable dt)
         {
             List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
             if (dt == null || dt.Rows.Count < 1) return ret;
@@ -170,7 +170,7 @@ namespace DatabaseWrapper
         /// </summary>
         /// <param name="dt">DataTable.</param>
         /// <returns>A Dictionary object.</returns>
-        public static Dictionary<string, object> DataTableToDictionary(DataTable dt)
+        internal static Dictionary<string, object> DataTableToDictionary(DataTable dt)
         {
             Dictionary<string, object> ret = new Dictionary<string, object>();
             if (dt == null || dt.Rows.Count < 1) return ret;
@@ -195,7 +195,7 @@ namespace DatabaseWrapper
         /// <typeparam name="T">The type of object to which the JSON should be deserialized.</typeparam>
         /// <param name="json">The JSON string.</param>
         /// <returns>An object of type T built using data from the JSON string.</returns>
-        public static T DeserializeJson<T>(string json)
+        internal static T DeserializeJson<T>(string json)
         {
             if (String.IsNullOrEmpty(json)) throw new ArgumentNullException(nameof(json));
             return JsonConvert.DeserializeObject<T>(json);
@@ -207,7 +207,7 @@ namespace DatabaseWrapper
         /// <typeparam name="T">The type of object to which the JSON should be deserialized.</typeparam>
         /// <param name="bytes">The byte array containing JSON data.</param>
         /// <returns>An object of type T built using data from the JSON byte data.</returns>
-        public static T DeserializeJson<T>(byte[] bytes)
+        internal static T DeserializeJson<T>(byte[] bytes)
         {
             if (bytes == null || bytes.Length < 1) throw new ArgumentNullException(nameof(bytes));
             return DeserializeJson<T>(Encoding.UTF8.GetString(bytes));
@@ -219,7 +219,7 @@ namespace DatabaseWrapper
         /// <param name="obj">An object.</param>
         /// <param name="pretty">Enable pretty printing.</param>
         /// <returns>A string containing JSON built from the supplied object.</returns>
-        public static string SerializeJson(object obj, bool pretty)
+        internal static string SerializeJson(object obj, bool pretty)
         {
             if (obj == null) return null;
             string json;
@@ -253,7 +253,7 @@ namespace DatabaseWrapper
         /// </summary>
         /// <param name="data">The string to evaluate.</param>
         /// <returns>A Boolean indicating whether or not extended characters were detected.</returns>
-        public static bool IsExtendedCharacters(string data)
+        internal static bool IsExtendedCharacters(string data)
         {
             if (String.IsNullOrEmpty(data)) return false;
             foreach (char c in data)

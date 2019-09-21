@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace DatabaseWrapper
 {
+    /// <summary>
+    /// Boolean expression.
+    /// </summary>
     public class Expression
     {
         #region Constructor
