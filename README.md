@@ -22,9 +22,9 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v1.4.5
-
-- XML documentation
+## New in v1.4.6
+ 
+- Fix bug with describing a table returning redundant rows
 
 ## A Note on Sanitization
 

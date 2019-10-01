@@ -337,6 +337,7 @@ namespace DatabaseWrapper
                 } 
             }
 
+            columns = columns.Distinct().ToList();
             return columns; 
         }
 

@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v1.4.6
+
+- Fix bug with describing a table returning redundant rows
+
+## Previous Versions
+
 v1.4.5
 
 - XML documentation
-
-## Previous Versions
 
 v1.4.x
 
