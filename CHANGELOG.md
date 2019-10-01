@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v1.4.6
+v1.4.7
 
 - Fix bug with describing a table returning redundant rows
 

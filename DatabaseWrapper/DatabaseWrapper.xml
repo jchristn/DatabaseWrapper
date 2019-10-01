@@ -55,21 +55,11 @@
             <param name="precision">Precision for the column.</param>
             <param name="nullable">Indicate if this column is nullable.</param>
         </member>
-        <member name="T:DatabaseWrapper.ConcurrentList`1">
+        <member name="M:DatabaseWrapper.Column.ToString">
             <summary>
-            A thread-safe list with support for:
-            1) negative indexes (read from end).  "myList[-1]" gets the last value
-            2) modification while enumerating: enumerates a copy of the collection.
-            Taken from StackOverflow http://stackoverflow.com/questions/9995266/how-to-create-a-thread-safe-generic-list
-            </summary> 
-            <typeparam name="TValue"></typeparam>
-        </member>
-        <member name="P:DatabaseWrapper.ConcurrentList`1.Item(System.Int32)">
-            <summary>
-            support for negative indexes (read from end).  "myList[-1]" gets the last value
+            Produce a human-readable string of the object.
             </summary>
-            <param name="index"></param>
-            <returns></returns>
+            <returns>String.</returns>
         </member>
         <member name="T:DatabaseWrapper.DatabaseClient">
             <summary>

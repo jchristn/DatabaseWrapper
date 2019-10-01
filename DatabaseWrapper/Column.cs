@@ -83,6 +83,24 @@ namespace DatabaseWrapper
 
         #region Public-Methods
 
+        /// <summary>
+        /// Produce a human-readable string of the object.
+        /// </summary>
+        /// <returns>String.</returns>
+        public override string ToString()
+        {
+            string ret =
+                "  [" + Name + "] ";
+
+            if (PrimaryKey) ret += "PK ";
+            ret += "Type: " + Type + " ";
+            if (MaxLength != null) ret += "MaxLen: " + MaxLength + " ";
+            if (Precision != null) ret += "Precision: " + Precision + " ";
+            ret += "Null: " + Nullable;
+
+            return ret;
+        }
+
         #endregion
 
         #region Private-Methods

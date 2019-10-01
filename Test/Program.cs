@@ -22,8 +22,7 @@ namespace DatabaseWrapperTest
                 /*
                  * 
                  * 
-                 * Create the database 'test' before proceeding
-                 * Update the 'client' initializer with your credentials
+                 * Create the database 'test' before proceeding 
                  * 
                  * 
                  */
@@ -32,19 +31,22 @@ namespace DatabaseWrapperTest
                 string dbType = Console.ReadLine();
                 if (String.IsNullOrEmpty(dbType)) return;
 
+                Console.Write("User: ");
+                string user = Console.ReadLine();
+
                 Console.Write("Password: ");
                 string password = Console.ReadLine();
 
                 switch (dbType)
                 {
                     case "mssql":
-                        client = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, "sa", password, null, "test");
+                        client = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, user, password, null, "test");
                         break;
                     case "mysql":
-                        client = new DatabaseClient(DbTypes.MySql, "localhost", 3306, "root", password, null, "test");
+                        client = new DatabaseClient(DbTypes.MySql, "localhost", 3306, user, password, null, "test");
                         break;
                     case "pgsql":
-                        client = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, "postgres", password, null, "test");
+                        client = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, user, password, null, "test");
                         break;
                     default:
                         return;
@@ -87,10 +89,7 @@ namespace DatabaseWrapperTest
                 Console.WriteLine("Table 'person' exists: " + client.TableExists("person"));
                 Console.WriteLine("Table 'person' configuration:");
                 columns = client.DescribeTable("person");
-                foreach (Column col in columns)
-                {
-                    Console.WriteLine("  " + col.Name + " " + col.Type.ToString() + " null:" + col.Nullable);
-                }
+                foreach (Column col in columns) Console.WriteLine(col.ToString());
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 

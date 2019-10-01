@@ -273,7 +273,7 @@ namespace DatabaseWrapper
                     #region Process-Each-Column
 
                     /*
-                    public bool IsPrimaryKey;
+                    public bool PrimaryKey;
                     public string Name;
                     public string DataType;
                     public int? MaxLength;
@@ -281,63 +281,57 @@ namespace DatabaseWrapper
                     */
 
                     Column tempColumn = new Column();
+                    
+                    tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
+
                     int maxLength = 0;
+                    if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
+                    else tempColumn.MaxLength = maxLength;
+
+                    tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
+
+                    if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
+                    else tempColumn.Nullable = false;
 
                     switch (_DbType)
                     {
                         case DbTypes.MsSql:
-                            #region Mssql
-
-                            tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
-                            if (currColumn["CONSTRAINT_NAME"].ToString().StartsWith("PK_")) tempColumn.PrimaryKey = true;
-                            else tempColumn.PrimaryKey = false;
-                            tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
-                            if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
-                            else tempColumn.MaxLength = maxLength;
-                            if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
-                            else tempColumn.Nullable = false;
-                            break;
-
-                        #endregion
+                            if (currColumn["CONSTRAINT_NAME"] != null
+                                && currColumn["CONSTRAINT_NAME"] != DBNull.Value
+                                && !String.IsNullOrEmpty(currColumn["CONSTRAINT_NAME"].ToString()))
+                            {
+                                if (currColumn["CONSTRAINT_NAME"].ToString().ToLower().StartsWith("pk")) tempColumn.PrimaryKey = true; 
+                            }
+                            break; 
 
                         case DbTypes.MySql:
-                            #region Mysql
-
-                            tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
-                            if (String.Compare(currColumn["COLUMN_KEY"].ToString(), "PRI") == 0) tempColumn.PrimaryKey = true;
-                            else tempColumn.PrimaryKey = false;
-                            tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
-                            if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
-                            else tempColumn.MaxLength = maxLength;
-                            if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
-                            else tempColumn.Nullable = false;
+                            if (currColumn["COLUMN_KEY"] != null
+                                && currColumn["COLUMN_KEY"] != DBNull.Value
+                                && !String.IsNullOrEmpty(currColumn["COLUMN_KEY"].ToString()))
+                            {
+                                if (currColumn["COLUMN_KEY"].ToString().ToLower().Equals("pri")) tempColumn.PrimaryKey = true;
+                            }
                             break;
-
-                        #endregion
-
+                             
                         case DbTypes.PgSql:
-                            #region Pgsql
-
-                            tempColumn.Name = currColumn["column_name"].ToString();
-                            if (String.Compare(currColumn["is_primary_key"].ToString(), "YES") == 0) tempColumn.PrimaryKey = true;
-                            else tempColumn.PrimaryKey = false;
-                            tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
-                            if (!Int32.TryParse(currColumn["max_len"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
-                            else tempColumn.MaxLength = maxLength;
-                            if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
-                            else tempColumn.Nullable = false;
-                            break;
-
-                            #endregion
+                            if (currColumn["IS_PRIMARY_KEY"] != null
+                                && currColumn["IS_PRIMARY_KEY"] != DBNull.Value
+                                && !String.IsNullOrEmpty(currColumn["IS_PRIMARY_KEY"].ToString()))
+                            {
+                                if (currColumn["IS_PRIMARY_KEY"].ToString().ToLower().Equals("yes")) tempColumn.PrimaryKey = true;
+                            }
+                            break; 
                     }
-
-                    columns.Add(tempColumn);
+                     
+                    if (!columns.Exists(c => c.Name.Equals(tempColumn.Name)))
+                    {
+                        columns.Add(tempColumn);
+                    }
 
                     #endregion
                 } 
             }
 
-            columns = columns.Distinct().ToList();
             return columns; 
         }
 

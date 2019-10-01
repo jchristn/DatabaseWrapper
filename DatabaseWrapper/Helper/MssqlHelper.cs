@@ -52,7 +52,7 @@ namespace DatabaseWrapper
                 "SELECT " +
                 "  col.TABLE_NAME, col.COLUMN_NAME, col.IS_NULLABLE, col.DATA_TYPE, col.CHARACTER_MAXIMUM_LENGTH, con.CONSTRAINT_NAME " +
                 "FROM INFORMATION_SCHEMA.COLUMNS col " +
-                "LEFT JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE con ON con.COLUMN_NAME = col.COLUMN_NAME " +
+                "LEFT JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE con ON con.COLUMN_NAME = col.COLUMN_NAME AND con.TABLE_NAME = col.TABLE_NAME " +
                 "WHERE col.TABLE_NAME='" + table + "' " +
                 "AND col.TABLE_CATALOG='" + database + "'";
         }

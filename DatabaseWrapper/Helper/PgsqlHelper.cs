@@ -35,13 +35,13 @@ namespace DatabaseWrapper
         {
             return
                 "SELECT " +
-                "  cols.COLUMN_NAME AS column_name, " +
-                "  cols.IS_NULLABLE AS is_nullable, " +
-                "  cols.DATA_TYPE AS data_type, " +
-                "  cols.CHARACTER_MAXIMUM_LENGTH AS max_len, " +
+                "  cols.COLUMN_NAME AS COLUMN_NAME, " +
+                "  cols.IS_NULLABLE AS IS_NULLABLE, " +
+                "  cols.DATA_TYPE AS DATA_TYPE, " +
+                "  cols.CHARACTER_MAXIMUM_LENGTH AS CHARACTER_MAXIMUM_LENGTH, " +
                 "  CASE " +
                 "    WHEN cons.COLUMN_NAME IS NULL THEN 'NO' ELSE 'YES' " +
-                "  END AS is_primary_key " +
+                "  END AS IS_PRIMARY_KEY " +
                 "FROM test.INFORMATION_SCHEMA.COLUMNS cols " +
                 "LEFT JOIN " + database + ".INFORMATION_SCHEMA.KEY_COLUMN_USAGE cons ON cols.COLUMN_NAME = cons.COLUMN_NAME " +
                 "WHERE cols.TABLE_NAME = '" + table + "';";

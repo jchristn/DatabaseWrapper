@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.4.6</Version>
+    <Version>1.4.7</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for Microsoft SQL Server, MySQL, and PostgreSQL written in C# supporting dynamic query building and nesting using expressions.</Description>
