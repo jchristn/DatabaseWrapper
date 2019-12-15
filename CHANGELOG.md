@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v1.5.0
+
+- Breaking changes; improved logging setup
+
+## Previous Versions
+
 v1.4.7
 
 - Fix bug with describing a table returning redundant rows
-
-## Previous Versions
 
 v1.4.5
 

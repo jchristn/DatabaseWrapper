@@ -7,11 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using DatabaseWrapper;
 
-namespace DatabaseWrapperTest
+namespace Test
 {
     class Program
     { 
-        static DatabaseClient client; 
+        static DatabaseClient _Database; 
 
         static void Main(string[] args)
         { 
@@ -40,27 +40,28 @@ namespace DatabaseWrapperTest
                 switch (dbType)
                 {
                     case "mssql":
-                        client = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, user, password, null, "test");
+                        _Database = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, user, password, null, "test");
                         break;
                     case "mysql":
-                        client = new DatabaseClient(DbTypes.MySql, "localhost", 3306, user, password, null, "test");
+                        _Database = new DatabaseClient(DbTypes.MySql, "localhost", 3306, user, password, null, "test");
                         break;
                     case "pgsql":
-                        client = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, user, password, null, "test");
+                        _Database = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, user, password, null, "test");
                         break;
                     default:
                         return;
                 }
 
-                client.DebugRawQuery = true;
-                client.DebugResultRowCount = true;
+                _Database.Logger = Logger;
+                _Database.LogQueries = true;
+                _Database.LogResults = true;
 
                 #endregion
 
                 #region Drop-Table
 
                 Console.WriteLine("Dropping table 'person'...");
-                client.DropTable("person");
+                _Database.DropTable("person");
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -78,7 +79,7 @@ namespace DatabaseWrapperTest
                 columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
                 columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
 
-                client.CreateTable("person", columns);
+                _Database.CreateTable("person", columns);
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -86,9 +87,9 @@ namespace DatabaseWrapperTest
 
                 #region Check-Existence-and-Describe
 
-                Console.WriteLine("Table 'person' exists: " + client.TableExists("person"));
+                Console.WriteLine("Table 'person' exists: " + _Database.TableExists("person"));
                 Console.WriteLine("Table 'person' configuration:");
-                columns = client.DescribeTable("person");
+                columns = _Database.DescribeTable("person");
                 foreach (Column col in columns) Console.WriteLine(col.ToString());
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
@@ -127,7 +128,7 @@ namespace DatabaseWrapperTest
                 #region Drop-Table
 
                 Console.WriteLine("Dropping table...");
-                client.DropTable("person");
+                _Database.DropTable("person");
                 Console.ReadLine();
 
                 #endregion
@@ -208,7 +209,7 @@ namespace DatabaseWrapperTest
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
 
-                client.Insert("person", d);
+                _Database.Insert("person", d);
             }
         }
 
@@ -222,7 +223,7 @@ namespace DatabaseWrapperTest
                 d.Add("age", i); 
 
                 Expression e = new Expression("id", Operators.Equals, i);
-                client.Update("person", d, e);
+                _Database.Update("person", d, e);
             }
         }
 
@@ -244,7 +245,7 @@ namespace DatabaseWrapperTest
                 // is here to show how to build a nested expression
                 //
 
-                client.Select("person", 0, 3, returnFields, e, "ORDER BY id ASC");
+                _Database.Select("person", 0, 3, returnFields, e, "ORDER BY id ASC");
             }
         }
 
@@ -266,7 +267,7 @@ namespace DatabaseWrapperTest
                 // is here to show how to build a nested expression
                 //
 
-                client.Select("person", (i - 10), 5, returnFields, e, "ORDER BY age DESC");
+                _Database.Select("person", (i - 10), 5, returnFields, e, "ORDER BY age DESC");
             }
         }
 
@@ -275,7 +276,7 @@ namespace DatabaseWrapperTest
             for (int i = 20; i < 30; i++)
             {
                 Expression e = new Expression("id", Operators.Equals, i);
-                client.Delete("person", e);
+                _Database.Delete("person", e);
             }
         }
         
@@ -323,6 +324,11 @@ namespace DatabaseWrapperTest
             Console.WriteLine("---");
 
             return;
+        }
+
+        private static void Logger(string msg)
+        {
+            Console.WriteLine(msg);
         }
     }
 }
