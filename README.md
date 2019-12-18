@@ -22,9 +22,9 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v1.5.0
- 
-- Breaking changes; improved logging setup
+## New in v1.5.1
+
+- INSERT fix for MySQL 
 
 ## A Note on Sanitization
 

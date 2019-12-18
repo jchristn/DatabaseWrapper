@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v1.5.1
+
+- INSERT fix for MySQL
+
+## Previous Versions
+
 v1.5.0
 
 - Breaking changes; improved logging setup
-
-## Previous Versions
 
 v1.4.7
 

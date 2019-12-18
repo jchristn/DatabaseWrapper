@@ -685,7 +685,7 @@ namespace DatabaseWrapper
                         }
                         else
                         {
-                            retrievalQuery = "SELECT * FROM " + tableName + " WHERE " + primaryKeyColumn + "=" + insertedId;
+                            retrievalQuery = "SELECT * FROM `" + tableName + "` WHERE " + primaryKeyColumn + "=" + insertedId;
                             result = Query(retrievalQuery);
                         }
                     }
