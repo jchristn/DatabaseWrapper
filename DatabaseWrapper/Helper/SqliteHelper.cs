@@ -136,7 +136,7 @@ namespace DatabaseWrapper
                     ret += "REAL ";
                     break;
                 case DataType.DateTime:
-                    ret += "NUMERIC ";
+                    ret += "TEXT ";
                     break;
                 case DataType.Blob:
                     ret += "BLOB ";
