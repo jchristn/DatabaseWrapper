@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +34,17 @@ namespace DatabaseWrapper
         /// <summary>
         /// The connection string used to connect to the database server.
         /// </summary>
-        public string ConnectionString { get; private set; }
+        public string ConnectionString 
+        { 
+            get
+            {
+                return _ConnectionString;
+            }
+            private set
+            {
+                _ConnectionString = value;
+            }
+        }
 
         /// <summary>
         /// Enable or disable logging of queries using the Logger(string msg) method (default: false).
@@ -55,23 +66,38 @@ namespace DatabaseWrapper
         #region Private-Members
 
         private bool _Disposed = false;
-
+        private string _ConnectionString = null;
+        private string _SqliteFilename = null;
         private DbTypes _DbType;
-        private string _ServerIp;
-        private int _ServerPort;
+        private string _ServerIp = null;
+        private int _ServerPort = 0;
         private string _Username;
         private string _Password;
         private string _Instance;
         private string _DatabaseName;
           
         private Random _Random = new Random();
-         
+
         #endregion
 
         #region Constructors-and-Factories
 
         /// <summary>
-        /// Create an instance of the database client.
+        /// Create an instance of the database client for a Sqlite database file.
+        /// </summary>
+        /// <param name="filename"></param>
+        public DatabaseClient(string filename)
+        {
+            if (String.IsNullOrEmpty(filename)) throw new ArgumentNullException(nameof(filename));
+
+            _DbType = DbTypes.Sqlite;
+            _SqliteFilename = filename;
+
+            PopulateConnectionString();
+        }
+
+        /// <summary>
+        /// Create an instance of the database client for Microsoft SQL Server, MySQL, or PostgreSQL.
         /// </summary>
         /// <param name="dbType">The type of database.</param>
         /// <param name="serverIp">The IP address or hostname of the database server.</param>
@@ -89,10 +115,6 @@ namespace DatabaseWrapper
             string instance,
             string database)
         {
-            //
-            // MsSql, MySql, and PostgreSql will use server IP, port, username, password, database
-            // Sqlite will use just database and it should refer to the database file
-            //
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
             if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
             if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
@@ -105,11 +127,11 @@ namespace DatabaseWrapper
             _Instance = instance;
             _DatabaseName = database;
 
-            PopulateConnectionString();  
+            PopulateConnectionString();
         }
 
         /// <summary>
-        /// Create an instance of the database client.
+        /// Create an instance of the database client for Microsoft SQL Server, MySQL, or PostgreSQL.
         /// </summary>
         /// <param name="dbType">The type of database.</param>
         /// <param name="serverIp">The IP address or hostname of the database server.</param>
@@ -127,10 +149,10 @@ namespace DatabaseWrapper
             string instance,
             string database)
         {
+            if (String.IsNullOrEmpty(dbType)) throw new ArgumentNullException(nameof(dbType));
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
             if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
             if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
-            if (String.IsNullOrEmpty(dbType)) throw new ArgumentNullException(nameof(dbType));
 
             switch (dbType.ToLower())
             {
@@ -146,6 +168,9 @@ namespace DatabaseWrapper
                     _DbType = DbTypes.PgSql;
                     break;
 
+                case "sqlite":
+                    throw new ArgumentException("Sqlite is not a supported database type for this constructor.");
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbType));
             }
@@ -157,7 +182,7 @@ namespace DatabaseWrapper
             _Instance = instance;
             _DatabaseName = database;
 
-            PopulateConnectionString();  
+            PopulateConnectionString();
         }
 
         #endregion
@@ -196,6 +221,10 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     query = PgsqlHelper.LoadTableNamesQuery();
                     break;
+
+                case DbTypes.Sqlite:
+                    query = SqliteHelper.LoadTableNamesQuery();
+                    break;
             }
 
             result = Query(query);
@@ -224,6 +253,13 @@ namespace DatabaseWrapper
                             tableNames.Add(curr["tablename"].ToString());
                         }
                         break;
+
+                    case DbTypes.Sqlite:
+                        foreach (DataRow curr in result.Rows)
+                        {
+                            tableNames.Add(curr["TABLE_NAME"].ToString());
+                        }
+                        break;
                 }
             }
 
@@ -233,8 +269,8 @@ namespace DatabaseWrapper
         /// <summary>
         /// Check if a table exists in the database.
         /// </summary>
-        /// <param name="tableName"></param>
-        /// <returns></returns>
+        /// <param name="tableName">The name of the table.</param>
+        /// <returns>True if exists.</returns>
         public bool TableExists(string tableName)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
@@ -268,6 +304,10 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     query = PgsqlHelper.LoadTableColumnsQuery(_DatabaseName, tableName);
                     break;
+
+                case DbTypes.Sqlite:
+                    query = SqliteHelper.LoadTableColumnsQuery(tableName);
+                    break;
             }
              
             result = Query(query);
@@ -289,14 +329,27 @@ namespace DatabaseWrapper
                     
                     tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
 
-                    int maxLength = 0;
-                    if (!Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength)) { tempColumn.MaxLength = null; }
-                    else tempColumn.MaxLength = maxLength;
+                    tempColumn.MaxLength = null;
+                    if (currColumn.Table.Columns.Contains("CHARACTER_MAXIMUM_LENGTH"))
+                    {
+                        int maxLength = 0;
+                        if (Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength))
+                        {
+                            tempColumn.MaxLength = maxLength;
+                        }
+                    }
 
                     tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
 
-                    if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
-                    else tempColumn.Nullable = false;
+                    if (currColumn.Table.Columns.Contains("IS_NULLABLE"))
+                    {
+                        if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
+                        else tempColumn.Nullable = false;
+                    }
+                    else if (currColumn.Table.Columns.Contains("IS_NOT_NULLABLE"))
+                    {
+                        tempColumn.Nullable = !(Convert.ToBoolean(currColumn["IS_NOT_NULLABLE"]));
+                    }
 
                     switch (_DbType)
                     {
@@ -325,7 +378,16 @@ namespace DatabaseWrapper
                             {
                                 if (currColumn["IS_PRIMARY_KEY"].ToString().ToLower().Equals("yes")) tempColumn.PrimaryKey = true;
                             }
-                            break; 
+                            break;
+
+                        case DbTypes.Sqlite:
+                            if (currColumn["IS_PRIMARY_KEY"] != null
+                                && currColumn["IS_PRIMARY_KEY"] != DBNull.Value
+                                && !String.IsNullOrEmpty(currColumn["IS_PRIMARY_KEY"].ToString()))
+                            {
+                                tempColumn.PrimaryKey = Convert.ToBoolean(currColumn["IS_PRIMARY_KEY"]);
+                            }
+                            break;
                     }
                      
                     if (!columns.Exists(c => c.Name.Equals(tempColumn.Name)))
@@ -386,6 +448,10 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     query = PgsqlHelper.CreateTableQuery(tableName, columns);
                     break;
+
+                case DbTypes.Sqlite:
+                    query = SqliteHelper.CreateTableQuery(tableName, columns);
+                    break;
             }
 
             DataTable result = Query(query); 
@@ -413,6 +479,10 @@ namespace DatabaseWrapper
 
                 case DbTypes.PgSql:
                     query = PgsqlHelper.DropTableQuery(tableName);
+                    break;
+
+                case DbTypes.Sqlite:
+                    query = SqliteHelper.DropTableQuery(tableName);
                     break;
             }
 
@@ -515,6 +585,10 @@ namespace DatabaseWrapper
                      
                 case DbTypes.PgSql:
                     query = PgsqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
+                    break;
+
+                case DbTypes.Sqlite:
+                    query = SqliteHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
                     break;
             }
 
@@ -641,6 +715,10 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     query = PgsqlHelper.InsertQuery(tableName, keys, values);
                     break;
+
+                case DbTypes.Sqlite:
+                    query = SqliteHelper.InsertQuery(tableName, keys, values);
+                    break;
             }
 
             result = Query(query);
@@ -701,7 +779,40 @@ namespace DatabaseWrapper
                     //
                     break;
 
+                #endregion
+
+                case DbTypes.Sqlite:
+                    #region Sqlite
+
+                    if (!Helper.DataTableIsNullOrEmpty(result))
+                    {
+                        bool idFound = false;
+
+                        string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
+
+                        foreach (DataRow curr in result.Rows)
+                        {
+                            if (Int32.TryParse(curr["id"].ToString(), out insertedId))
+                            {
+                                idFound = true;
+                                break;
+                            }
+                        }
+
+                        if (!idFound)
+                        {
+                            result = null;
+                        }
+                        else
+                        {
+                            retrievalQuery = "SELECT * FROM `" + tableName + "` WHERE " + primaryKeyColumn + "=" + insertedId;
+                            result = Query(retrievalQuery);
+                        }
+                    }
+                    break;
+
                     #endregion
+
             }
 
             #endregion
@@ -711,11 +822,13 @@ namespace DatabaseWrapper
 
         /// <summary>
         /// Execute an UPDATE query.
+        /// For Microsoft SQL Server and PostgreSQL, the updated rows are returned.
+        /// For MySQL and Sqlite, nothing is returned.
         /// </summary>
         /// <param name="tableName">The table in which you wish to UPDATE.</param>
         /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
         /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
-        /// <returns>A DataTable containing the results.</returns>
+        /// <returns>For Microsoft SQL Server and PostgreSQL, a DataTable containing the results.  For MySQL and Sqlite, null.</returns>
         public DataTable Update(string tableName, Dictionary<string, object> keyValuePairs, Expression filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
@@ -814,6 +927,10 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     query = PgsqlHelper.UpdateQuery(tableName, keyValueClause, filter);
                     break;
+
+                case DbTypes.Sqlite:
+                    query = SqliteHelper.UpdateQuery(tableName, keyValueClause, filter);
+                    break;
             }
 
             result = Query(query);
@@ -856,6 +973,10 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     query = PgsqlHelper.DeleteQuery(tableName, filter);
                     break;
+
+                case DbTypes.Sqlite:
+                    query = SqliteHelper.DeleteQuery(tableName, filter);
+                    break;
             }
 
             result = Query(query);
@@ -896,7 +1017,7 @@ namespace DatabaseWrapper
                 case DbTypes.MsSql:
                     #region Mssql
 
-                    using (SqlConnection conn = new SqlConnection(ConnectionString))
+                    using (SqlConnection conn = new SqlConnection(_ConnectionString))
                     {
                         conn.Open();
                         SqlDataAdapter sda = new SqlDataAdapter(query, conn);
@@ -912,7 +1033,7 @@ namespace DatabaseWrapper
                 case DbTypes.MySql:
                     #region Mysql
 
-                    using (MySqlConnection conn = new MySqlConnection(ConnectionString))
+                    using (MySqlConnection conn = new MySqlConnection(_ConnectionString))
                     {
                         conn.Open();
                         MySqlCommand cmd = new MySqlCommand();
@@ -942,7 +1063,7 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     #region Pgsql
 
-                    using (NpgsqlConnection conn = new NpgsqlConnection(ConnectionString))
+                    using (NpgsqlConnection conn = new NpgsqlConnection(_ConnectionString))
                     {
                         conn.Open();
                         NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn);
@@ -958,6 +1079,28 @@ namespace DatabaseWrapper
                     }
 
                     break;
+
+                case DbTypes.Sqlite:
+                    #region Sqlite
+
+                    using (SQLiteConnection conn = new SQLiteConnection(_ConnectionString))
+                    {
+                        conn.Open();
+
+                        using (SQLiteCommand cmd = new SQLiteCommand(query, conn))
+                        {
+                            using (SQLiteDataReader rdr = cmd.ExecuteReader())
+                            {
+                                result.Load(rdr); 
+                            }
+                        }
+
+                        conn.Close();
+                    }
+                    
+                    break;
+
+                    #endregion
 
                     #endregion
             }
@@ -987,13 +1130,12 @@ namespace DatabaseWrapper
             switch (_DbType)
             {
                 case DbTypes.MsSql:
+                case DbTypes.PgSql:
+                case DbTypes.Sqlite:
                     return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
 
                 case DbTypes.MySql:
                     return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
-
-                case DbTypes.PgSql:
-                    return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
 
                 default:
                     return null;
@@ -1003,94 +1145,30 @@ namespace DatabaseWrapper
         /// <summary>
         /// Sanitize an input string.
         /// </summary>
-        /// <param name="val">The value to sanitize.</param>
+        /// <param name="s">The value to sanitize.</param>
         /// <returns>A sanitized string.</returns>
-        public string SanitizeString(string val)
+        public string SanitizeString(string s)
         {
-            if (String.IsNullOrEmpty(val)) return val;
+            if (String.IsNullOrEmpty(s)) return s;
 
             switch (_DbType)
             {
                 case DbTypes.MsSql:
-                    return MssqlHelper.SanitizeString(val);
+                    return MssqlHelper.SanitizeString(s);
                     
                 case DbTypes.MySql:
-                    return MysqlHelper.SanitizeString(val);
+                    return MysqlHelper.SanitizeString(s);
 
                 case DbTypes.PgSql:
-                    return PgsqlHelper.SanitizeString(val);
+                    return PgsqlHelper.SanitizeString(s);
+
+                case DbTypes.Sqlite:
+                    return SqliteHelper.SanitizeString(s);
             }
 
             throw new Exception("Unknown database type");
         }
-
-        /// <summary>
-        /// Retrieve a DataType based on a supplied string.
-        /// </summary>
-        /// <param name="s">String.</param>
-        /// <returns>DataType.</returns>
-        public DataType DataTypeFromString(string s)
-        {
-            if (String.IsNullOrEmpty(s)) throw new ArgumentNullException(nameof(s));
-
-            s = s.ToLower();
-
-            switch (s)
-            {
-                case "bigserial":               // pgsql
-                case "bigint":                  // mssql
-                    return DataType.Long;
-
-                case "smallserial":             // pgsql
-                case "smallest":                // pgsql
-                case "tinyint":                 // mssql, mysql
-                case "integer":                 // pgsql
-                case "int":                     // mssql, mysql
-                case "smallint":                // mssql, mysql
-                case "mediumint":               // mysql
-                case "serial":                  // pgsql
-                    return DataType.Int;
-
-                case "double precision":        // pgsql
-                case "real":                    // pgsql
-                case "float":                   // mysql
-                case "double":                  // mysql
-                case "decimal":                 // mssql
-                case "numeric":                 // mssql
-                    return DataType.Decimal;
-
-                case "timestamp without timezone":      // pgsql
-                case "timestamp without time zone":     // pgsql
-                case "timestamp with timezone":         // pgsql
-                case "timestamp with time zone":        // pgsql
-                case "time without timezone":           // pgsql
-                case "time without time zone":          // pgsql
-                case "time with timezone":              // pgsql
-                case "time with time zone":             // pgsql
-                case "time":                    // mssql, mysql
-                case "date":                    // mssql, mysql
-                case "datetime":                // mssql, mysql
-                case "datetime2":               // mssql
-                case "timestamp":               // mysql
-                    return DataType.DateTime;
-
-                case "character":               // pgsql
-                case "char":                    // mssql, mysql, pgsql
-                case "text":                    // mssql, mysql, pgsql
-                case "varchar":                 // mssql, mysql, pgsql
-                    return DataType.Varchar;
-
-                case "character varying":       // pgsql
-                case "nchar":
-                case "ntext":
-                case "nvarchar":
-                    return DataType.Nvarchar;   // mssql
-
-                default:
-                    throw new ArgumentException("Unknown DataType: " + s);
-            }
-        }
-
+         
         #endregion
 
         #region Private-Methods
@@ -1116,20 +1194,24 @@ namespace DatabaseWrapper
 
         private void PopulateConnectionString()
         {
-            ConnectionString = "";
+            _ConnectionString = "";
 
             switch (_DbType)
             {
                 case DbTypes.MsSql:
-                    ConnectionString = MssqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _Instance, _DatabaseName);
+                    _ConnectionString = MssqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _Instance, _DatabaseName);
                     break;
 
                 case DbTypes.MySql:
-                    ConnectionString = MysqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    _ConnectionString = MysqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
                     break;
 
                 case DbTypes.PgSql:
-                    ConnectionString = PgsqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    _ConnectionString = PgsqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    break;
+
+                case DbTypes.Sqlite:
+                    _ConnectionString = SqliteHelper.ConnectionString(_SqliteFilename);
                     break;
             }
 
@@ -1148,6 +1230,9 @@ namespace DatabaseWrapper
 
                 case DbTypes.PgSql:
                     return "\"" + s + "\"";
+
+                case DbTypes.Sqlite:
+                    return "'" + s + "'";
             }
 
             return null;
@@ -1166,6 +1251,9 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     // uses $xx$ escaping
                     return PgsqlHelper.SanitizeString(s);
+
+                case DbTypes.Sqlite:
+                    return "'" + SqliteHelper.SanitizeString(s) + "'";
             }
 
             return null;
@@ -1183,9 +1271,80 @@ namespace DatabaseWrapper
 
                 case DbTypes.PgSql:
                     return "U&" + PreparedStringValue(s);
+
+                case DbTypes.Sqlite:
+                    return "N" + PreparedStringValue(s);
             }
 
             return null;
+        }
+
+        private DataType DataTypeFromString(string s)
+        {
+            if (String.IsNullOrEmpty(s)) throw new ArgumentNullException(nameof(s));
+
+            s = s.ToLower();
+            if (s.Contains("(")) s = s.Substring(0, s.IndexOf("("));
+
+            switch (s)
+            {
+                case "bigserial":               // pgsql
+                case "bigint":                  // mssql
+                    return DataType.Long;
+
+                case "smallserial":             // pgsql
+                case "smallest":                // pgsql
+                case "tinyint":                 // mssql, mysql
+                case "integer":                 // pgsql, sqlite
+                case "int":                     // mssql, mysql
+                case "smallint":                // mssql, mysql
+                case "mediumint":               // mysql
+                case "serial":                  // pgsql
+                    return DataType.Int;
+
+                case "real":                    // pgsql, sqlite
+                case "double":                  // mysql
+                case "double precision":        // pgsql
+                case "float":                   // mysql
+                    return DataType.Double;
+
+                case "decimal":                 // mssql
+                case "numeric":                 // mssql
+                    return DataType.Decimal;
+
+                case "timestamp without timezone":      // pgsql
+                case "timestamp without time zone":     // pgsql
+                case "timestamp with timezone":         // pgsql
+                case "timestamp with time zone":        // pgsql
+                case "time without timezone":           // pgsql
+                case "time without time zone":          // pgsql
+                case "time with timezone":              // pgsql
+                case "time with time zone":             // pgsql
+                case "time":                    // mssql, mysql
+                case "date":                    // mssql, mysql
+                case "datetime":                // mssql, mysql
+                case "datetime2":               // mssql
+                case "timestamp":               // mysql
+                    return DataType.DateTime;
+
+                case "character":               // pgsql
+                case "char":                    // mssql, mysql, pgsql
+                case "text":                    // mssql, mysql, pgsql, sqlite
+                case "varchar":                 // mssql, mysql, pgsql
+                    return DataType.Varchar;
+
+                case "character varying":       // pgsql
+                case "nchar":
+                case "ntext":
+                case "nvarchar":
+                    return DataType.Nvarchar;   // mssql
+
+                case "blob":
+                    return DataType.Blob;       // sqlite
+
+                default:
+                    throw new ArgumentException("Unknown DataType: " + s);
+            }
         }
 
         #endregion
@@ -1204,6 +1363,7 @@ namespace DatabaseWrapper
             {
                 case DbTypes.MsSql:
                 case DbTypes.PgSql:
+                case DbTypes.Sqlite:
                     return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
 
                 case DbTypes.MySql:
@@ -1233,6 +1393,9 @@ namespace DatabaseWrapper
 
                 case "pgsql":
                     return DbTimestamp(DbTypes.PgSql, ts);
+
+                case "sqlite":
+                    return DbTimestamp(DbTypes.Sqlite, ts);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbType));

@@ -22,7 +22,11 @@ namespace DatabaseWrapper
         /// <summary>
         /// PostgreSQL
         /// </summary>
-        PgSql
+        PgSql,
+        /// <summary>
+        /// Sqlite
+        /// </summary>
+        Sqlite
     }
 
     /// <summary>
@@ -94,5 +98,44 @@ namespace DatabaseWrapper
         /// Value is not null
         /// </summary>
         IsNotNull
+    }
+
+    /// <summary>
+    /// Type of data contained in the column.
+    /// </summary>
+    public enum DataType
+    {
+        /// <summary>
+        /// Variable-length character.
+        /// </summary>
+        Varchar,
+        /// <summary>
+        /// Variable-length unicode character.
+        /// </summary>
+        Nvarchar,
+        /// <summary>
+        /// Integer.
+        /// </summary>
+        Int,
+        /// <summary>
+        /// Long
+        /// </summary>
+        Long,
+        /// <summary>
+        /// Decimal
+        /// </summary>
+        Decimal,
+        /// <summary>
+        /// Double
+        /// </summary>
+        Double,
+        /// <summary>
+        /// Timestamp
+        /// </summary>
+        DateTime,
+        /// <summary>
+        /// Blob
+        /// </summary>
+        Blob
     }
 }

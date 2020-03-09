@@ -9,7 +9,7 @@ namespace DatabaseWrapper
 {
     internal static class PgsqlHelper
     {
-        public static string ConnectionString(string serverIp, int serverPort, string username, string password, string database)
+        internal static string ConnectionString(string serverIp, int serverPort, string username, string password, string database)
         {
             string ret = "";
 
@@ -26,12 +26,12 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        public static string LoadTableNamesQuery()
+        internal static string LoadTableNamesQuery()
         {
             return "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'";
         }
 
-        public static string LoadTableColumnsQuery(string database, string table)
+        internal static string LoadTableColumnsQuery(string database, string table)
         {
             return
                 "SELECT " +
@@ -47,13 +47,13 @@ namespace DatabaseWrapper
                 "WHERE cols.TABLE_NAME = '" + table + "';";
         }
 
-        public static string SanitizeString(string val)
+        internal static string SanitizeString(string val)
         {
             string tag = "$" + EscapeString(val, 2) + "$";
             return tag + val + tag;
         }
 
-        private static string EscapeString(string val, int numChar)
+        internal static string EscapeString(string val, int numChar)
         {
             string ret = "";
             Random random = new Random();
@@ -89,7 +89,7 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        private static string SanitizeFieldname(string val)
+        internal static string SanitizeFieldname(string val)
         {
             string ret = "";
 
@@ -165,7 +165,7 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        private static string ColumnToCreateString(string tableName, Column col)
+        internal static string ColumnToCreateString(string tableName, Column col)
         {
             string ret =
                 "\"" + SanitizeFieldname(col.Name) + "\" ";
@@ -191,6 +191,9 @@ namespace DatabaseWrapper
                 case DataType.Decimal:
                     ret += "numeric(" + col.MaxLength + "," + col.Precision + ") ";
                     break;
+                case DataType.Double:
+                    ret += "float(" + col.MaxLength + ") ";
+                    break;
                 case DataType.DateTime:
                     ret += "timestamp with time zone ";
                     break;
@@ -204,14 +207,14 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        private static Column GetPrimaryKeyColumn(List<Column> columns)
+        internal static Column GetPrimaryKeyColumn(List<Column> columns)
         {
             Column c = columns.FirstOrDefault(d => d.PrimaryKey);
             if (c == null || c == default(Column)) return null;
             return c;
         }
 
-        public static string CreateTableQuery(string tableName, List<Column> columns)
+        internal static string CreateTableQuery(string tableName, List<Column> columns)
         {
             string query =
                 "CREATE TABLE \"" + SanitizeFieldname(tableName) + "\" " +
@@ -235,13 +238,13 @@ namespace DatabaseWrapper
             return query; 
         }
 
-        public static string DropTableQuery(string tableName)
+        internal static string DropTableQuery(string tableName)
         {
             string query = "DROP TABLE IF EXISTS \"" + SanitizeFieldname(tableName) + "\"";
             return query;
         }
 
-        public static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
+        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         {
             string outerQuery = "";
             string whereClause = "";
@@ -311,7 +314,7 @@ namespace DatabaseWrapper
             return outerQuery;
         }
 
-        private static string PreparedOrderByClause(string val)
+        internal static string PreparedOrderByClause(string val)
         {
             string ret = "";
 
@@ -387,7 +390,7 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        public static string InsertQuery(string tableName, string keys, string values)
+        internal static string InsertQuery(string tableName, string keys, string values)
         {
             string ret =
                 "INSERT INTO \"" + tableName + "\" " +
@@ -398,7 +401,7 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        public static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
+        internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
                 "UPDATE \"" + tableName + "\" SET " +
@@ -410,7 +413,7 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        public static string DeleteQuery(string tableName, Expression filter)
+        internal static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
                 "DELETE FROM \"" + tableName + "\" ";

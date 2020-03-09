@@ -10,7 +10,7 @@ namespace DatabaseWrapper
 {
     internal static class MysqlHelper
     {
-        public static string ConnectionString(string serverIp, int serverPort, string username, string password, string database)
+        internal static string ConnectionString(string serverIp, int serverPort, string username, string password, string database)
         {
             string ret = "";
 
@@ -27,12 +27,12 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        public static string LoadTableNamesQuery()
+        internal static string LoadTableNamesQuery()
         {
             return "SHOW TABLES";
         }
 
-        public static string LoadTableColumnsQuery(string database, string table)
+        internal static string LoadTableColumnsQuery(string database, string table)
         {
             return
                 "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE " +
@@ -40,14 +40,14 @@ namespace DatabaseWrapper
                 "AND TABLE_SCHEMA='" + database + "'";
         }
 
-        public static string SanitizeString(string val)
+        internal static string SanitizeString(string val)
         {
             string ret = "";
             ret = MySqlHelper.EscapeString(val);
             return ret;
         }
 
-        private static string ColumnToCreateString(Column col)
+        internal static string ColumnToCreateString(Column col)
         { 
             string ret =
                 "`" + SanitizeString(col.Name) + "` ";
@@ -65,6 +65,9 @@ namespace DatabaseWrapper
                 case DataType.Decimal:
                     ret += "decimal(" + col.MaxLength + "," + col.Precision + ") ";
                     break;
+                case DataType.Double:
+                    ret += "float(" + col.MaxLength + "," + col.Precision + ") ";
+                    break;
                 case DataType.DateTime:
                     ret += "datetime ";
                     break;
@@ -80,14 +83,14 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        private static Column GetPrimaryKeyColumn(List<Column> columns)
+        internal static Column GetPrimaryKeyColumn(List<Column> columns)
         {
             Column c = columns.FirstOrDefault(d => d.PrimaryKey);
             if (c == null || c == default(Column)) return null;
             return c;
         }
 
-        public static string CreateTableQuery(string tableName, List<Column> columns)
+        internal static string CreateTableQuery(string tableName, List<Column> columns)
         {
             string query =
                 "CREATE TABLE `" + SanitizeString(tableName) + "` " +
@@ -119,13 +122,13 @@ namespace DatabaseWrapper
             return query;
         }
 
-        public static string DropTableQuery(string tableName)
+        internal static string DropTableQuery(string tableName)
         {
             string query = "DROP TABLE IF EXISTS `" + SanitizeString(tableName) + "`";
             return query;
         }
 
-        public static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
+        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         { 
             string outerQuery = "";
             string whereClause = "";
@@ -195,7 +198,7 @@ namespace DatabaseWrapper
             return outerQuery;
         }
 
-        public static string InsertQuery(string tableName, string keys, string values)
+        internal static string InsertQuery(string tableName, string keys, string values)
         {
             string ret =
                 "START TRANSACTION; " +
@@ -209,7 +212,7 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        public static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
+        internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
                 "UPDATE `" + tableName + "` SET " +
@@ -220,7 +223,7 @@ namespace DatabaseWrapper
             return ret;
         }
 
-        public static string DeleteQuery(string tableName, Expression filter)
+        internal static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
                 "DELETE FROM `" + tableName + "` ";

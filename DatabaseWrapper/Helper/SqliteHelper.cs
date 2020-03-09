@@ -6,55 +6,34 @@ using System.Threading.Tasks;
 
 namespace DatabaseWrapper
 {
-    internal static class MssqlHelper
-    {
-        internal static string ConnectionString(string serverIp, int serverPort, string username, string password, string instance, string database)
+    internal static class SqliteHelper
+    { 
+        internal static string ConnectionString(string filename)
         {
-            string ret = "";
-
-            if (String.IsNullOrEmpty(username) && String.IsNullOrEmpty(password))
-            {
-                ret += "Data Source=" + serverIp;
-                if (!String.IsNullOrEmpty(instance)) ret += "\\" + instance + "; ";
-                else ret += "; ";
-                ret += "Integrated Security=SSPI; ";
-                ret += "Initial Catalog=" + database + "; ";
-            }
-            else
-            {
-                if (serverPort > 0)
-                {
-                    if (String.IsNullOrEmpty(instance)) ret += "Server=" + serverIp + "," + serverPort + "; ";
-                    else ret += "Server=" + serverIp + "\\" + instance + "," + serverPort + "; ";
-                }
-                else
-                {
-                    if (String.IsNullOrEmpty(instance)) ret += "Server=" + serverIp + "; ";
-                    else ret += "Server=" + serverIp + "\\" + instance + "; ";
-                }
-
-                ret += "Database=" + database + "; ";
-                if (!String.IsNullOrEmpty(username)) ret += "User ID=" + username + "; ";
-                if (!String.IsNullOrEmpty(password)) ret += "Password=" + password + "; ";
-            }
-
-            return ret;
+            return "Data Source=" + filename + ";Version=3;Pooling=False";
         }
 
-        internal static string LoadTableNamesQuery(string database)
+        internal static string LoadTableNamesQuery()
         {
-            return "SELECT TABLE_NAME FROM " + database + ".INFORMATION_SCHEMA.Tables WHERE TABLE_TYPE = 'BASE TABLE'";
+            return "SELECT name AS TABLE_NAME FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%'; ";
         }
 
-        internal static string LoadTableColumnsQuery(string database, string table)
+        internal static string LoadTableColumnsQuery(string table)
         {
-            return 
-                "SELECT " +
-                "  col.TABLE_NAME, col.COLUMN_NAME, col.IS_NULLABLE, col.DATA_TYPE, col.CHARACTER_MAXIMUM_LENGTH, con.CONSTRAINT_NAME " +
-                "FROM INFORMATION_SCHEMA.COLUMNS col " +
-                "LEFT JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE con ON con.COLUMN_NAME = col.COLUMN_NAME AND con.TABLE_NAME = col.TABLE_NAME " +
-                "WHERE col.TABLE_NAME='" + table + "' " +
-                "AND col.TABLE_CATALOG='" + database + "'";
+            return
+               "SELECT " +
+               "    m.name AS TABLE_NAME,  " +
+               "    p.cid AS COLUMN_ID, " +
+               "    p.name AS COLUMN_NAME, " +
+               "    p.type AS DATA_TYPE, " +
+               "    p.pk AS IS_PRIMARY_KEY, " +
+               "    p.[notnull] AS IS_NOT_NULLABLE " +
+               "FROM sqlite_master m " +
+               "LEFT OUTER JOIN pragma_table_info((m.name)) p " +
+               "    ON m.name <> p.name " +
+               "WHERE m.type = 'table' " +
+               "    AND m.name = '" + table + "' " +
+               "ORDER BY TABLE_NAME, COLUMN_ID "; 
         }
 
         internal static string SanitizeString(string val)
@@ -136,39 +115,38 @@ namespace DatabaseWrapper
         internal static string ColumnToCreateString(Column col)
         {
             string ret =
-                "[" + SanitizeString(col.Name) + "] ";
+                SanitizeString(col.Name) + " ";
 
             switch (col.Type)
             {
-                case DataType.Varchar:
-                    ret += "[varchar](" + col.MaxLength + ") ";
-                    break;
+                case DataType.Varchar: 
                 case DataType.Nvarchar:
-                    ret += "[nvarchar](" + col.MaxLength + ") ";
+                    ret += "VARCHAR(" + col.MaxLength + ") ";
                     break;
                 case DataType.Int:
-                    ret += "[int] ";
+                    ret += "INTEGER ";
                     break;
                 case DataType.Long:
-                    ret += "[bigint] ";
+                    ret += "BIGINT ";
                     break;
                 case DataType.Decimal:
-                    ret += "[decimal](" + col.MaxLength + "," + col.Precision + ") ";
+                    ret += "DECIMAL(" + col.MaxLength + "," + col.Precision + ") ";
                     break;
                 case DataType.Double:
-                    ret += "[float](" + col.MaxLength + ") ";
+                    ret += "REAL ";
                     break;
                 case DataType.DateTime:
-                    ret += "[datetime2] ";
+                    ret += "NUMERIC ";
+                    break;
+                case DataType.Blob:
+                    ret += "BLOB ";
                     break;
                 default:
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
             }
 
-            if (col.PrimaryKey) ret += "IDENTITY(1,1) ";
-
-            if (col.Nullable) ret += "NULL ";
-            else ret += "NOT NULL ";
+            if (col.PrimaryKey) ret += "PRIMARY KEY AUTOINCREMENT "; 
+            if (!col.Nullable) ret += "NOT NULL ";
 
             return ret;
         }
@@ -182,49 +160,26 @@ namespace DatabaseWrapper
 
         internal static string CreateTableQuery(string tableName, List<Column> columns)
         {
-            string query =
-                "CREATE TABLE [" + SanitizeString(tableName) + "] " +
+            string ret =
+                "CREATE TABLE IF NOT EXISTS " + SanitizeString(tableName) + " " +
                 "(";
 
             int added = 0;
             foreach (Column curr in columns)
             {
-                if (added > 0) query += ", ";
-                query += ColumnToCreateString(curr); 
+                if (added > 0) ret += ", ";
+                ret += ColumnToCreateString(curr); 
                 added++;
             }
 
-            Column primaryKey = GetPrimaryKeyColumn(columns);
-            if (primaryKey != null)
-            {
-                query +=
-                    ", " +
-                    "CONSTRAINT [PK_" + SanitizeString(tableName) + "] PRIMARY KEY CLUSTERED " +
-                    "(" +
-                    "  [" + SanitizeString(primaryKey.Name) + "] ASC " +
-                    ") " +
-                    "WITH " +
-                    "(" +
-                    "  PAD_INDEX = OFF, " +
-                    "  STATISTICS_NORECOMPUTE = OFF, " +
-                    "  IGNORE_DUP_KEY = OFF, " +
-                    "  ALLOW_ROW_LOCKS = ON, " +
-                    "  ALLOW_PAGE_LOCKS = ON " +
-                    ") " +
-                    "ON [PRIMARY] ";
-            } 
+            ret += ")";
 
-            query +=
-                ") " +
-                "ON [PRIMARY] ";
-
-            return query;
+            return ret;
         }
 
         internal static string DropTableQuery(string tableName)
         {
-            string query = "IF OBJECT_ID('dbo." + SanitizeString(tableName) + "', 'U') IS NOT NULL DROP TABLE [" + SanitizeString(tableName) + "]";
-            return query;
+            return "DROP TABLE IF EXISTS '" + SanitizeString(tableName) + "'";
         }
 
         internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
@@ -253,12 +208,12 @@ namespace DatabaseWrapper
                 {
                     if (fieldsAdded == 0)
                     {
-                        query += "[" + SanitizeString(curr) + "]";
+                        query += SanitizeString(curr);
                         fieldsAdded++;
                     }
                     else
                     {
-                        query += ",[" + SanitizeString(curr) + "]";
+                        query += "," + SanitizeString(curr);
                         fieldsAdded++;
                     }
                 }
@@ -268,12 +223,12 @@ namespace DatabaseWrapper
             //
             // table
             //
-            query += "FROM [" + SanitizeString(tableName) + "] ";
+            query += "FROM " + SanitizeString(tableName) + " ";
 
             //
             // expressions
             //
-            if (filter != null) whereClause = filter.ToWhereClause(DbTypes.MsSql);
+            if (filter != null) whereClause = filter.ToWhereClause(DbTypes.Sqlite);
             if (!String.IsNullOrEmpty(whereClause))
             {
                 query += "WHERE " + whereClause + " ";
@@ -292,12 +247,12 @@ namespace DatabaseWrapper
             //
             if (indexStart != null && maxResults != null)
             {
-                query += "OFFSET " + indexStart + " ROWS ";
-                query += "FETCH NEXT " + maxResults + " ROWS ONLY ";
+                query += "LIMIT " + maxResults + " ";
+                query += "OFFSET " + indexStart + " ";
             }
-            else if (indexStart != null)
+            else if (maxResults != null)
             {
-                query += "OFFSET " + indexStart + " ROWS ";
+                query += "LIMIT " + maxResults + " ";
             }
 
             return query;
@@ -305,34 +260,30 @@ namespace DatabaseWrapper
 
         internal static string InsertQuery(string tableName, string keys, string values)
         {
-            string ret = 
-                "INSERT INTO [" + tableName + "] WITH (ROWLOCK) " + 
-                "(" + keys + ") " + 
-                "OUTPUT INSERTED.* " + 
-                "VALUES " + 
-                "(" + values + ") ";
-
-            return ret;
+            return
+                "INSERT INTO " + tableName + " " +
+                "(" + keys + ") " +
+                "VALUES " +
+                "(" + values + "); " +
+                "SELECT last_insert_rowid() AS id; ";
         }
 
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
-            string ret =
-                "UPDATE [" + tableName + "] WITH (ROWLOCK) SET " +
-                keyValueClause + " " +
-                "OUTPUT INSERTED.* ";
+            string ret = 
+                "UPDATE " + tableName + " SET " +
+                keyValueClause + " ";
 
-            if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.MsSql) + " ";
-
+            if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.Sqlite) + " "; 
             return ret;
         }
 
         internal static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
-                "DELETE FROM [" + tableName + "] WITH (ROWLOCK) ";
+                "DELETE FROM " + tableName + " ";
 
-            if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.MsSql) + " ";
+            if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.Sqlite) + " ";
 
             return ret;
         }

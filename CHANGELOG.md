@@ -2,11 +2,18 @@
 
 ## Current Version
 
+v2.0.0
+
+- Support for Sqlite (.NET Framework 4.6.1 and Sqlite seems to have issues, but .NET Core works well)
+  - For Microsoft SQL Server, MySQL, and PostgreSQL, use the original full constructors
+  - For Sqlite, use the simplified constructor ```DatabaseClient(string filename)```
+- Update dependencies (and update minimum .NET Framework required to .NET Framework 4.6.1)
+
+## Previous Versions
+
 v1.5.1
 
 - INSERT fix for MySQL
-
-## Previous Versions
 
 v1.5.0
 

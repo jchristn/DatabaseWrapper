@@ -10,7 +10,11 @@ using DatabaseWrapper;
 namespace Test
 {
     class Program
-    { 
+    {
+        static string _DbType;
+        static string _Filename;
+        static string _Username;
+        static string _Password;
         static DatabaseClient _Database; 
 
         static void Main(string[] args)
@@ -22,36 +26,53 @@ namespace Test
                 /*
                  * 
                  * 
-                 * Create the database 'test' before proceeding 
+                 * Create the database 'test' before proceeding if using mssql, mysql, or pgsql
                  * 
                  * 
                  */
 
-                Console.Write("DB type [mssql|mysql|pgsql]: ");
-                string dbType = Console.ReadLine();
-                if (String.IsNullOrEmpty(dbType)) return;
+                Console.Write("DB type [mssql|mysql|pgsql|sqlite]: ");
+                _DbType = Console.ReadLine();
+                if (String.IsNullOrEmpty(_DbType)) return;
+                _DbType = _DbType.ToLower();
 
-                Console.Write("User: ");
-                string user = Console.ReadLine();
-
-                Console.Write("Password: ");
-                string password = Console.ReadLine();
-
-                switch (dbType)
+                if (_DbType.Equals("mssql") || _DbType.Equals("mysql") || _DbType.Equals("pgsql"))
                 {
-                    case "mssql":
-                        _Database = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, user, password, null, "test");
-                        break;
-                    case "mysql":
-                        _Database = new DatabaseClient(DbTypes.MySql, "localhost", 3306, user, password, null, "test");
-                        break;
-                    case "pgsql":
-                        _Database = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, user, password, null, "test");
-                        break;
-                    default:
-                        return;
-                }
+                    Console.Write("User: ");
+                    _Username = Console.ReadLine();
 
+                    Console.Write("Password: ");
+                    _Password = Console.ReadLine();
+
+                    switch (_DbType)
+                    {
+                        case "mssql":
+                            _Database = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, _Username, _Password, null, "test");
+                            break;
+                        case "mysql":
+                            _Database = new DatabaseClient(DbTypes.MySql, "localhost", 3306, _Username, _Password, null, "test");
+                            break;
+                        case "pgsql":
+                            _Database = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, _Username, _Password, null, "test");
+                            break;
+                        default:
+                            return;
+                    }
+                }
+                else if (_DbType.Equals("sqlite"))
+                {
+                    Console.Write("Filename: ");
+                    _Filename = Console.ReadLine();
+                    if (String.IsNullOrEmpty(_Filename)) return;
+
+                    _Database = new DatabaseClient(_Filename);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid database type.");
+                    return;
+                }
+                 
                 _Database.Logger = Logger;
                 _Database.LogQueries = true;
                 _Database.LogResults = true;

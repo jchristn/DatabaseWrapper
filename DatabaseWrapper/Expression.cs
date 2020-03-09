@@ -81,6 +81,9 @@ namespace DatabaseWrapper
                 case "pgsql":
                     return ToWhereClause(DbTypes.PgSql);
 
+                case "sqlite":
+                    return ToWhereClause(DbTypes.Sqlite);
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbType));
             }
@@ -777,6 +780,10 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     ret = PgsqlHelper.SanitizeString(s);
                     break;
+
+                case DbTypes.Sqlite:
+                    ret = SqliteHelper.SanitizeString(s);
+                    break;
             }
 
             return ret;
@@ -794,6 +801,9 @@ namespace DatabaseWrapper
 
                 case DbTypes.PgSql:
                     return "\"" + s + "\"";
+
+                case DbTypes.Sqlite:
+                    return "'" + s + "'";
             }
 
             return null;
@@ -812,6 +822,9 @@ namespace DatabaseWrapper
                 case DbTypes.PgSql:
                     // uses $xx$ escaping
                     return PgsqlHelper.SanitizeString(s);
+
+                case DbTypes.Sqlite:
+                    return "'" + SqliteHelper.SanitizeString(s) + "'"; 
             }
 
             return null;
@@ -829,6 +842,9 @@ namespace DatabaseWrapper
 
                 case DbTypes.PgSql:
                     return "U&" + PreparedStringValue(dbType, s);
+
+                case DbTypes.Sqlite:
+                    return "N" + PreparedStringValue(dbType, s);
             }
 
             return null;
@@ -851,6 +867,9 @@ namespace DatabaseWrapper
 
                 case DbTypes.PgSql:
                     return dt.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
+
+                case DbTypes.Sqlite:
+                    return dt.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
 
                 default:
                     return null;
