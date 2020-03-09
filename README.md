@@ -22,9 +22,9 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v2.0.1
+## New in v2.0.2
 
-- Change Sqlite timestamp fields from NUMERIC to TEXT
+- Fix Sqlite field name encapsulation character
 
 ## A Note on Sanitization
 

@@ -803,7 +803,7 @@ namespace DatabaseWrapper
                     return "\"" + s + "\"";
 
                 case DbTypes.Sqlite:
-                    return "'" + s + "'";
+                    return "`" + s + "`";
             }
 
             return null;

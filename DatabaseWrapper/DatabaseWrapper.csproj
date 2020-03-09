@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite. written in C# supporting dynamic query building and nesting using expressions.</Description>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageReleaseNotes>Change Sqlite timestamp fields, upon table creation, from NUMERIC to TEXT.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix Sqlite prepared field name encapsulation character.</PackageReleaseNotes>
     <PackageTags>database sql mysql mssql pgsql postgresql dynamic query builder datarow datatable</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/jchristn/databasewrapper/master/assets/icon.ico</PackageIconUrl>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>

@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v2.0.2
+
+- Fix Sqlite field name encapsulation character
+
+## Previous Versions
+
 v2.0.1
 
 - Change Sqlite timestamp fields from NUMERIC to TEXT
-
-## Previous Versions
 
 v2.0.0
 
