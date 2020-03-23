@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v2.0.3
+
+- String names for serialized enum members
+
+## Previous Versions
+
 v2.0.2
 
 - Fix Sqlite field name encapsulation character
-
-## Previous Versions
 
 v2.0.1
 

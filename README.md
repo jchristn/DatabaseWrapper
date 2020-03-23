@@ -22,9 +22,9 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v2.0.2
+## New in v2.0.3
 
-- Fix Sqlite field name encapsulation character
+- String names for serialized enum members
 
 ## A Note on Sanitization
 
