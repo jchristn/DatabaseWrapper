@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v2.0.4
+
+- Truncate table fix
+
+## Previous Versions
+
 v2.0.3
 
 - String names for serialized enum members
-
-## Previous Versions
 
 v2.0.2
 

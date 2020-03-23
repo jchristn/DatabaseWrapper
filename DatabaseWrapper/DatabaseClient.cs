@@ -992,9 +992,28 @@ namespace DatabaseWrapper
         /// <param name="tableName">The table you wish to TRUNCATE.</param>
         public void Truncate(string tableName)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName)); 
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
 
-            string query = "TRUNCATE TABLE " + PreparedFieldname(tableName);
+            string query = null;
+
+            switch (_DbType)
+            {
+                case DbTypes.MsSql:
+                    query = MssqlHelper.TruncateQuery(tableName);
+                    break;
+                case DbTypes.MySql:
+                    query = MysqlHelper.TruncateQuery(tableName);
+                    break;
+                case DbTypes.PgSql:
+                    query = PgsqlHelper.TruncateQuery(tableName);
+                    break;
+                case DbTypes.Sqlite:
+                    query = SqliteHelper.TruncateQuery(tableName);
+                    break;
+                default:
+                    throw new ArgumentException("Unknown database type: " + _DbType.ToString());
+            }
+             
             DataTable result = Query(query);
 
             return;
@@ -1011,7 +1030,7 @@ namespace DatabaseWrapper
             DataTable result = new DataTable();
 
             if (LogQueries && Logger != null) Logger("[" + _DbType.ToString() + "] Query: " + query);
-             
+
             switch (_DbType)
             {
                 case DbTypes.MsSql:
@@ -1080,6 +1099,8 @@ namespace DatabaseWrapper
 
                     break;
 
+                #endregion
+
                 case DbTypes.Sqlite:
                     #region Sqlite
 
@@ -1091,18 +1112,19 @@ namespace DatabaseWrapper
                         {
                             using (SQLiteDataReader rdr = cmd.ExecuteReader())
                             {
-                                result.Load(rdr); 
+                                result.Load(rdr);
                             }
                         }
 
                         conn.Close();
                     }
-                    
+
                     break;
 
-                    #endregion
+                #endregion 
 
-                    #endregion
+                default:
+                    throw new ArgumentException("Unknown database type: " + _DbType.ToString());
             }
 
             if (LogResults && Logger != null)
@@ -1131,10 +1153,10 @@ namespace DatabaseWrapper
             {
                 case DbTypes.MsSql:
                 case DbTypes.PgSql:
-                case DbTypes.Sqlite:
                     return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
 
                 case DbTypes.MySql:
+                case DbTypes.Sqlite:
                     return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
 
                 default:

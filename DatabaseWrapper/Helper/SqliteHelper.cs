@@ -261,7 +261,7 @@ namespace DatabaseWrapper
         internal static string InsertQuery(string tableName, string keys, string values)
         {
             return
-                "INSERT INTO " + tableName + " " +
+                "INSERT INTO " + SanitizeString(tableName) + " " +
                 "(" + keys + ") " +
                 "VALUES " +
                 "(" + values + "); " +
@@ -271,7 +271,7 @@ namespace DatabaseWrapper
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret = 
-                "UPDATE " + tableName + " SET " +
+                "UPDATE " + SanitizeString(tableName) + " SET " +
                 keyValueClause + " ";
 
             if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.Sqlite) + " "; 
@@ -281,11 +281,16 @@ namespace DatabaseWrapper
         internal static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
-                "DELETE FROM " + tableName + " ";
+                "DELETE FROM " + SanitizeString(tableName) + " ";
 
             if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.Sqlite) + " ";
 
             return ret;
+        }
+
+        internal static string TruncateQuery(string tableName)
+        {
+            return "DELETE FROM " + SanitizeString(tableName);
         }
     }
 }

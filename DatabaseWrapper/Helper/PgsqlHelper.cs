@@ -280,7 +280,7 @@ namespace DatabaseWrapper
             //
             // table
             //
-            outerQuery += "FROM \"" + tableName + "\" ";
+            outerQuery += "FROM \"" + SanitizeString(tableName) + "\" ";
 
             //
             // expressions
@@ -393,7 +393,7 @@ namespace DatabaseWrapper
         internal static string InsertQuery(string tableName, string keys, string values)
         {
             string ret =
-                "INSERT INTO \"" + tableName + "\" " +
+                "INSERT INTO \"" + SanitizeString(tableName) + "\" " +
                 "(" + keys + ") " +
                 "VALUES " +
                 "(" + values + ") " +
@@ -404,7 +404,7 @@ namespace DatabaseWrapper
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
-                "UPDATE \"" + tableName + "\" SET " +
+                "UPDATE \"" + SanitizeString(tableName) + "\" SET " +
                 keyValueClause + " ";
 
             if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.PgSql) + " ";
@@ -416,11 +416,16 @@ namespace DatabaseWrapper
         internal static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
-                "DELETE FROM \"" + tableName + "\" ";
+                "DELETE FROM \"" + SanitizeString(tableName) + "\" ";
 
             if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.PgSql) + " ";
 
             return ret;
+        }
+
+        internal static string TruncateQuery(string tableName)
+        {
+            return "TRUNCATE TABLE \"" + SanitizeString(tableName) + "\"";
         }
     }
 }

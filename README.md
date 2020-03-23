@@ -22,9 +22,9 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v2.0.3
+## New in v2.0.4
 
-- String names for serialized enum members
+- Truncate table fix
 
 ## A Note on Sanitization
 

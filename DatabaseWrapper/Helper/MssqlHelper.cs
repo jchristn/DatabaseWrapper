@@ -306,7 +306,7 @@ namespace DatabaseWrapper
         internal static string InsertQuery(string tableName, string keys, string values)
         {
             string ret = 
-                "INSERT INTO [" + tableName + "] WITH (ROWLOCK) " + 
+                "INSERT INTO [" + SanitizeString(tableName) + "] WITH (ROWLOCK) " + 
                 "(" + keys + ") " + 
                 "OUTPUT INSERTED.* " + 
                 "VALUES " + 
@@ -318,7 +318,7 @@ namespace DatabaseWrapper
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
-                "UPDATE [" + tableName + "] WITH (ROWLOCK) SET " +
+                "UPDATE [" + SanitizeString(tableName) + "] WITH (ROWLOCK) SET " +
                 keyValueClause + " " +
                 "OUTPUT INSERTED.* ";
 
@@ -330,11 +330,16 @@ namespace DatabaseWrapper
         internal static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
-                "DELETE FROM [" + tableName + "] WITH (ROWLOCK) ";
+                "DELETE FROM [" + SanitizeString(tableName) + "] WITH (ROWLOCK) ";
 
             if (filter != null) ret += "WHERE " + filter.ToWhereClause(DbTypes.MsSql) + " ";
 
             return ret;
+        }
+
+        internal static string TruncateQuery(string tableName)
+        {
+            return "TRUNCATE TABLE [" + SanitizeString(tableName) + "]";
         }
     }
 }
