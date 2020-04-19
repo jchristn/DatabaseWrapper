@@ -1,9 +1,6 @@
 # DatabaseWrapper
 
-[![][nuget-img]][nuget]
-
-[nuget]:     https://www.nuget.org/packages/DatabaseWrapper/
-[nuget-img]: https://badge.fury.io/nu/Object.svg
+[![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper/) [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.svg)](https://www.nuget.org/packages/DatabaseWrapper) 
 
 Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite written in C#, targeting both .NET Core and .NET Framework.
 
