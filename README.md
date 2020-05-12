@@ -19,9 +19,9 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v2.0.4
+## New in v2.0.5
 
-- Truncate table fix
+- Added COLLATE NOCASE to Sqlite TEXT column creation
 
 ## A Note on Sanitization
 

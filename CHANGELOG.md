@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v2.0.5
+
+- Added COLLATE NOCASE to Sqlite TEXT column creation
+
+## Previous Versions
+
 v2.0.4
 
 - Truncate table fix
-
-## Previous Versions
 
 v2.0.3
 

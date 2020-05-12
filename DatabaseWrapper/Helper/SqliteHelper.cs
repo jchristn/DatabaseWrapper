@@ -121,7 +121,7 @@ namespace DatabaseWrapper
             {
                 case DataType.Varchar: 
                 case DataType.Nvarchar:
-                    ret += "VARCHAR(" + col.MaxLength + ") ";
+                    ret += "VARCHAR(" + col.MaxLength + ") COLLATE NOCASE ";
                     break;
                 case DataType.Int:
                     ret += "INTEGER ";
