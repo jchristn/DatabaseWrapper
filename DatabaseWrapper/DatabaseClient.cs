@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Data;
-using System.Data.SqlClient;
-using System.Data.SQLite;
+using System.Data; 
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using MySql;
-using MySql.Data.MySqlClient;
-using Npgsql;
+using System.Threading.Tasks; 
+using DatabaseWrapper.Core;
+using DatabaseWrapper.Mysql;
+using DatabaseWrapper.Postgresql;
+using DatabaseWrapper.Sqlite;
+using DatabaseWrapper.SqlServer;
 
 namespace DatabaseWrapper
 {
     /// <summary>
-    /// Database client for MSSQL, Mysql, and PostgreSQL.
+    /// Database client for MSSQL, Mysql, PostgreSQL, and Sqlite.
     /// </summary>
     public class DatabaseClient : IDisposable
     {
@@ -38,35 +38,157 @@ namespace DatabaseWrapper
         { 
             get
             {
-                return _ConnectionString;
-            }
-            private set
-            {
-                _ConnectionString = value;
+                switch (_DbType)
+                {
+                    case DbTypes.SqlServer:
+                        return _SqlServer.ConnectionString;
+                    case DbTypes.Mysql:
+                        return _Mysql.ConnectionString;
+                    case DbTypes.Postgresql:
+                        return _Postgresql.ConnectionString;
+                    case DbTypes.Sqlite:
+                        return _Sqlite.ConnectionString;
+                    default:
+                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                }
             }
         }
 
         /// <summary>
         /// Enable or disable logging of queries using the Logger(string msg) method (default: false).
         /// </summary>
-        public bool LogQueries = false;
+        public bool LogQueries
+        {
+            get
+            {
+                switch (_DbType)
+                {
+                    case DbTypes.SqlServer:
+                        return _SqlServer.LogQueries;
+                    case DbTypes.Mysql:
+                        return _Mysql.LogQueries;
+                    case DbTypes.Postgresql:
+                        return _Postgresql.LogQueries;
+                    case DbTypes.Sqlite:
+                        return _Sqlite.LogQueries;
+                    default:
+                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                }
+            }
+            set
+            {
+                switch (_DbType)
+                {
+                    case DbTypes.SqlServer:
+                        _SqlServer.LogQueries = value;
+                        break;
+                    case DbTypes.Mysql:
+                        _Mysql.LogQueries = value;
+                        break;
+                    case DbTypes.Postgresql:
+                        _Postgresql.LogQueries = value;
+                        break;
+                    case DbTypes.Sqlite:
+                        _Sqlite.LogQueries = value;
+                        break;
+                    default:
+                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                }
+            }
+        }
 
         /// <summary>
         /// Enable or disable logging of query results using the Logger(string msg) method (default: false).
         /// </summary>
-        public bool LogResults = false;
+        public bool LogResults
+        {
+            get
+            {
+                switch (_DbType)
+                {
+                    case DbTypes.SqlServer:
+                        return _SqlServer.LogResults;
+                    case DbTypes.Mysql:
+                        return _Mysql.LogResults;
+                    case DbTypes.Postgresql:
+                        return _Postgresql.LogResults;
+                    case DbTypes.Sqlite:
+                        return _Sqlite.LogResults;
+                    default:
+                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                }
+            }
+            set
+            {
+                switch (_DbType)
+                {
+                    case DbTypes.SqlServer:
+                        _SqlServer.LogResults = value;
+                        break;
+                    case DbTypes.Mysql:
+                        _Mysql.LogResults = value;
+                        break;
+                    case DbTypes.Postgresql:
+                        _Postgresql.LogResults = value;
+                        break;
+                    case DbTypes.Sqlite:
+                        _Sqlite.LogResults = value;
+                        break;
+                    default:
+                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                }
+            }
+        }
 
         /// <summary>
         /// Method to invoke when sending a log message.
         /// </summary>
-        public Action<string> Logger = null;
+        public Action<string> Logger
+        {
+            get
+            {
+                switch (_DbType)
+                {
+                    case DbTypes.SqlServer:
+                        return _SqlServer.Logger;
+                    case DbTypes.Mysql:
+                        return _Mysql.Logger;
+                    case DbTypes.Postgresql:
+                        return _Postgresql.Logger;
+                    case DbTypes.Sqlite:
+                        return _Sqlite.Logger;
+                    default:
+                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                }
+            }
+            set
+            {
+                switch (_DbType)
+                {
+                    case DbTypes.SqlServer:
+                        _SqlServer.Logger = value;
+                        break;
+                    case DbTypes.Mysql:
+                        _Mysql.Logger = value;
+                        break;
+                    case DbTypes.Postgresql:
+                        _Postgresql.Logger = value;
+                        break;
+                    case DbTypes.Sqlite:
+                        _Sqlite.Logger = value;
+                        break;
+                    default:
+                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                }
+            }
+        }
 
         #endregion
 
         #region Private-Members
 
         private bool _Disposed = false;
-        private string _ConnectionString = null;
+        private string _Header = ""; 
         private string _SqliteFilename = null;
         private DbTypes _DbType;
         private string _ServerIp = null;
@@ -75,6 +197,11 @@ namespace DatabaseWrapper
         private string _Password;
         private string _Instance;
         private string _DatabaseName;
+
+        private DatabaseWrapper.Mysql.DatabaseClient        _Mysql = null;
+        private DatabaseWrapper.Postgresql.DatabaseClient   _Postgresql = null;
+        private DatabaseWrapper.Sqlite.DatabaseClient       _Sqlite = null;
+        private DatabaseWrapper.SqlServer.DatabaseClient    _SqlServer = null;
           
         private Random _Random = new Random();
 
@@ -92,12 +219,13 @@ namespace DatabaseWrapper
 
             _DbType = DbTypes.Sqlite;
             _SqliteFilename = filename;
-
-            PopulateConnectionString();
+            _Header = "[DatabaseWrapper." + _DbType.ToString() + "] ";
+            
+            _Sqlite = new Sqlite.DatabaseClient(filename);
         }
 
         /// <summary>
-        /// Create an instance of the database client for Microsoft SQL Server, MySQL, or PostgreSQL.
+        /// Create an instance of the database client.
         /// </summary>
         /// <param name="dbType">The type of database.</param>
         /// <param name="serverIp">The IP address or hostname of the database server.</param>
@@ -126,65 +254,74 @@ namespace DatabaseWrapper
             _Password = password;
             _Instance = instance;
             _DatabaseName = database;
+            _Header = "[DatabaseWrapper." + _DbType.ToString() + "] ";
 
-            PopulateConnectionString();
+            switch (_DbType)
+            {
+                case DbTypes.Sqlite:
+                    throw new ArgumentException("Unable to use this constructor with 'DbTypes.Sqlite'.");
+                case DbTypes.Mysql:
+                    _Mysql = new Mysql.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    break;
+                case DbTypes.Postgresql:
+                    _Postgresql = new Postgresql.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    break;
+                case DbTypes.SqlServer:
+                    _SqlServer = new SqlServer.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _Instance, _DatabaseName);
+                    break;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+            }
         }
 
         /// <summary>
-        /// Create an instance of the database client for Microsoft SQL Server, MySQL, or PostgreSQL.
+        /// Create an instance of the database client.
         /// </summary>
         /// <param name="dbType">The type of database.</param>
         /// <param name="serverIp">The IP address or hostname of the database server.</param>
         /// <param name="serverPort">The TCP port of the database server.</param>
         /// <param name="username">The username to use when authenticating with the database server.</param>
-        /// <param name="password">The password to use when authenticating with the database server.</param>
-        /// <param name="instance">The instance on the database server (for use with Microsoft SQL Server).</param>
+        /// <param name="password">The password to use when authenticating with the database server.</param> 
         /// <param name="database">The name of the database with which to connect.</param>
         public DatabaseClient(
-            string dbType,
+            DbTypes dbType,
             string serverIp,
             int serverPort,
             string username,
-            string password,
-            string instance,
+            string password, 
             string database)
         {
-            if (String.IsNullOrEmpty(dbType)) throw new ArgumentNullException(nameof(dbType));
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
             if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
             if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
 
-            switch (dbType.ToLower())
-            {
-                case "mssql":
-                    _DbType = DbTypes.MsSql;
-                    break;
-
-                case "mysql":
-                    _DbType = DbTypes.MySql;
-                    break;
-
-                case "pgsql":
-                    _DbType = DbTypes.PgSql;
-                    break;
-
-                case "sqlite":
-                    throw new ArgumentException("Sqlite is not a supported database type for this constructor.");
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(dbType));
-            }
-
+            _DbType = dbType;
             _ServerIp = serverIp;
             _ServerPort = serverPort;
             _Username = username;
             _Password = password;
-            _Instance = instance;
+            _Instance = null;
             _DatabaseName = database;
+            _Header = "[DatabaseWrapper." + _DbType.ToString() + "] ";
 
-            PopulateConnectionString();
+            switch (_DbType)
+            {
+                case DbTypes.Sqlite:
+                    throw new ArgumentException("Unable to use this constructor with 'DbTypes.Sqlite'.");
+                case DbTypes.Mysql:
+                    _Mysql = new Mysql.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    break;
+                case DbTypes.Postgresql:
+                    _Postgresql = new Postgresql.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    break;
+                case DbTypes.SqlServer:
+                    _SqlServer = new SqlServer.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, null, _DatabaseName);
+                    break;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+            }
         }
-
+         
         #endregion
 
         #region Public-Methods
@@ -204,66 +341,19 @@ namespace DatabaseWrapper
         /// <returns>List of strings, each being a table name.</returns>
         public List<string> ListTables()
         {
-            string query = null;
-            DataTable result = null;
-            List<string> tableNames = new List<string>();
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    query = MssqlHelper.LoadTableNamesQuery(_DatabaseName);
-                    break;
-
-                case DbTypes.MySql:
-                    query = MysqlHelper.LoadTableNamesQuery();
-                    break;
-
-                case DbTypes.PgSql:
-                    query = PgsqlHelper.LoadTableNamesQuery();
-                    break;
-
+                case DbTypes.Mysql:
+                    return _Mysql.ListTables();
+                case DbTypes.Postgresql:
+                    return _Postgresql.ListTables();
                 case DbTypes.Sqlite:
-                    query = SqliteHelper.LoadTableNamesQuery();
-                    break;
-            }
-
-            result = Query(query);
-
-            if (result != null && result.Rows.Count > 0)
-            {
-                switch (_DbType)
-                {
-                    case DbTypes.MsSql:
-                        foreach (DataRow curr in result.Rows)
-                        {
-                            tableNames.Add(curr["TABLE_NAME"].ToString());
-                        }
-                        break;
-
-                    case DbTypes.MySql:
-                        foreach (DataRow curr in result.Rows)
-                        {
-                            tableNames.Add(curr["Tables_in_" + _DatabaseName].ToString());
-                        }
-                        break;
-
-                    case DbTypes.PgSql:
-                        foreach (DataRow curr in result.Rows)
-                        {
-                            tableNames.Add(curr["tablename"].ToString());
-                        }
-                        break;
-
-                    case DbTypes.Sqlite:
-                        foreach (DataRow curr in result.Rows)
-                        {
-                            tableNames.Add(curr["TABLE_NAME"].ToString());
-                        }
-                        break;
-                }
-            }
-
-            return tableNames;
+                    return _Sqlite.ListTables();
+                case DbTypes.SqlServer:
+                    return _SqlServer.ListTables();
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'."); 
+            } 
         }
 
         /// <summary>
@@ -273,9 +363,19 @@ namespace DatabaseWrapper
         /// <returns>True if exists.</returns>
         public bool TableExists(string tableName)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-
-            return ListTables().Contains(tableName);
+            switch (_DbType)
+            {
+                case DbTypes.Mysql:
+                    return _Mysql.TableExists(tableName);
+                case DbTypes.Postgresql:
+                    return _Postgresql.TableExists(tableName);
+                case DbTypes.Sqlite:
+                    return _Sqlite.TableExists(tableName);
+                case DbTypes.SqlServer:
+                    return _SqlServer.TableExists(tableName);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+            }
         }
 
         /// <summary>
@@ -285,121 +385,19 @@ namespace DatabaseWrapper
         /// <returns>A list of column objects.</returns>
         public List<Column> DescribeTable(string tableName)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-
-            string query = null;
-            DataTable result = null;
-            List<Column> columns = new List<Column>();
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    query = MssqlHelper.LoadTableColumnsQuery(_DatabaseName, tableName);
-                    break;
-
-                case DbTypes.MySql:
-                    query = MysqlHelper.LoadTableColumnsQuery(_DatabaseName, tableName);
-                    break;
-
-                case DbTypes.PgSql:
-                    query = PgsqlHelper.LoadTableColumnsQuery(_DatabaseName, tableName);
-                    break;
-
+                case DbTypes.Mysql:
+                    return _Mysql.DescribeTable(tableName);
+                case DbTypes.Postgresql:
+                    return _Postgresql.DescribeTable(tableName);
                 case DbTypes.Sqlite:
-                    query = SqliteHelper.LoadTableColumnsQuery(tableName);
-                    break;
+                    return _Sqlite.DescribeTable(tableName);
+                case DbTypes.SqlServer:
+                    return _SqlServer.DescribeTable(tableName);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-             
-            result = Query(query);
-            if (result != null && result.Rows.Count > 0)
-            {
-                foreach (DataRow currColumn in result.Rows)
-                {
-                    #region Process-Each-Column
-
-                    /*
-                    public bool PrimaryKey;
-                    public string Name;
-                    public string DataType;
-                    public int? MaxLength;
-                    public bool Nullable;
-                    */
-
-                    Column tempColumn = new Column();
-                    
-                    tempColumn.Name = currColumn["COLUMN_NAME"].ToString();
-
-                    tempColumn.MaxLength = null;
-                    if (currColumn.Table.Columns.Contains("CHARACTER_MAXIMUM_LENGTH"))
-                    {
-                        int maxLength = 0;
-                        if (Int32.TryParse(currColumn["CHARACTER_MAXIMUM_LENGTH"].ToString(), out maxLength))
-                        {
-                            tempColumn.MaxLength = maxLength;
-                        }
-                    }
-
-                    tempColumn.Type = DataTypeFromString(currColumn["DATA_TYPE"].ToString());
-
-                    if (currColumn.Table.Columns.Contains("IS_NULLABLE"))
-                    {
-                        if (String.Compare(currColumn["IS_NULLABLE"].ToString(), "YES") == 0) tempColumn.Nullable = true;
-                        else tempColumn.Nullable = false;
-                    }
-                    else if (currColumn.Table.Columns.Contains("IS_NOT_NULLABLE"))
-                    {
-                        tempColumn.Nullable = !(Convert.ToBoolean(currColumn["IS_NOT_NULLABLE"]));
-                    }
-
-                    switch (_DbType)
-                    {
-                        case DbTypes.MsSql:
-                            if (currColumn["CONSTRAINT_NAME"] != null
-                                && currColumn["CONSTRAINT_NAME"] != DBNull.Value
-                                && !String.IsNullOrEmpty(currColumn["CONSTRAINT_NAME"].ToString()))
-                            {
-                                if (currColumn["CONSTRAINT_NAME"].ToString().ToLower().StartsWith("pk")) tempColumn.PrimaryKey = true; 
-                            }
-                            break; 
-
-                        case DbTypes.MySql:
-                            if (currColumn["COLUMN_KEY"] != null
-                                && currColumn["COLUMN_KEY"] != DBNull.Value
-                                && !String.IsNullOrEmpty(currColumn["COLUMN_KEY"].ToString()))
-                            {
-                                if (currColumn["COLUMN_KEY"].ToString().ToLower().Equals("pri")) tempColumn.PrimaryKey = true;
-                            }
-                            break;
-                             
-                        case DbTypes.PgSql:
-                            if (currColumn["IS_PRIMARY_KEY"] != null
-                                && currColumn["IS_PRIMARY_KEY"] != DBNull.Value
-                                && !String.IsNullOrEmpty(currColumn["IS_PRIMARY_KEY"].ToString()))
-                            {
-                                if (currColumn["IS_PRIMARY_KEY"].ToString().ToLower().Equals("yes")) tempColumn.PrimaryKey = true;
-                            }
-                            break;
-
-                        case DbTypes.Sqlite:
-                            if (currColumn["IS_PRIMARY_KEY"] != null
-                                && currColumn["IS_PRIMARY_KEY"] != DBNull.Value
-                                && !String.IsNullOrEmpty(currColumn["IS_PRIMARY_KEY"].ToString()))
-                            {
-                                tempColumn.PrimaryKey = Convert.ToBoolean(currColumn["IS_PRIMARY_KEY"]);
-                            }
-                            break;
-                    }
-                     
-                    if (!columns.Exists(c => c.Name.Equals(tempColumn.Name)))
-                    {
-                        columns.Add(tempColumn);
-                    }
-
-                    #endregion
-                } 
-            }
-
-            return columns; 
         }
 
         /// <summary>
@@ -407,20 +405,20 @@ namespace DatabaseWrapper
         /// </summary>
         /// <returns>Dictionary.  Key is table name, value is List of Column objects.</returns>
         public Dictionary<string, List<Column>> DescribeDatabase()
-        { 
-            DataTable result = new DataTable();
-            Dictionary<string, List<Column>> ret = new Dictionary<string, List<Column>>();
-            List<string> tableNames = ListTables();
-
-            if (tableNames != null && tableNames.Count > 0)
+        {
+            switch (_DbType)
             {
-                foreach (string tableName in tableNames)
-                {
-                    ret.Add(tableName, DescribeTable(tableName));
-                }
+                case DbTypes.Mysql:
+                    return _Mysql.DescribeDatabase();
+                case DbTypes.Postgresql:
+                    return _Postgresql.DescribeDatabase();
+                case DbTypes.Sqlite:
+                    return _Sqlite.DescribeDatabase();
+                case DbTypes.SqlServer:
+                    return _SqlServer.DescribeDatabase();
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            return ret; 
         }
 
         /// <summary>
@@ -430,31 +428,23 @@ namespace DatabaseWrapper
         /// <param name="columns">Columns.</param>
         public void CreateTable(string tableName, List<Column> columns)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            if (columns == null || columns.Count < 1) throw new ArgumentNullException(nameof(columns));
-
-            string query = null;
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    query = MssqlHelper.CreateTableQuery(tableName, columns);
-                    break;
-
-                case DbTypes.MySql:
-                    query = MysqlHelper.CreateTableQuery(tableName, columns);
-                    break;
-
-                case DbTypes.PgSql:
-                    query = PgsqlHelper.CreateTableQuery(tableName, columns);
-                    break;
-
+                case DbTypes.Mysql:
+                    _Mysql.CreateTable(tableName, columns);
+                    return;
+                case DbTypes.Postgresql:
+                    _Postgresql.CreateTable(tableName, columns);
+                    return;
                 case DbTypes.Sqlite:
-                    query = SqliteHelper.CreateTableQuery(tableName, columns);
-                    break;
+                    _Sqlite.CreateTable(tableName, columns);
+                    return;
+                case DbTypes.SqlServer:
+                    _SqlServer.CreateTable(tableName, columns);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            DataTable result = Query(query); 
         }
 
         /// <summary>
@@ -463,30 +453,23 @@ namespace DatabaseWrapper
         /// <param name="tableName">The table to drop.</param>
         public void DropTable(string tableName)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-
-            string query = null;
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    query = MssqlHelper.DropTableQuery(tableName);
-                    break;
-
-                case DbTypes.MySql:
-                    query = MysqlHelper.DropTableQuery(tableName);
-                    break;
-
-                case DbTypes.PgSql:
-                    query = PgsqlHelper.DropTableQuery(tableName);
-                    break;
-
+                case DbTypes.Mysql:
+                    _Mysql.DropTable(tableName);
+                    return;
+                case DbTypes.Postgresql:
+                    _Postgresql.DropTable(tableName);
+                    return;
                 case DbTypes.Sqlite:
-                    query = SqliteHelper.DropTableQuery(tableName);
-                    break;
+                    _Sqlite.DropTable(tableName);
+                    return;
+                case DbTypes.SqlServer:
+                    _SqlServer.DropTable(tableName);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            DataTable result = Query(query); 
         }
 
         /// <summary>
@@ -496,18 +479,19 @@ namespace DatabaseWrapper
         /// <returns>A string containing the column name.</returns>
         public string GetPrimaryKeyColumn(string tableName)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-
-            List<Column> details = DescribeTable(tableName);
-            if (details != null && details.Count > 0)
+            switch (_DbType)
             {
-                foreach (Column c in details)
-                {
-                    if (c.PrimaryKey) return c.Name;
-                }
+                case DbTypes.Mysql:
+                    return _Mysql.GetPrimaryKeyColumn(tableName);
+                case DbTypes.Postgresql:
+                    return _Postgresql.GetPrimaryKeyColumn(tableName);
+                case DbTypes.Sqlite:
+                    return _Sqlite.GetPrimaryKeyColumn(tableName);
+                case DbTypes.SqlServer:
+                    return _SqlServer.GetPrimaryKeyColumn(tableName);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            return null;
         }
 
         /// <summary>
@@ -517,20 +501,19 @@ namespace DatabaseWrapper
         /// <returns>A list of strings containing the column names.</returns>
         public List<string> GetColumnNames(string tableName)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-
-            List<Column> details = DescribeTable(tableName);
-            List<string> columnNames = new List<string>();
-
-            if (details != null && details.Count > 0)
+            switch (_DbType)
             {
-                foreach (Column c in details)
-                {
-                    columnNames.Add(c.Name);
-                }
+                case DbTypes.Mysql:
+                    return _Mysql.GetColumnNames(tableName);
+                case DbTypes.Postgresql:
+                    return _Postgresql.GetColumnNames(tableName);
+                case DbTypes.Sqlite:
+                    return _Sqlite.GetColumnNames(tableName);
+                case DbTypes.SqlServer:
+                    return _SqlServer.GetColumnNames(tableName);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            return columnNames;
         }
 
         /// <summary>
@@ -542,18 +525,19 @@ namespace DatabaseWrapper
         /// <returns>A DataTable containing at most one row.</returns>
         public DataTable GetUniqueObjectById(string tableName, string columnName, object value)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            if (String.IsNullOrEmpty(columnName)) throw new ArgumentNullException(nameof(columnName));
-            if (value == null) throw new ArgumentNullException(nameof(value));
-
-            Expression e = new Expression
+            switch (_DbType)
             {
-                LeftTerm = columnName,
-                Operator = Operators.Equals,
-                RightTerm = value.ToString()
-            };
-
-            return Select(tableName, null, 1, null, e, null);
+                case DbTypes.Mysql:
+                    return _Mysql.GetUniqueObjectById(tableName, columnName, value);
+                case DbTypes.Postgresql:
+                    return _Postgresql.GetUniqueObjectById(tableName, columnName, value);
+                case DbTypes.Sqlite:
+                    return _Sqlite.GetUniqueObjectById(tableName, columnName, value);
+                case DbTypes.SqlServer:
+                    return _SqlServer.GetUniqueObjectById(tableName, columnName, value);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+            }
         }
 
         /// <summary>
@@ -568,32 +552,19 @@ namespace DatabaseWrapper
         /// <returns>A DataTable containing the results.</returns>
         public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-             
-            string query = "";
-            DataTable result; 
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    query = MssqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
-                    break;
-
-                case DbTypes.MySql:
-                    query = MysqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
-                    break;
-                     
-                case DbTypes.PgSql:
-                    query = PgsqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
-                    break;
-
+                case DbTypes.Mysql:
+                    return _Mysql.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
+                case DbTypes.Postgresql:
+                    return _Postgresql.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
                 case DbTypes.Sqlite:
-                    query = SqliteHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
-                    break;
+                    return _Sqlite.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
+                case DbTypes.SqlServer:
+                    return _SqlServer.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            result = Query(query);
-            return result;
         }
 
         /// <summary>
@@ -604,220 +575,19 @@ namespace DatabaseWrapper
         /// <returns>A DataTable containing the results.</returns>
         public DataTable Insert(string tableName, Dictionary<string, object> keyValuePairs)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            if (keyValuePairs == null || keyValuePairs.Count < 1) throw new ArgumentNullException(nameof(keyValuePairs));
-
-            #region Variables
-
-            string keys = "";
-            string values = "";
-            string query = "";
-            int insertedId = 0;
-            string retrievalQuery = "";
-            DataTable result;
-
-            #endregion
-
-            #region Build-Key-Value-Pairs
-
-            int added = 0;
-            foreach (KeyValuePair<string, object> curr in keyValuePairs)
-            {
-                if (String.IsNullOrEmpty(curr.Key)) continue; 
-
-                if (added == 0)
-                {
-                    #region First
-
-                    keys += PreparedFieldname(curr.Key);
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            values += "'" + DbTimestamp(_DbType, (DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            values += curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                values += PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                values += PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
-                    }
-                    else
-                    {
-                        values += "null";
-                    }
-
-                    #endregion
-                }
-                else
-                {
-                    #region Subsequent
-
-                    keys += "," + PreparedFieldname(curr.Key);
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            values += ",'" + DbTimestamp(_DbType, (DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            values += "," + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                values += "," + PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                values += "," + PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        values += ",null";
-                    }
-
-                    #endregion
-                }
-
-                added++;
-            }
-
-            #endregion
-
-            #region Build-INSERT-Query-and-Submit
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    query = MssqlHelper.InsertQuery(tableName, keys, values);
-                    break;
-
-                case DbTypes.MySql:
-                    query = MysqlHelper.InsertQuery(tableName, keys, values);
-                    break;
-
-                case DbTypes.PgSql:
-                    query = PgsqlHelper.InsertQuery(tableName, keys, values);
-                    break;
-
+                case DbTypes.Mysql:
+                    return _Mysql.Insert(tableName, keyValuePairs);
+                case DbTypes.Postgresql:
+                    return _Postgresql.Insert(tableName, keyValuePairs);
                 case DbTypes.Sqlite:
-                    query = SqliteHelper.InsertQuery(tableName, keys, values);
-                    break;
+                    return _Sqlite.Insert(tableName, keyValuePairs);
+                case DbTypes.SqlServer:
+                    return _SqlServer.Insert(tableName, keyValuePairs);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            result = Query(query);
-
-            #endregion
-
-            #region Post-Retrieval
-
-            switch (_DbType)
-            {
-                case DbTypes.MsSql:
-                    #region MsSql
-
-                    //
-                    // built into the query
-                    //
-                    break;
-
-                    #endregion
-
-                case DbTypes.MySql:
-                    #region MySql
-
-                    if (!Helper.DataTableIsNullOrEmpty(result))
-                    {
-                        bool idFound = false;
-
-                        string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
-
-                        foreach (DataRow curr in result.Rows)
-                        {
-                            if (Int32.TryParse(curr["id"].ToString(), out insertedId))
-                            {
-                                idFound = true;
-                                break;
-                            }
-                        }
-
-                        if (!idFound)
-                        {
-                            result = null;
-                        }
-                        else
-                        {
-                            retrievalQuery = "SELECT * FROM `" + tableName + "` WHERE " + primaryKeyColumn + "=" + insertedId;
-                            result = Query(retrievalQuery);
-                        }
-                    }
-                    break;
-
-                #endregion
-
-                case DbTypes.PgSql:
-                    #region PgSql
-
-                    //
-                    // built into the query
-                    //
-                    break;
-
-                #endregion
-
-                case DbTypes.Sqlite:
-                    #region Sqlite
-
-                    if (!Helper.DataTableIsNullOrEmpty(result))
-                    {
-                        bool idFound = false;
-
-                        string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
-
-                        foreach (DataRow curr in result.Rows)
-                        {
-                            if (Int32.TryParse(curr["id"].ToString(), out insertedId))
-                            {
-                                idFound = true;
-                                break;
-                            }
-                        }
-
-                        if (!idFound)
-                        {
-                            result = null;
-                        }
-                        else
-                        {
-                            retrievalQuery = "SELECT * FROM `" + tableName + "` WHERE " + primaryKeyColumn + "=" + insertedId;
-                            result = Query(retrievalQuery);
-                        }
-                    }
-                    break;
-
-                    #endregion
-
-            }
-
-            #endregion
-
-            return result;
         }
 
         /// <summary>
@@ -831,159 +601,47 @@ namespace DatabaseWrapper
         /// <returns>For Microsoft SQL Server and PostgreSQL, a DataTable containing the results.  For MySQL and Sqlite, null.</returns>
         public DataTable Update(string tableName, Dictionary<string, object> keyValuePairs, Expression filter)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            if (keyValuePairs == null || keyValuePairs.Count < 1) throw new ArgumentNullException(nameof(keyValuePairs));
-
-            #region Variables
-
-            string query = "";
-            string keyValueClause = "";
-            DataTable result;  
-
-            #endregion
-
-            #region Build-Key-Value-Clause
-
-            int added = 0;
-            foreach (KeyValuePair<string, object> curr in keyValuePairs)
-            {
-                if (String.IsNullOrEmpty(curr.Key)) continue; 
-
-                if (added == 0)
-                {
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            keyValueClause += PreparedFieldname(curr.Key) + "='" + DbTimestamp(_DbType, (DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            keyValueClause += PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                keyValueClause += PreparedFieldname(curr.Key) + "=" + PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                keyValueClause += PreparedFieldname(curr.Key) + "=" + PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
-                    }
-                    else
-                    {
-                        keyValueClause += PreparedFieldname(curr.Key) + "= null";
-                    }
-                }
-                else
-                {
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            keyValueClause += "," + PreparedFieldname(curr.Key) + "='" + DbTimestamp(_DbType, (DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            keyValueClause += "," + PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                keyValueClause += "," + PreparedFieldname(curr.Key) + "=" + PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                keyValueClause += "," + PreparedFieldname(curr.Key) + "=" + PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
-                    }
-                    else
-                    {
-                        keyValueClause += "," + PreparedFieldname(curr.Key) + "= null";
-                    }
-                }
-                added++;
-            }
-
-            #endregion
-
-            #region Build-UPDATE-Query-and-Submit
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    query = MssqlHelper.UpdateQuery(tableName, keyValueClause, filter);
-                    break;
-                    
-                case DbTypes.MySql:
-                    query = MysqlHelper.UpdateQuery(tableName, keyValueClause, filter);
-                    break;
-
-                case DbTypes.PgSql:
-                    query = PgsqlHelper.UpdateQuery(tableName, keyValueClause, filter);
-                    break;
-
+                case DbTypes.Mysql:
+                    _Mysql.Update(tableName, keyValuePairs, filter);
+                    return null;
+                case DbTypes.Postgresql:
+                    return _Postgresql.Update(tableName, keyValuePairs, filter);
                 case DbTypes.Sqlite:
-                    query = SqliteHelper.UpdateQuery(tableName, keyValueClause, filter);
-                    break;
+                    _Sqlite.Update(tableName, keyValuePairs, filter);
+                    return null;
+                case DbTypes.SqlServer:
+                    return _SqlServer.Update(tableName, keyValuePairs, filter);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            result = Query(query);
-
-            #endregion
-            
-            return result;
         }
 
         /// <summary>
         /// Execute a DELETE query.
         /// </summary>
         /// <param name="tableName">The table in which you wish to DELETE.</param>
-        /// <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param>
-        /// <returns>A DataTable containing the results.</returns>
-        public DataTable Delete(string tableName, Expression filter)
+        /// <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param> 
+        public void Delete(string tableName, Expression filter)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            if (filter == null) throw new ArgumentNullException(nameof(filter));
-
-            #region Variables
-
-            string query = "";
-            DataTable result; 
-
-            #endregion
-
-            #region Build-DELETE-Query-and-Submit
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    query = MssqlHelper.DeleteQuery(tableName, filter);
-                    break;
-                     
-                case DbTypes.MySql:
-                    query = MysqlHelper.DeleteQuery(tableName, filter);
-                    break;
-
-                case DbTypes.PgSql:
-                    query = PgsqlHelper.DeleteQuery(tableName, filter);
-                    break;
-
+                case DbTypes.Mysql:
+                    _Mysql.Delete(tableName, filter);
+                    return;
+                case DbTypes.Postgresql:
+                    _Postgresql.Delete(tableName, filter);
+                    return;
                 case DbTypes.Sqlite:
-                    query = SqliteHelper.DeleteQuery(tableName, filter);
-                    break;
+                    _Sqlite.Delete(tableName, filter);
+                    return;
+                case DbTypes.SqlServer:
+                    _SqlServer.Delete(tableName, filter);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            result = Query(query);
-
-            #endregion
-
-            return result;
         }
 
         /// <summary>
@@ -992,31 +650,23 @@ namespace DatabaseWrapper
         /// <param name="tableName">The table you wish to TRUNCATE.</param>
         public void Truncate(string tableName)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-
-            string query = null;
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    query = MssqlHelper.TruncateQuery(tableName);
-                    break;
-                case DbTypes.MySql:
-                    query = MysqlHelper.TruncateQuery(tableName);
-                    break;
-                case DbTypes.PgSql:
-                    query = PgsqlHelper.TruncateQuery(tableName);
-                    break;
+                case DbTypes.Mysql:
+                    _Mysql.Truncate(tableName);
+                    return;
+                case DbTypes.Postgresql:
+                    _Postgresql.Truncate(tableName);
+                    return;
                 case DbTypes.Sqlite:
-                    query = SqliteHelper.TruncateQuery(tableName);
-                    break;
+                    _Sqlite.Truncate(tableName);
+                    return;
+                case DbTypes.SqlServer:
+                    _SqlServer.Truncate(tableName);
+                    return;
                 default:
-                    throw new ArgumentException("Unknown database type: " + _DbType.ToString());
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-             
-            DataTable result = Query(query);
-
-            return;
         }
 
         /// <summary>
@@ -1026,120 +676,19 @@ namespace DatabaseWrapper
         /// <returns>A DataTable containing the results.</returns>
         public DataTable Query(string query)
         {
-            if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
-            DataTable result = new DataTable();
-
-            if (LogQueries && Logger != null) Logger("[" + _DbType.ToString() + "] Query: " + query);
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    #region Mssql
-
-                    using (SqlConnection conn = new SqlConnection(_ConnectionString))
-                    {
-                        conn.Open();
-                        SqlDataAdapter sda = new SqlDataAdapter(query, conn);
-                        sda.Fill(result);
-                        conn.Dispose();
-                        conn.Close();
-                    }
-
-                    break;
-
-                #endregion
-
-                case DbTypes.MySql:
-                    #region Mysql
-
-                    using (MySqlConnection conn = new MySqlConnection(_ConnectionString))
-                    {
-                        conn.Open();
-                        MySqlCommand cmd = new MySqlCommand();
-                        cmd.Connection = conn;
-                        cmd.CommandText = query;
-                        MySqlDataAdapter sda = new MySqlDataAdapter(cmd);
-                        DataSet ds = new DataSet();
-                        sda.Fill(ds);
-                        if (ds != null)
-                        {
-                            if (ds.Tables != null)
-                            {
-                                if (ds.Tables.Count > 0)
-                                {
-                                    result = ds.Tables[0];
-                                }
-                            }
-                        }
-
-                        conn.Close();
-                    }
-
-                    break;
-
-                #endregion
-
-                case DbTypes.PgSql:
-                    #region Pgsql
-
-                    using (NpgsqlConnection conn = new NpgsqlConnection(_ConnectionString))
-                    {
-                        conn.Open();
-                        NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn);
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-
-                        if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
-                        {
-                            result = ds.Tables[0];
-                        }
-
-                        conn.Close();
-                    }
-
-                    break;
-
-                #endregion
-
+                case DbTypes.Mysql:
+                    return _Mysql.Query(query);
+                case DbTypes.Postgresql:
+                    return _Postgresql.Query(query);
                 case DbTypes.Sqlite:
-                    #region Sqlite
-
-                    using (SQLiteConnection conn = new SQLiteConnection(_ConnectionString))
-                    {
-                        conn.Open();
-
-                        using (SQLiteCommand cmd = new SQLiteCommand(query, conn))
-                        {
-                            using (SQLiteDataReader rdr = cmd.ExecuteReader())
-                            {
-                                result.Load(rdr);
-                            }
-                        }
-
-                        conn.Close();
-                    }
-
-                    break;
-
-                #endregion 
-
+                    return _Sqlite.Query(query);
+                case DbTypes.SqlServer:
+                    return _SqlServer.Query(query);
                 default:
-                    throw new ArgumentException("Unknown database type: " + _DbType.ToString());
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            if (LogResults && Logger != null)
-            {
-                if (result != null)
-                {
-                    Logger("[" + _DbType.ToString() + "] Query result: " + result.Rows.Count + " rows");
-                }
-                else
-                {
-                    Logger("[" + _DbType.ToString() + "] Query result: null");
-                }
-            }
-
-            return result;
         }
 
         /// <summary>
@@ -1151,16 +700,16 @@ namespace DatabaseWrapper
         {
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                case DbTypes.PgSql:
-                    return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
-
-                case DbTypes.MySql:
+                case DbTypes.Mysql:
+                    return _Mysql.Timestamp(ts);
+                case DbTypes.Postgresql:
+                    return _Postgresql.Timestamp(ts);
                 case DbTypes.Sqlite:
-                    return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
-
+                    return _Sqlite.Timestamp(ts);
+                case DbTypes.SqlServer:
+                    return _SqlServer.Timestamp(ts);
                 default:
-                    return null;
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
         }
 
@@ -1171,24 +720,19 @@ namespace DatabaseWrapper
         /// <returns>A sanitized string.</returns>
         public string SanitizeString(string s)
         {
-            if (String.IsNullOrEmpty(s)) return s;
-
             switch (_DbType)
             {
-                case DbTypes.MsSql:
-                    return MssqlHelper.SanitizeString(s);
-                    
-                case DbTypes.MySql:
-                    return MysqlHelper.SanitizeString(s);
-
-                case DbTypes.PgSql:
-                    return PgsqlHelper.SanitizeString(s);
-
+                case DbTypes.Mysql:
+                    return _Mysql.SanitizeString(s);
+                case DbTypes.Postgresql:
+                    return _Postgresql.SanitizeString(s);
                 case DbTypes.Sqlite:
-                    return SqliteHelper.SanitizeString(s);
+                    return _Sqlite.SanitizeString(s);
+                case DbTypes.SqlServer:
+                    return _SqlServer.SanitizeString(s);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
-
-            throw new Exception("Unknown database type");
         }
          
         #endregion
@@ -1207,168 +751,23 @@ namespace DatabaseWrapper
             }
 
             if (disposing)
-            { 
+            {
                 // placeholder
+                if (_Mysql != null) 
+                    _Mysql.Dispose();
+                else if (_Postgresql != null) 
+                    _Postgresql.Dispose();
+                else if (_Sqlite != null) 
+                    _Sqlite.Dispose();
+                else if (_SqlServer != null) 
+                    _SqlServer.Dispose();
+                else
+                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
             }
 
             _Disposed = true;
         }
-
-        private void PopulateConnectionString()
-        {
-            _ConnectionString = "";
-
-            switch (_DbType)
-            {
-                case DbTypes.MsSql:
-                    _ConnectionString = MssqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _Instance, _DatabaseName);
-                    break;
-
-                case DbTypes.MySql:
-                    _ConnectionString = MysqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
-                    break;
-
-                case DbTypes.PgSql:
-                    _ConnectionString = PgsqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
-                    break;
-
-                case DbTypes.Sqlite:
-                    _ConnectionString = SqliteHelper.ConnectionString(_SqliteFilename);
-                    break;
-            }
-
-            return;
-        }
           
-        private string PreparedFieldname(string s)
-        {
-            switch (_DbType)
-            {
-                case DbTypes.MsSql:
-                    return "[" + s + "]";
-
-                case DbTypes.MySql:
-                    return "`" + s + "`";
-
-                case DbTypes.PgSql:
-                    return "\"" + s + "\"";
-
-                case DbTypes.Sqlite:
-                    return "`" + s + "`";
-            }
-
-            return null;
-        }
-
-        private string PreparedStringValue(string s)
-        {
-            switch (_DbType)
-            {
-                case DbTypes.MsSql:
-                    return "'" + MssqlHelper.SanitizeString(s) + "'";
-
-                case DbTypes.MySql:
-                    return "'" + MysqlHelper.SanitizeString(s) + "'";
-
-                case DbTypes.PgSql:
-                    // uses $xx$ escaping
-                    return PgsqlHelper.SanitizeString(s);
-
-                case DbTypes.Sqlite:
-                    return "'" + SqliteHelper.SanitizeString(s) + "'";
-            }
-
-            return null;
-        }
-
-        private string PreparedUnicodeValue(string s)
-        {
-            switch (_DbType)
-            {
-                case DbTypes.MsSql:
-                    return "N" + PreparedStringValue(s);
-
-                case DbTypes.MySql:
-                    return "N" + PreparedStringValue(s);
-
-                case DbTypes.PgSql:
-                    return "U&" + PreparedStringValue(s);
-
-                case DbTypes.Sqlite:
-                    return "N" + PreparedStringValue(s);
-            }
-
-            return null;
-        }
-
-        private DataType DataTypeFromString(string s)
-        {
-            if (String.IsNullOrEmpty(s)) throw new ArgumentNullException(nameof(s));
-
-            s = s.ToLower();
-            if (s.Contains("(")) s = s.Substring(0, s.IndexOf("("));
-
-            switch (s)
-            {
-                case "bigserial":               // pgsql
-                case "bigint":                  // mssql
-                    return DataType.Long;
-
-                case "smallserial":             // pgsql
-                case "smallest":                // pgsql
-                case "tinyint":                 // mssql, mysql
-                case "integer":                 // pgsql, sqlite
-                case "int":                     // mssql, mysql
-                case "smallint":                // mssql, mysql
-                case "mediumint":               // mysql
-                case "serial":                  // pgsql
-                    return DataType.Int;
-
-                case "real":                    // pgsql, sqlite
-                case "double":                  // mysql
-                case "double precision":        // pgsql
-                case "float":                   // mysql
-                    return DataType.Double;
-
-                case "decimal":                 // mssql
-                case "numeric":                 // mssql
-                    return DataType.Decimal;
-
-                case "timestamp without timezone":      // pgsql
-                case "timestamp without time zone":     // pgsql
-                case "timestamp with timezone":         // pgsql
-                case "timestamp with time zone":        // pgsql
-                case "time without timezone":           // pgsql
-                case "time without time zone":          // pgsql
-                case "time with timezone":              // pgsql
-                case "time with time zone":             // pgsql
-                case "time":                    // mssql, mysql
-                case "date":                    // mssql, mysql
-                case "datetime":                // mssql, mysql
-                case "datetime2":               // mssql
-                case "timestamp":               // mysql
-                    return DataType.DateTime;
-
-                case "character":               // pgsql
-                case "char":                    // mssql, mysql, pgsql
-                case "text":                    // mssql, mysql, pgsql, sqlite
-                case "varchar":                 // mssql, mysql, pgsql
-                    return DataType.Varchar;
-
-                case "character varying":       // pgsql
-                case "nchar":
-                case "ntext":
-                case "nvarchar":
-                    return DataType.Nvarchar;   // mssql
-
-                case "blob":
-                    return DataType.Blob;       // sqlite
-
-                default:
-                    throw new ArgumentException("Unknown DataType: " + s);
-            }
-        }
-
         #endregion
 
         #region Public-Static-Methods
@@ -1383,47 +782,19 @@ namespace DatabaseWrapper
         {
             switch (dbType)
             {
-                case DbTypes.MsSql:
-                case DbTypes.PgSql:
+                case DbTypes.Mysql:
+                    return Mysql.DatabaseClient.DbTimestamp(ts);
+                case DbTypes.Postgresql:
+                    return Postgresql.DatabaseClient.DbTimestamp(ts);
                 case DbTypes.Sqlite:
-                    return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
-
-                case DbTypes.MySql:
-                    return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
-
+                    return Sqlite.DatabaseClient.DbTimestamp(ts);
+                case DbTypes.SqlServer:
+                    return SqlServer.DatabaseClient.DbTimestamp(ts);
                 default:
                     return null;
             }
         }
-
-        /// <summary>
-        /// Convert a DateTime to a string formatted for the specified database type.
-        /// </summary>
-        /// <param name="dbType">The type of database.</param>
-        /// <param name="ts">The timestamp.</param>
-        /// <returns>A string formatted for use with the specified database.</returns>
-        public static string DbTimestamp(string dbType, DateTime ts)
-        {
-            if (String.IsNullOrEmpty(dbType)) throw new ArgumentNullException(nameof(dbType));
-            switch (dbType.ToLower())
-            {
-                case "mssql":
-                    return DbTimestamp(DbTypes.MsSql, ts);
-
-                case "mysql":
-                    return DbTimestamp(DbTypes.MySql, ts);
-
-                case "pgsql":
-                    return DbTimestamp(DbTypes.PgSql, ts);
-
-                case "sqlite":
-                    return DbTimestamp(DbTypes.Sqlite, ts);
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(dbType));
-            }
-        }
-
+         
         #endregion
     }
 }

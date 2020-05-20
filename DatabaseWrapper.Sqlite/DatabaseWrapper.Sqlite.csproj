@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>3.0.0.1</Version>
+    <Authors>Joel Christner</Authors>
+    <Description>Simple database wrapper for Sqlite written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, MySQL, and PostgreSQL.</Description>
+    <Copyright>(c)2020 Joel Christner</Copyright>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/jchristn/DatabaseWrapper</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/jchristn/databasewrapper/master/assets/icon.ico</PackageIconUrl>
+    <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
+    <PackageReleaseNotes>Include sqlite3.dll</PackageReleaseNotes>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <DocumentationFile>C:\Code\Misc\DatabaseWrapper-3.0\DatabaseWrapper.Sqlite\DatabaseWrapper.Sqlite.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DatabaseWrapper.Core" Version="3.0.0.1" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.112.2" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="sqlite3.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

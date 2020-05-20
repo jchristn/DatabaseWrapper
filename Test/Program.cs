@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DatabaseWrapper;
+using DatabaseWrapper.Core;
 
 namespace Test
 {
@@ -47,13 +48,13 @@ namespace Test
                     switch (_DbType)
                     {
                         case "mssql":
-                            _Database = new DatabaseClient(DbTypes.MsSql, "localhost", 1433, _Username, _Password, null, "test");
+                            _Database = new DatabaseClient(DbTypes.SqlServer, "localhost", 1433, _Username, _Password, null, "test");
                             break;
                         case "mysql":
-                            _Database = new DatabaseClient(DbTypes.MySql, "localhost", 3306, _Username, _Password, null, "test");
+                            _Database = new DatabaseClient(DbTypes.Mysql, "localhost", 3306, _Username, _Password, null, "test");
                             break;
                         case "pgsql":
-                            _Database = new DatabaseClient(DbTypes.PgSql, "localhost", 5432, _Username, _Password, null, "test");
+                            _Database = new DatabaseClient(DbTypes.Postgresql, "localhost", 5432, _Username, _Password, null, "test");
                             break;
                         default:
                             return;
@@ -159,65 +160,7 @@ namespace Test
                 ExceptionConsole("Main", "Outer exception", e);
             } 
         }
-
-        static void PrependAndTest()
-        {
-            Expression e1 = new Expression
-            {
-                LeftTerm = "key1",
-                Operator = Operators.Or,
-                RightTerm = new Expression("key2", Operators.And, "val2")
-            };
-
-            Expression e2 = new Expression("something", Operators.LessThan, "22");
-            Expression e3 = Expression.PrependAndClause(e1, e2);
-            Console.WriteLine(e3.ToWhereClause(DbTypes.MsSql));
-        }
-
-        static void PrependOrTest()
-        {
-            Expression e1 = new Expression
-            {
-                LeftTerm = "key1",
-                Operator = Operators.Or,
-                RightTerm = new Expression("key2", Operators.And, "val2")
-            };
-
-            Expression e2 = new Expression("something", Operators.LessThan, 22);
-            Expression e3 = Expression.PrependOrClause(e1, e2);
-            Console.WriteLine(e3.ToWhereClause(DbTypes.MsSql));
-        }
-
-        static void DisplayNestedAndExpression()
-        {
-            List<Expression> exprList = new List<Expression>();
-            Expression e1 = new Expression { LeftTerm = "key1", Operator = Operators.Or, RightTerm = "val1" };
-            Expression e2 = new Expression { LeftTerm = "key2", Operator = Operators.And, RightTerm = "val2" };
-            Expression e3 = new Expression { LeftTerm = "key3", Operator = Operators.GreaterThan, RightTerm = "val3" };
-            Expression e4 = new Expression { LeftTerm = "key4", Operator = Operators.LessThan, RightTerm = "val4" };
-            exprList.Add(e1);
-            exprList.Add(e2);
-            exprList.Add(e3);
-            exprList.Add(e4);
-            Expression e = Expression.ListToNestedAndExpression(exprList);
-            Console.WriteLine(e.ToWhereClause(DbTypes.MsSql));
-        }
-
-        static void DisplayNestedOrExpression()
-        {
-            List<Expression> exprList = new List<Expression>();
-            Expression e1 = new Expression { LeftTerm = "key1", Operator = Operators.Or, RightTerm = "val1" };
-            Expression e2 = new Expression { LeftTerm = "key2", Operator = Operators.And, RightTerm = "val2" };
-            Expression e3 = new Expression { LeftTerm = "key3", Operator = Operators.GreaterThan, RightTerm = "val3" };
-            Expression e4 = new Expression { LeftTerm = "key4", Operator = Operators.LessThan, RightTerm = "val4" };
-            exprList.Add(e1);
-            exprList.Add(e2);
-            exprList.Add(e3);
-            exprList.Add(e4);
-            Expression e = Expression.ListToNestedOrExpression(exprList);
-            Console.WriteLine(e.ToWhereClause(DbTypes.MsSql));
-        }
-
+           
         static void LoadRows()
         {
             for (int i = 0; i < 50; i++)

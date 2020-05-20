@@ -8,36 +8,8 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
 
-namespace DatabaseWrapper
+namespace DatabaseWrapper.Core
 {
-    /// <summary>
-    /// Enumeration containing the supported database types.
-    /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum DbTypes
-    {
-        /// <summary>
-        /// Microsoft SQL Server
-        /// </summary>
-        [EnumMember(Value = "MsSql")]
-        MsSql,
-        /// <summary>
-        /// MySQL
-        /// </summary>
-        [EnumMember(Value = "MySql")]
-        MySql,
-        /// <summary>
-        /// PostgreSQL
-        /// </summary>
-        [EnumMember(Value = "PgSql")]
-        PgSql,
-        /// <summary>
-        /// Sqlite
-        /// </summary>
-        [EnumMember(Value = "Sqlite")]
-        Sqlite
-    }
-
     /// <summary>
     /// Enumeration containing the supported WHERE clause operators.
     /// </summary>
@@ -124,53 +96,5 @@ namespace DatabaseWrapper
         /// </summary>
         [EnumMember(Value = "IsNotNull")]
         IsNotNull
-    }
-
-    /// <summary>
-    /// Type of data contained in the column.
-    /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum DataType
-    {
-        /// <summary>
-        /// Variable-length character.
-        /// </summary>
-        [EnumMember(Value = "Varchar")]
-        Varchar,
-        /// <summary>
-        /// Variable-length unicode character.
-        /// </summary>
-        [EnumMember(Value = "Nvarchar")]
-        Nvarchar,
-        /// <summary>
-        /// Integer.
-        /// </summary>
-        [EnumMember(Value = "Int")]
-        Int,
-        /// <summary>
-        /// Long
-        /// </summary>
-        [EnumMember(Value = "Long")]
-        Long,
-        /// <summary>
-        /// Decimal
-        /// </summary>
-        [EnumMember(Value = "Decimal")]
-        Decimal,
-        /// <summary>
-        /// Double
-        /// </summary>
-        [EnumMember(Value = "Double")]
-        Double,
-        /// <summary>
-        /// Timestamp
-        /// </summary>
-        [EnumMember(Value = "DateTime")]
-        DateTime,
-        /// <summary>
-        /// Blob
-        /// </summary>
-        [EnumMember(Value = "Blob")]
-        Blob
     }
 }

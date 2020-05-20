@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DatabaseWrapper
+namespace DatabaseWrapper.Core
 {
     /// <summary>
     /// Database table column.

@@ -1,27 +1,31 @@
 # DatabaseWrapper
 
-[![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper/) [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.svg)](https://www.nuget.org/packages/DatabaseWrapper) 
+| Library | Version | Downloads |
+|---|---|---|
+| DatabaseWrapper | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.svg)](https://www.nuget.org/packages/DatabaseWrapper) |
+| DatabaseWrapper.Mysql | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.Mysql.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.Mysql/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.Mysql.svg)](https://www.nuget.org/packages/DatabaseWrapper.Mysql) |
+| DatabaseWrapper.Postgresql | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.Postgresql.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.Postgresql/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.Postgresql.svg)](https://www.nuget.org/packages/DatabaseWrapper.Postgresql) |
+| DatabaseWrapper.Sqlite | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.Sqlite.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.Sqlite/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.Sqlite.svg)](https://www.nuget.org/packages/DatabaseWrapper.Sqlite) |
+| DatabaseWrapper.SqlServer | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.SqlServer.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.SqlServer/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.SqlServer.svg)](https://www.nuget.org/packages/DatabaseWrapper.SqlServer) |
+| DatabaseWrapper.Core | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.Core.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.Core/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.Core.svg)](https://www.nuget.org/packages/DatabaseWrapper.Core) |
 
-Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite written in C#, targeting both .NET Core and .NET Framework.
+DatabaseWrapper is the EASIEST and FASTEST way to get a data-driven application up and running using SQL Server, MySQL, PostgreSQL, or Sqlite.
 
-For a sample app exercising this library, refer to the test project contained within the solution.
-
-## Description
-
-DatabaseWrapper is a simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite databases written in C#.   
+For a sample app exercising this library, refer to the ```Test``` project contained within the solution.
 
 Core features:
 
-- Dynamic query building using expression objects
-- Support for nested queries within expressions
+- Dynamic query building
+- Hierarchical Boolean logic using Expression objects
 - Support for SQL server native vs Windows authentication
 - Support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, CREATE, DROP or raw queries
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v2.0.5
+## New in v3.0.0
 
-- Added COLLATE NOCASE to Sqlite TEXT column creation
+- Major refactor with minor breaking changes
+- Broke apart DatabaseWrapper into several database-specific projects; DatabaseWrapper itself can still target any
 
 ## A Note on Sanitization
 
@@ -34,11 +38,20 @@ If you find an injection attack that will defeat the sanitization layer built in
 Refer to the test project for a more complete example with sample table setup scripts.
 ```
 using DatabaseWrapper;
-// SQL Server, MySQL, or PostgreSQL
+using DatabaseWrapper.Core;
 
-DatabaseClient client = new DatabaseClient(DbTypes.MsSql, "localhost", 0, null, null, "SQLEXPRESS", "test");
+DatabaseClient = null;
+
 // Sqlite
-DatabaseClient client = new DatabaseClient("filename");
+client = new DatabaseClient("[databasefilename]");
+
+// SQL Server, MySQL, or PostgreSQL
+client = new DatabaseClient(DbTypes.SqlServer,  "[hostname]", [port], "[user]", "[password]", "[databasename]");
+client = new DatabaseClient(DbTypes.Mysql,      "[hostname]", [port], "[user]", "[password]", "[databasename]");
+client = new DatabaseClient(DbTypes.Postgresql, "[hostname]", [port], "[user]", "[password]", "[databasename]");
+
+// SQL Express
+client = new DatabaseClient(DbTypes.SqlServer,  "[hostname]", [port], "[user]", "[password]", "[instance]", "[databasename]");
 
 // some variables we'll be using
 Dictionary<string, object> d;
@@ -96,8 +109,8 @@ DataTable result = client.Select("person", 5, 10, null, e, "ORDER BY age DESC");
 
 We added a simple static method for this which you can use when building expressions (or elsewhere).  An object method exists as well.
 ```
-string mssql1 = DatabaseClient.DbTimestamp(DbTypes.MsSql, DateTime.Now));
-string mssql2 = client.Timestamp(DateTime.Now);
+string SqlServer1 = DatabaseClient.DbTimestamp(DbTypes.SqlServer, DateTime.Now));
+string SqlServer2 = client.Timestamp(DateTime.Now);
 // 08/23/2016 05:34:32.4349034 PM
 
 string mysql1 = DatabaseClient.DbTimestamp(DbTypes.MySql, DateTime.Now));
@@ -107,9 +120,30 @@ string mysql2 = client.Timestamp(DateTime.Now);
 
 ## Other Notes
 
+### General
+
+When using database-specific classes ```DatabaseWrapper.Mysql```, ```DatabaseWrapper.Postgresql```, ```DatabaseWrapper.SqlServer```, or ```DatabaseWrapper.Sqlite```, the constructor is simplified from what is shown above.
+
+For Sqlite:
+```
+DatabaseClient client = new DatabaseClient("[databasefilename]");
+```
+
+For SQL Server, MySQL, or PostgreSQL:
+```
+DatabaseClient client = new DatabaseClient(DbTypes.SqlServer,  "[hostname]", [port], "[user]", "[password]", "[databasename]");
+DatabaseClient client = new DatabaseClient(DbTypes.Mysql,      "[hostname]", [port], "[user]", "[password]", "[databasename]");
+DatabaseClient client = new DatabaseClient(DbTypes.Postgresql, "[hostname]", [port], "[user]", "[password]", "[databasename]");
+```
+
+For SQL Express:
+```
+DatabaseClient client = new DatabaseClient(DbTypes.SqlServer, "[hostname]", [port], "[user]", "[password]", "[instance]", "[databasename]");
+```
+
 ### MySQL
 
-- MySQL does not like to return updated rows.  Sorry about that.  I thought about making the UPDATE clause require that you supply the ID field and the ID value so that I could retrieve it after the fact, but that approach is just too limiting.
+- MySQL does not like to return updated rows.  I thought about making the UPDATE clause require that you supply the ID field and the ID value so that I could retrieve it after the fact, but that approach is just too limiting.
 
 ### PostgreSQL
 
@@ -117,7 +151,7 @@ string mysql2 = client.Timestamp(DateTime.Now);
 
 ### Sqlite
 
-- Sqlite seems to work well with .NET Core, but has image format exception issues with .NET Framework 4.6.1.  If anyone has a fix for this, please submit a PR!
+- Sqlite has only shown to work well with .NET Core and not .NET Framework.  If you have a solution for making it work more reliably with .NET Framework, please let me know.
 
 ## Version history
 

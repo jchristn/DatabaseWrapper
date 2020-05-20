@@ -1,127 +1,103 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>DatabaseWrapper</name>
+        <name>DatabaseWrapper.Mysql</name>
     </assembly>
     <members>
-        <member name="T:DatabaseWrapper.DatabaseClient">
+        <member name="T:DatabaseWrapper.Mysql.DatabaseClient">
             <summary>
-            Database client for MSSQL, Mysql, PostgreSQL, and Sqlite.
+            Database client for MSSQL, Mysql, and PostgreSQL.
             </summary>
         </member>
-        <member name="P:DatabaseWrapper.DatabaseClient.Type">
+        <member name="P:DatabaseWrapper.Mysql.DatabaseClient.ConnectionString">
             <summary>
-            The type of database.
+            The connection string used to connect to the database.
             </summary>
         </member>
-        <member name="P:DatabaseWrapper.DatabaseClient.ConnectionString">
-            <summary>
-            The connection string used to connect to the database server.
-            </summary>
-        </member>
-        <member name="P:DatabaseWrapper.DatabaseClient.LogQueries">
+        <member name="F:DatabaseWrapper.Mysql.DatabaseClient.LogQueries">
             <summary>
             Enable or disable logging of queries using the Logger(string msg) method (default: false).
             </summary>
         </member>
-        <member name="P:DatabaseWrapper.DatabaseClient.LogResults">
+        <member name="F:DatabaseWrapper.Mysql.DatabaseClient.LogResults">
             <summary>
             Enable or disable logging of query results using the Logger(string msg) method (default: false).
             </summary>
         </member>
-        <member name="P:DatabaseWrapper.DatabaseClient.Logger">
+        <member name="F:DatabaseWrapper.Mysql.DatabaseClient.Logger">
             <summary>
             Method to invoke when sending a log message.
             </summary>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.#ctor(System.String)">
-            <summary>
-            Create an instance of the database client for a Sqlite database file.
-            </summary>
-            <param name="filename"></param>
-        </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.#ctor(DatabaseWrapper.Core.DbTypes,System.String,System.Int32,System.String,System.String,System.String,System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.#ctor(System.String,System.Int32,System.String,System.String,System.String)">
             <summary>
             Create an instance of the database client.
-            </summary>
-            <param name="dbType">The type of database.</param>
-            <param name="serverIp">The IP address or hostname of the database server.</param>
-            <param name="serverPort">The TCP port of the database server.</param>
-            <param name="username">The username to use when authenticating with the database server.</param>
-            <param name="password">The password to use when authenticating with the database server.</param>
-            <param name="instance">The instance on the database server (for use with Microsoft SQL Server).</param>
-            <param name="database">The name of the database with which to connect.</param>
-        </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.#ctor(DatabaseWrapper.Core.DbTypes,System.String,System.Int32,System.String,System.String,System.String)">
-            <summary>
-            Create an instance of the database client.
-            </summary>
-            <param name="dbType">The type of database.</param>
+            </summary> 
             <param name="serverIp">The IP address or hostname of the database server.</param>
             <param name="serverPort">The TCP port of the database server.</param>
             <param name="username">The username to use when authenticating with the database server.</param>
             <param name="password">The password to use when authenticating with the database server.</param> 
             <param name="database">The name of the database with which to connect.</param>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Dispose">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Dispose">
             <summary>
             Tear down the client and dispose of resources.
             </summary>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.ListTables">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.ListTables">
             <summary>
             List all tables in the database.
             </summary>
             <returns>List of strings, each being a table name.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.TableExists(System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.TableExists(System.String)">
             <summary>
             Check if a table exists in the database.
             </summary>
             <param name="tableName">The name of the table.</param>
             <returns>True if exists.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.DescribeTable(System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.DescribeTable(System.String)">
             <summary>
             Show the columns and column metadata from a specific table.
             </summary>
             <param name="tableName">The table to view.</param>
             <returns>A list of column objects.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.DescribeDatabase">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.DescribeDatabase">
             <summary>
             Describe each of the tables in the database.
             </summary>
-            <returns>Dictionary.  Key is table name, value is List of Column objects.</returns>
+            <returns>Dictionary where Key is table name, value is List of Column objects.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.CreateTable(System.String,System.Collections.Generic.List{DatabaseWrapper.Core.Column})">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.CreateTable(System.String,System.Collections.Generic.List{DatabaseWrapper.Core.Column})">
             <summary>
             Create a table with a specified name.
             </summary>
             <param name="tableName">The name of the table.</param>
             <param name="columns">Columns.</param>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.DropTable(System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.DropTable(System.String)">
             <summary>
             Drop the specified table.  
             </summary>
             <param name="tableName">The table to drop.</param>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.GetPrimaryKeyColumn(System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.GetPrimaryKeyColumn(System.String)">
             <summary>
             Retrieve the name of the primary key column from a specific table.
             </summary>
             <param name="tableName">The table of which you want the primary key.</param>
             <returns>A string containing the column name.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.GetColumnNames(System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.GetColumnNames(System.String)">
             <summary>
             Retrieve a list of the names of columns from within a specific table.
             </summary>
             <param name="tableName">The table of which ou want to retrieve the list of columns.</param>
             <returns>A list of strings containing the column names.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.GetUniqueObjectById(System.String,System.String,System.Object)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.GetUniqueObjectById(System.String,System.String,System.Object)">
             <summary>
             Returns a DataTable containing at most one row with data from the specified table where the specified column contains the specified value.  Should only be used on key or unique fields.
             </summary>
@@ -130,7 +106,7 @@
             <param name="value">The value to match in the key or unique field column.  This should be an object that can be cast to a string value.</param>
             <returns>A DataTable containing at most one row.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},DatabaseWrapper.Core.Expression,System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},DatabaseWrapper.Core.Expression,System.String)">
             <summary>
             Execute a SELECT query.
             </summary>
@@ -142,7 +118,7 @@
             <param name="orderByClause">Specify an ORDER BY clause if desired.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Insert(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Insert(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
             <summary>
             Execute an INSERT query.
             </summary>
@@ -150,62 +126,58 @@
             <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Update(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},DatabaseWrapper.Core.Expression)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Update(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},DatabaseWrapper.Core.Expression)">
             <summary>
-            Execute an UPDATE query.
-            For Microsoft SQL Server and PostgreSQL, the updated rows are returned.
-            For MySQL and Sqlite, nothing is returned.
+            Execute an UPDATE query. 
             </summary>
             <param name="tableName">The table in which you wish to UPDATE.</param>
             <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
-            <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
-            <returns>For Microsoft SQL Server and PostgreSQL, a DataTable containing the results.  For MySQL and Sqlite, null.</returns>
+            <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param> 
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Delete(System.String,DatabaseWrapper.Core.Expression)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Delete(System.String,DatabaseWrapper.Core.Expression)">
             <summary>
             Execute a DELETE query.
             </summary>
             <param name="tableName">The table in which you wish to DELETE.</param>
             <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param> 
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Truncate(System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Truncate(System.String)">
             <summary>
             Empties a table completely.
             </summary>
             <param name="tableName">The table you wish to TRUNCATE.</param>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Query(System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Query(System.String)">
             <summary>
             Execute a query.
             </summary>
             <param name="query">Database query defined outside of the database client.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Timestamp(System.DateTime)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Timestamp(System.DateTime)">
             <summary>
-            Create a string timestamp from the given DateTime for the database of the instance type.
+            Create a string timestamp from the given DateTime.
             </summary>
             <param name="ts">DateTime.</param>
-            <returns>A string with timestamp formatted for the database of the instance type.</returns>
+            <returns>A string with formatted timestamp.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.SanitizeString(System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.SanitizeString(System.String)">
             <summary>
             Sanitize an input string.
             </summary>
             <param name="s">The value to sanitize.</param>
             <returns>A sanitized string.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Dispose(System.Boolean)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Dispose(System.Boolean)">
             <summary>
             Dispose of the object.
             </summary>
             <param name="disposing">Disposing of resources.</param>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.DbTimestamp(DatabaseWrapper.Core.DbTypes,System.DateTime)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.DbTimestamp(System.DateTime)">
             <summary>
-            Convert a DateTime to a string formatted for the specified database type.
-            </summary>
-            <param name="dbType">The type of database.</param>
+            Convert a DateTime to a formatted string.
+            </summary> 
             <param name="ts">The timestamp.</param>
             <returns>A string formatted for use with the specified database.</returns>
         </member>

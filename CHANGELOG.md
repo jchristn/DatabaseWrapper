@@ -2,11 +2,16 @@
 
 ## Current Version
 
+v3.0.0
+
+- Major refactor
+- Broke apart DatabaseWrapper into several database-specific projects; DatabaseWrapper itself can still target any
+
+## Previous Versions
+
 v2.0.5
 
 - Added COLLATE NOCASE to Sqlite TEXT column creation
-
-## Previous Versions
 
 v2.0.4
 
