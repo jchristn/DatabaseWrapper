@@ -4,7 +4,7 @@
 
 v3.0.0
 
-- Major refactor
+- Major refactor, minor breaking changes
 - Broke apart DatabaseWrapper into several database-specific projects; DatabaseWrapper itself can still target any
 
 ## Previous Versions
