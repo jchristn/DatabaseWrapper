@@ -2,7 +2,7 @@
 
 | Library | Version | Downloads |
 |---|---|---|
-| DatabaseWrapper | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.svg)](https://www.nuget.org/packages/DatabaseWrapper) |
+| DatabaseWrapper (all supported database types) | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.svg)](https://www.nuget.org/packages/DatabaseWrapper) |
 | DatabaseWrapper.Mysql | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.Mysql.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.Mysql/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.Mysql.svg)](https://www.nuget.org/packages/DatabaseWrapper.Mysql) |
 | DatabaseWrapper.Postgresql | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.Postgresql.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.Postgresql/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.Postgresql.svg)](https://www.nuget.org/packages/DatabaseWrapper.Postgresql) |
 | DatabaseWrapper.Sqlite | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.Sqlite.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.Sqlite/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.Sqlite.svg)](https://www.nuget.org/packages/DatabaseWrapper.Sqlite) |
