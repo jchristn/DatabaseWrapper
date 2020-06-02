@@ -127,8 +127,6 @@ namespace DatabaseWrapper.Core
             LeftTerm = e.LeftTerm;
             Operator = e.Operator;
             RightTerm = e.RightTerm;
-
-            return;
         }
 
         /// <summary>
