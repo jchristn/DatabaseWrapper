@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -34,6 +35,24 @@ namespace DatabaseWrapper.Core
             Operator = oper;
             RightTerm = right;
         }
+        /// <summary>
+        /// A structure in the form of term-operator-term that defines a boolean operation within a WHERE clause Supports only between operator.
+        /// </summary>
+        /// <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param>
+        /// <param name="oper">The operator.</param>
+        /// <param name="right">The right term of the expression; Should be list of two values.</param>
+        public Expression(object left, Operators oper, List<object> right)
+        {
+            if (right == null) throw new ArgumentNullException(nameof(right));
+            if (right.Count != 2) throw new ArgumentException("Right term must contain exactly two members.");
+            if (oper != Operators.Between) throw new InvalidEnumArgumentException("Multiple values can only be used when the Operator is set to 'Between'.");
+            Expression startOfBetween = new Expression(left, Operators.GreaterThanOrEqualTo, right.First());
+            Expression endOfBetween = new Expression(left, Operators.LessThanOrEqualTo, right.Last());
+            Expression e = PrependAndClause(startOfBetween, endOfBetween);
+            LeftTerm = e.LeftTerm;
+            Operator = e.Operator;
+            RightTerm = e.RightTerm;
+        }
 
         #endregion
 
@@ -61,7 +80,7 @@ namespace DatabaseWrapper.Core
         #endregion
 
         #region Public-Methods
-          
+
         /// <summary>
         /// Display Expression in a human-readable string.
         /// </summary>
@@ -108,8 +127,6 @@ namespace DatabaseWrapper.Core
             LeftTerm = e.LeftTerm;
             Operator = e.Operator;
             RightTerm = e.RightTerm;
-
-            return;
         }
 
         /// <summary>
@@ -301,7 +318,7 @@ namespace DatabaseWrapper.Core
                 case DbTypes.SqlServer:
                     ret = Sanitizer.SqlServerSanitizer(s);
                     break;
-                     
+
                 case DbTypes.Mysql:
                     ret = Sanitizer.MysqlSanitizer(s);
                     break;
