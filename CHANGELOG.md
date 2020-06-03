@@ -2,12 +2,16 @@
 
 ## Current Version
 
+v3.0.1
+
+- Support for 'Between' operator (thank you @twobytescy)
+
+## Previous Versions
+
 v3.0.0
 
 - Major refactor, minor breaking changes
 - Broke apart DatabaseWrapper into several database-specific projects; DatabaseWrapper itself can still target any
-
-## Previous Versions
 
 v2.0.5
 

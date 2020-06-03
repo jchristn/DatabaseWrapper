@@ -22,10 +22,9 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v3.0.0
+## New in v3.0.1
 
-- Major refactor with minor breaking changes
-- Broke apart DatabaseWrapper into several database-specific projects; DatabaseWrapper itself can still target any
+- Support for 'Between' operator (thank you @twobytescy)
 
 ## A Note on Sanitization
 

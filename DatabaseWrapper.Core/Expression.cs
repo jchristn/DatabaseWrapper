@@ -17,14 +17,14 @@ namespace DatabaseWrapper.Core
         #region Constructor
 
         /// <summary>
-        /// A structure in the form of term-operator-term that defines a boolean operation within a WHERE clause.
+        /// A structure in the form of term-operator-term that defines a Boolean evaluation within a WHERE clause.
         /// </summary>
         public Expression()
         {
         }
 
         /// <summary>
-        /// A structure in the form of term-operator-term that defines a boolean operation within a WHERE clause.
+        /// A structure in the form of term-operator-term that defines a Boolean evaluation within a WHERE clause.
         /// </summary>
         /// <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param>
         /// <param name="oper">The operator.</param>
@@ -35,12 +35,14 @@ namespace DatabaseWrapper.Core
             Operator = oper;
             RightTerm = right;
         }
+
         /// <summary>
-        /// A structure in the form of term-operator-term that defines a boolean operation within a WHERE clause Supports only between operator.
+        /// A structure in the form of term-operator-term that defines a Boolean evaluation within a WHERE clause.
+        /// This constructor supports only the 'Between' operator.
         /// </summary>
         /// <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param>
-        /// <param name="oper">The operator.</param>
-        /// <param name="right">The right term of the expression; Should be list of two values.</param>
+        /// <param name="oper">Must be 'Between'.</param>
+        /// <param name="right">List of two values where the first value is the lower value and the second value is the higher value.</param>
         public Expression(object left, Operators oper, List<object> right)
         {
             if (right == null) throw new ArgumentNullException(nameof(right));
