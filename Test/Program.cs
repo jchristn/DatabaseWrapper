@@ -253,10 +253,7 @@ namespace Test
         static void RetrieveRowsByBetween()
         {
             List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
-            List<object> vals = new List<object>();
-            vals.Add(10);
-            vals.Add(20);
-            Expression e = new Expression("id", Operators.Between, vals);
+            Expression e = Expression.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
             _Database.Select("person", null, null, returnFields, e, "ORDER BY age DESC");
         }
