@@ -95,12 +95,7 @@ namespace DatabaseWrapper.Core
         /// Value is not null
         /// </summary>
         [EnumMember(Value = "IsNotNull")]
-        IsNotNull,
-        /// <summary>
-        /// Value between the specified values
-        /// </summary>
-        [EnumMember(Value = "Between")]
-        Between
+        IsNotNull
 
     }
 }

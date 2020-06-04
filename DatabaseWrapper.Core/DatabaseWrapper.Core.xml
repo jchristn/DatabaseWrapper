@@ -149,13 +149,11 @@
             <param name="oper">The operator.</param>
             <param name="right">The right term of the expression; can either be an object for comparison or a nested Expression.</param>
         </member>
-        <member name="M:DatabaseWrapper.Core.Expression.#ctor(System.Object,DatabaseWrapper.Core.Operators,System.Collections.Generic.List{System.Object})">
+        <member name="M:DatabaseWrapper.Core.Expression.Between(System.Object,System.Collections.Generic.List{System.Object})">
             <summary>
-            A structure in the form of term-operator-term that defines a Boolean evaluation within a WHERE clause.
-            This constructor supports only the 'Between' operator.
+            An Expression that allows you to determine if an object is between two values, i.e. GreaterThanOrEqualTo the first value, and LessThanOrEqualTo the second value.
             </summary>
-            <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param>
-            <param name="oper">Must be 'Between'.</param>
+            <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param> 
             <param name="right">List of two values where the first value is the lower value and the second value is the higher value.</param>
         </member>
         <member name="F:DatabaseWrapper.Core.Expression.LeftTerm">
@@ -428,11 +426,6 @@
         <member name="F:DatabaseWrapper.Core.Operators.IsNotNull">
             <summary>
             Value is not null
-            </summary>
-        </member>
-        <member name="F:DatabaseWrapper.Core.Operators.Between">
-            <summary>
-            Value between the specified values
             </summary>
         </member>
         <member name="T:DatabaseWrapper.Core.Sanitizer">

@@ -44,9 +44,9 @@ namespace Test
 
                     Console.Write("Password: ");
                     _Password = Console.ReadLine();
-
+                     
                     switch (_DbType)
-                    {
+                    { 
                         case "mssql":
                             _Database = new DatabaseClient(DbTypes.SqlServer, "localhost", 1433, _Username, _Password, null, "test");
                             break;
@@ -57,8 +57,8 @@ namespace Test
                             _Database = new DatabaseClient(DbTypes.Postgresql, "localhost", 5432, _Username, _Password, null, "test");
                             break;
                         default:
-                            return;
-                    }
+                            return; 
+                    } 
                 }
                 else if (_DbType.Equals("sqlite"))
                 {
@@ -81,7 +81,8 @@ namespace Test
                 #endregion
 
                 #region Drop-Table
-
+                
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Dropping table 'person'...");
                 _Database.DropTable("person");
                 Console.WriteLine("Press ENTER to continue...");
@@ -91,6 +92,7 @@ namespace Test
 
                 #region Create-Table
 
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Creating table 'person'...");
                 List<Column> columns = new List<Column>();
                 columns.Add(new Column("id", true, DataType.Int, 11, null, false));
@@ -109,6 +111,7 @@ namespace Test
 
                 #region Check-Existence-and-Describe
 
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Table 'person' exists: " + _Database.TableExists("person"));
                 Console.WriteLine("Table 'person' configuration:");
                 columns = _Database.DescribeTable("person");
@@ -120,26 +123,37 @@ namespace Test
 
                 #region Load-Update-Retrieve-Delete
 
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Loading rows...");
                 LoadRows();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Updating rows...");
                 UpdateRows();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Retrieving rows...");
                 RetrieveRows();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Retrieving rows by index...");
                 RetrieveRowsByIndex();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
+                Console.WriteLine("Retrieving rows by between...");
+                RetrieveRowsByBetween();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Deleting rows...");
                 DeleteRows();
                 Console.WriteLine("Press ENTER to continue");
@@ -149,6 +163,7 @@ namespace Test
 
                 #region Drop-Table
 
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Dropping table...");
                 _Database.DropTable("person");
                 Console.ReadLine();
@@ -233,6 +248,17 @@ namespace Test
 
                 _Database.Select("person", (i - 10), 5, returnFields, e, "ORDER BY age DESC");
             }
+        }
+
+        static void RetrieveRowsByBetween()
+        {
+            List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
+            List<object> vals = new List<object>();
+            vals.Add(10);
+            vals.Add(20);
+            Expression e = new Expression("id", Operators.Between, vals);
+            Console.WriteLine("Expression: " + e.ToString());
+            _Database.Select("person", null, null, returnFields, e, "ORDER BY age DESC");
         }
 
         private static void DeleteRows()

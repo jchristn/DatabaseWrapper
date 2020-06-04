@@ -24,7 +24,7 @@ Core features:
 
 ## New in v3.0.1
 
-- Support for 'Between' operator (thank you @twobytescy)
+- Support for 'Between' operator (thank you @twobytescy) 
 
 ## A Note on Sanitization
 

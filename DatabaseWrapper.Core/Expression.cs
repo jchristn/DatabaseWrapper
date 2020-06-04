@@ -37,25 +37,19 @@ namespace DatabaseWrapper.Core
         }
 
         /// <summary>
-        /// A structure in the form of term-operator-term that defines a Boolean evaluation within a WHERE clause.
-        /// This constructor supports only the 'Between' operator.
+        /// An Expression that allows you to determine if an object is between two values, i.e. GreaterThanOrEqualTo the first value, and LessThanOrEqualTo the second value.
         /// </summary>
-        /// <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param>
-        /// <param name="oper">Must be 'Between'.</param>
+        /// <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param> 
         /// <param name="right">List of two values where the first value is the lower value and the second value is the higher value.</param>
-        public Expression(object left, Operators oper, List<object> right)
+        public static Expression Between(object left, List<object> right)
         {
             if (right == null) throw new ArgumentNullException(nameof(right));
-            if (right.Count != 2) throw new ArgumentException("Right term must contain exactly two members.");
-            if (oper != Operators.Between) throw new InvalidEnumArgumentException("Multiple values can only be used when the Operator is set to 'Between'.");
+            if (right.Count != 2) throw new ArgumentException("Right term must contain exactly two members."); 
             Expression startOfBetween = new Expression(left, Operators.GreaterThanOrEqualTo, right.First());
             Expression endOfBetween = new Expression(left, Operators.LessThanOrEqualTo, right.Last());
-            Expression e = PrependAndClause(startOfBetween, endOfBetween);
-            LeftTerm = e.LeftTerm;
-            Operator = e.Operator;
-            RightTerm = e.RightTerm;
+            return PrependAndClause(startOfBetween, endOfBetween); 
         }
-
+         
         #endregion
 
         #region Public-Members
@@ -422,6 +416,13 @@ namespace DatabaseWrapper.Core
                 default:
                     return null;
             }
+        }
+
+        private bool IsList(object obj)
+        {
+            return obj is IList &&
+                obj.GetType().IsGenericType &&
+                obj.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
         }
 
         #endregion
