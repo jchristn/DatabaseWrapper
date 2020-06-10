@@ -25,6 +25,7 @@ Core features:
 ## New in v3.0.1
 
 - Support for 'Between' operator (thank you @twobytescy) 
+- Migrate to Microsoft.Data.Sqlite for DatabaseWrapper.Sqlite
 
 ## A Note on Sanitization
 

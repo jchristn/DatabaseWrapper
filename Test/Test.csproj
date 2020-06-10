@@ -19,10 +19,4 @@
     <ProjectReference Include="..\DatabaseWrapper\DatabaseWrapper.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="sqlite3.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

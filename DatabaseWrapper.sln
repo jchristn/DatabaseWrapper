@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseWrapper.Mysql", "Da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseWrapper.Postgresql", "DatabaseWrapper.Postgresql\DatabaseWrapper.Postgresql.csproj", "{DDCDF70A-7A8F-420E-B8FE-F56039A4BEAF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseWrapper.Core", "DatabaseWrapper.Core\DatabaseWrapper.Core.csproj", "{F78FFF28-C3E5-4D3D-90CF-14A9A47B6958}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseWrapper.Core", "DatabaseWrapper.Core\DatabaseWrapper.Core.csproj", "{F78FFF28-C3E5-4D3D-90CF-14A9A47B6958}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Sqlite", "Test.Sqlite\Test.Sqlite.csproj", "{EDB58091-8C6D-4835-9712-9B352CA22647}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{F78FFF28-C3E5-4D3D-90CF-14A9A47B6958}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F78FFF28-C3E5-4D3D-90CF-14A9A47B6958}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F78FFF28-C3E5-4D3D-90CF-14A9A47B6958}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDB58091-8C6D-4835-9712-9B352CA22647}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDB58091-8C6D-4835-9712-9B352CA22647}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDB58091-8C6D-4835-9712-9B352CA22647}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDB58091-8C6D-4835-9712-9B352CA22647}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

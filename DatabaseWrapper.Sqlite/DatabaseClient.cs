@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Data; 
-using System.Data.SQLite;
+using System.Data;  
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
 using DatabaseWrapper.Core;
 
 namespace DatabaseWrapper.Sqlite
@@ -52,6 +52,7 @@ namespace DatabaseWrapper.Sqlite
         #region Private-Members
 
         private bool _Disposed = false;
+        private readonly object _Lock = new object();
         private string _Header = "[DatabaseWrapper.Sqlite] ";
         private string _ConnectionString = null;
         private string _SqliteFilename = null;   
@@ -92,7 +93,13 @@ namespace DatabaseWrapper.Sqlite
         public List<string> ListTables()
         { 
             List<string> tableNames = new List<string>();
-            DataTable result = Query(SqliteHelper.LoadTableNamesQuery());
+
+            DataTable result = null;
+
+            lock (_Lock)
+            {
+                result = Query(SqliteHelper.LoadTableNamesQuery());
+            }
 
             if (result != null && result.Rows.Count > 0)
             { 
@@ -126,9 +133,15 @@ namespace DatabaseWrapper.Sqlite
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
               
-            List<Column> columns = new List<Column>(); 
-             
-            DataTable result = Query(SqliteHelper.LoadTableColumnsQuery(tableName));
+            List<Column> columns = new List<Column>();
+
+            DataTable result = null;
+
+            lock (_Lock)
+            {
+                result = Query(SqliteHelper.LoadTableColumnsQuery(tableName));
+            }
+
             if (result != null && result.Rows.Count > 0)
             {
                 foreach (DataRow currColumn in result.Rows)
@@ -584,15 +597,15 @@ namespace DatabaseWrapper.Sqlite
 
             if (LogQueries && Logger != null) Logger(_Header + "query: " + query);
              
-            using (SQLiteConnection conn = new SQLiteConnection(_ConnectionString))
+            using (SqliteConnection conn = new SqliteConnection(_ConnectionString))
             {
                 conn.Open();
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                using (SQLiteCommand cmd = new SQLiteCommand(query, conn))
+                using (SqliteCommand cmd = new SqliteCommand(query, conn))
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
                 {
-                    using (SQLiteDataReader rdr = cmd.ExecuteReader())
+                    using (SqliteDataReader rdr = cmd.ExecuteReader())
                     {
                         result.Load(rdr);
                     }

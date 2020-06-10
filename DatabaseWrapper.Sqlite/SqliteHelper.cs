@@ -11,30 +11,44 @@ namespace DatabaseWrapper.Sqlite
     { 
         internal static string ConnectionString(string filename)
         {
-            return "Data Source=" + filename + ";Version=3;Pooling=False";
+            return "Data Source=" + filename;
         }
 
         internal static string LoadTableNamesQuery()
         {
-            return "SELECT name AS TABLE_NAME FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%'; ";
+            return
+                "DROP TABLE IF EXISTS sqlitemetadata; " +
+                "CREATE TEMPORARY TABLE sqlitemetadata AS " +
+                "  SELECT " +
+                "    name AS TABLE_NAME " +
+                "  FROM " +
+                "    sqlite_master " +
+                "  WHERE " +
+                "    type ='table' " +
+                "    AND name NOT LIKE 'sqlite_%'; " +
+                "SELECT * FROM sqlitemetadata;";
         }
 
         internal static string LoadTableColumnsQuery(string table)
         {
             return
-               "SELECT " +
-               "    m.name AS TABLE_NAME,  " +
-               "    p.cid AS COLUMN_ID, " +
-               "    p.name AS COLUMN_NAME, " +
-               "    p.type AS DATA_TYPE, " +
-               "    p.pk AS IS_PRIMARY_KEY, " +
-               "    p.[notnull] AS IS_NOT_NULLABLE " +
-               "FROM sqlite_master m " +
-               "LEFT OUTER JOIN pragma_table_info((m.name)) p " +
-               "    ON m.name <> p.name " +
-               "WHERE m.type = 'table' " +
-               "    AND m.name = '" + table + "' " +
-               "ORDER BY TABLE_NAME, COLUMN_ID "; 
+                "DROP TABLE IF EXISTS sqlitemetadata; " +
+                "CREATE TEMPORARY TABLE sqlitemetadata AS " +
+                "  SELECT " +
+                "    m.name AS TABLE_NAME,  " +
+                "    p.name AS COLUMN_NAME, " +
+                "    p.type AS DATA_TYPE, " +
+                "    p.pk AS IS_PRIMARY_KEY, " +
+                "    p.[notnull] AS IS_NOT_NULLABLE " +
+                "  FROM " +
+                "    sqlite_master m " +
+                "  LEFT OUTER JOIN pragma_table_info((m.name)) p " +
+                "    ON m.name <> p.name " +
+                "  WHERE " +
+                "    m.type = 'table' " +
+                "    AND m.name = '" + table + "' " +
+                "  ORDER BY TABLE_NAME; " +
+                "SELECT * FROM sqlitemetadata; ";
         }
 
         internal static string SanitizeString(string val)

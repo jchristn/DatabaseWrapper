@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v3.0.1.2
+
+- Migrate to Microsoft.Data.Sqlite for DatabaseWrapper.Sqlite
+
+## Previous Versions
+
 v3.0.1
 
 - Support for 'Between' operator (thank you @twobytescy)
-
-## Previous Versions
 
 v3.0.0
 
