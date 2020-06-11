@@ -9,34 +9,34 @@ namespace DatabaseWrapper.SqlServer
 {
     internal static class SqlServerHelper
     {
-        internal static string ConnectionString(string serverIp, int serverPort, string username, string password, string instance, string database)
+        internal static string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
 
-            if (String.IsNullOrEmpty(username) && String.IsNullOrEmpty(password))
+            if (String.IsNullOrEmpty(settings.Username) && String.IsNullOrEmpty(settings.Password))
             {
-                ret += "Data Source=" + serverIp;
-                if (!String.IsNullOrEmpty(instance)) ret += "\\" + instance + "; ";
+                ret += "Data Source=" + settings.Hostname;
+                if (!String.IsNullOrEmpty(settings.Instance)) ret += "\\" + settings.Instance + "; ";
                 else ret += "; ";
                 ret += "Integrated Security=SSPI; ";
-                ret += "Initial Catalog=" + database + "; ";
+                ret += "Initial Catalog=" + settings.DatabaseName + "; ";
             }
             else
             {
-                if (serverPort > 0)
+                if (settings.Port > 0)
                 {
-                    if (String.IsNullOrEmpty(instance)) ret += "Server=" + serverIp + "," + serverPort + "; ";
-                    else ret += "Server=" + serverIp + "\\" + instance + "," + serverPort + "; ";
+                    if (String.IsNullOrEmpty(settings.Instance)) ret += "Server=" + settings.Hostname + "," + settings.Port + "; ";
+                    else ret += "Server=" + settings.Hostname + "\\" + settings.Instance + "," + settings.Port + "; ";
                 }
                 else
                 {
-                    if (String.IsNullOrEmpty(instance)) ret += "Server=" + serverIp + "; ";
-                    else ret += "Server=" + serverIp + "\\" + instance + "; ";
+                    if (String.IsNullOrEmpty(settings.Instance)) ret += "Server=" + settings.Hostname + "; ";
+                    else ret += "Server=" + settings.Hostname + "\\" + settings.Instance + "; ";
                 }
 
-                ret += "Database=" + database + "; ";
-                if (!String.IsNullOrEmpty(username)) ret += "User ID=" + username + "; ";
-                if (!String.IsNullOrEmpty(password)) ret += "Password=" + password + "; ";
+                ret += "Database=" + settings.DatabaseName + "; ";
+                if (!String.IsNullOrEmpty(settings.Username)) ret += "User ID=" + settings.Username + "; ";
+                if (!String.IsNullOrEmpty(settings.Password)) ret += "Password=" + settings.Password + "; ";
             }
 
             return ret;

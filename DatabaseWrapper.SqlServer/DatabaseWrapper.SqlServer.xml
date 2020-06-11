@@ -29,6 +29,12 @@
             Method to invoke when sending a log message.
             </summary>
         </member>
+        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">
+            <summary>
+            Create an instance of the database client.
+            </summary>
+            <param name="settings">Database settings.</param>
+        </member>
         <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.#ctor(System.String,System.Int32,System.String,System.String,System.String,System.String)">
             <summary>
             Create an instance of the database client.

@@ -61,6 +61,90 @@
             </summary>
             <returns>String.</returns>
         </member>
+        <member name="T:DatabaseWrapper.Core.DatabaseSettings">
+            <summary>
+            Database settings.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Filename">
+            <summary>
+            Filename, if using Sqlite.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Type">
+            <summary>
+            The type of database.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Hostname">
+            <summary>
+            The hostname of the database server.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Port">
+            <summary>
+            The TCP port number on which the server is listening.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Username">
+            <summary>
+            The username to use when accessing the database.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Password">
+            <summary>
+            The password to use when accessing the database.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Instance">
+            <summary>
+            For SQL Server Express, the instance name.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.DatabaseName">
+            <summary>
+            The name of the database.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor(System.String)">
+            <summary>
+            Instantiate the object using Sqlite.
+            </summary>
+            <param name="filename">The Sqlite database filename.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor(System.String,System.String,System.Int32,System.String,System.String,System.String)">
+            <summary>
+            Instantiate the object using SQL Server, MySQL, or PostgreSQL.
+            </summary>
+            <param name="dbType">The type of database.</param>
+            <param name="hostname">The hostname of the database server.</param>
+            <param name="port">The TCP port number on which the server is listening.</param>
+            <param name="username">The username to use when accessing the database.</param>
+            <param name="password">The password to use when accessing the database.</param> 
+            <param name="dbName">The name of the database.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor(DatabaseWrapper.Core.DbTypes,System.String,System.Int32,System.String,System.String,System.String)">
+            <summary>
+            Instantiate the object using SQL Server, MySQL, or PostgreSQL.
+            </summary>
+            <param name="dbType">The type of database.</param>
+            <param name="hostname">The hostname of the database server.</param>
+            <param name="port">The TCP port number on which the server is listening.</param>
+            <param name="username">The username to use when accessing the database.</param>
+            <param name="password">The password to use when accessing the database.</param> 
+            <param name="dbName">The name of the database.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor(System.String,System.Int32,System.String,System.String,System.String,System.String)">
+            <summary>
+            Instantiate the object for SQL Server Express.
+            </summary> 
+            <param name="hostname">The hostname of the database server.</param>
+            <param name="port">The TCP port number on which the server is listening.</param>
+            <param name="username">The username to use when accessing the database.</param>
+            <param name="password">The password to use when accessing the database.</param>
+            <param name="instance">For SQL Server Express, the instance name.</param>
+            <param name="dbName">The name of the database.</param>
+        </member>
         <member name="T:DatabaseWrapper.Core.DataType">
             <summary>
             Type of data contained in the column.

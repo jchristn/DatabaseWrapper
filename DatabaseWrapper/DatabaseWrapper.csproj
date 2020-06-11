@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.0.1.2</Version>
+    <Version>3.1.0.1</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite. written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages if you only need support for one database type.</Description>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageReleaseNotes>- Dependency update for Sqlite</PackageReleaseNotes>
+    <PackageReleaseNotes>Breaking changes, removal of .NET Framework, upgrade to .NET standard 2.1, DatabaseSettings class, new constructors</PackageReleaseNotes>
     <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/jchristn/databasewrapper/master/assets/icon.ico</PackageIconUrl>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
@@ -30,11 +30,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Core" Version="3.0.1.1" />
-    <PackageReference Include="DatabaseWrapper.Mysql" Version="3.0.1.1" />
-    <PackageReference Include="DatabaseWrapper.Postgresql" Version="3.0.1.1" />
-    <PackageReference Include="DatabaseWrapper.Sqlite" Version="3.0.1.1" />
-    <PackageReference Include="DatabaseWrapper.SqlServer" Version="3.0.1.1" />
+    <PackageReference Include="DatabaseWrapper.Core" Version="3.1.0" />
+    <PackageReference Include="DatabaseWrapper.Mysql" Version="3.1.0" />
+    <PackageReference Include="DatabaseWrapper.Postgresql" Version="3.1.0" />
+    <PackageReference Include="DatabaseWrapper.Sqlite" Version="3.1.0" />
+    <PackageReference Include="DatabaseWrapper.SqlServer" Version="3.1.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.5" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.0" />

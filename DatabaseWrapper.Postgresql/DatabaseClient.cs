@@ -53,18 +53,25 @@ namespace DatabaseWrapper.Postgresql
 
         private bool _Disposed = false;
         private string _Header = "[DatabaseWrapper.Postgresql] ";
-        private string _ConnectionString = null;  
-        private string _ServerIp = null;
-        private int _ServerPort = 0;
-        private string _Username;
-        private string _Password; 
-        private string _DatabaseName;
+        private DatabaseSettings _Settings = null;
+        private string _ConnectionString = null;   
           
         private Random _Random = new Random();
 
         #endregion
 
         #region Constructors-and-Factories
+
+        /// <summary>
+        /// Create an instance of the database client.
+        /// </summary>
+        /// <param name="settings">Database settings.</param>
+        public DatabaseClient(DatabaseSettings settings)
+        {
+            _Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            if (_Settings.Type != DbTypes.Postgresql) throw new ArgumentException("Database settings must be of type 'Postgresql'.");
+            _ConnectionString = PostgresqlHelper.ConnectionString(_Settings);
+        }
 
         /// <summary>
         /// Create an instance of the database client.
@@ -84,13 +91,9 @@ namespace DatabaseWrapper.Postgresql
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
             if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
             if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
-             
-            _ServerIp = serverIp;
-            _ServerPort = serverPort;
-            _Username = username;
-            _Password = password; 
-            _DatabaseName = database;
-            _ConnectionString = PgsqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+
+            _Settings = new DatabaseSettings(DbTypes.Postgresql, serverIp, serverPort, username, password, database);
+            _ConnectionString = PostgresqlHelper.ConnectionString(_Settings);
         }
          
         #endregion
@@ -113,7 +116,7 @@ namespace DatabaseWrapper.Postgresql
         public List<string> ListTables()
         { 
             List<string> tableNames = new List<string>(); 
-            DataTable result = Query(PgsqlHelper.LoadTableNamesQuery());
+            DataTable result = Query(PostgresqlHelper.LoadTableNamesQuery());
 
             if (result != null && result.Rows.Count > 0)
             { 
@@ -147,7 +150,7 @@ namespace DatabaseWrapper.Postgresql
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
              
             List<Column> columns = new List<Column>(); 
-            DataTable result = Query(PgsqlHelper.LoadTableColumnsQuery(_DatabaseName, tableName));
+            DataTable result = Query(PostgresqlHelper.LoadTableColumnsQuery(_Settings.DatabaseName, tableName));
             if (result != null && result.Rows.Count > 0)
             {
                 foreach (DataRow currColumn in result.Rows)
@@ -237,7 +240,7 @@ namespace DatabaseWrapper.Postgresql
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (columns == null || columns.Count < 1) throw new ArgumentNullException(nameof(columns)); 
-            Query(PgsqlHelper.CreateTableQuery(tableName, columns)); 
+            Query(PostgresqlHelper.CreateTableQuery(tableName, columns)); 
         }
 
         /// <summary>
@@ -247,7 +250,7 @@ namespace DatabaseWrapper.Postgresql
         public void DropTable(string tableName)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            Query(PgsqlHelper.DropTableQuery(tableName));
+            Query(PostgresqlHelper.DropTableQuery(tableName));
         }
 
         /// <summary>
@@ -330,7 +333,7 @@ namespace DatabaseWrapper.Postgresql
         public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            return Query(PgsqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause)); 
+            return Query(PostgresqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause)); 
         }
 
         /// <summary>
@@ -357,7 +360,7 @@ namespace DatabaseWrapper.Postgresql
                 {
                     #region First
 
-                    keys += PgsqlHelper.PreparedFieldname(curr.Key);
+                    keys += PostgresqlHelper.PreparedFieldname(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
@@ -372,11 +375,11 @@ namespace DatabaseWrapper.Postgresql
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                values += PgsqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                values += PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                values += PgsqlHelper.PreparedStringValue(curr.Value.ToString());
+                                values += PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
@@ -391,7 +394,7 @@ namespace DatabaseWrapper.Postgresql
                 {
                     #region Subsequent
 
-                    keys += "," + PgsqlHelper.PreparedFieldname(curr.Key);
+                    keys += "," + PostgresqlHelper.PreparedFieldname(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
@@ -406,11 +409,11 @@ namespace DatabaseWrapper.Postgresql
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                values += "," + PgsqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                values += "," + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                values += "," + PgsqlHelper.PreparedStringValue(curr.Value.ToString());
+                                values += "," + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
 
@@ -430,7 +433,7 @@ namespace DatabaseWrapper.Postgresql
 
             #region Build-INSERT-Query-and-Submit
 
-            return Query(PgsqlHelper.InsertQuery(tableName, keys, values)); 
+            return Query(PostgresqlHelper.InsertQuery(tableName, keys, values)); 
 
             #endregion 
         }
@@ -462,27 +465,27 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            keyValueClause += PgsqlHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                            keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
                         }
                         else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                         {
-                            keyValueClause += PgsqlHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
+                            keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += PgsqlHelper.PreparedFieldname(curr.Key) + "=" + PgsqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += PgsqlHelper.PreparedFieldname(curr.Key) + "=" + PgsqlHelper.PreparedStringValue(curr.Value.ToString());
+                                keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += PgsqlHelper.PreparedFieldname(curr.Key) + "= null";
+                        keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "= null";
                     }
                 }
                 else
@@ -491,27 +494,27 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            keyValueClause += "," + PgsqlHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                            keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
                         }
                         else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                         {
-                            keyValueClause += "," + PgsqlHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
+                            keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += "," + PgsqlHelper.PreparedFieldname(curr.Key) + "=" + PgsqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += "," + PgsqlHelper.PreparedFieldname(curr.Key) + "=" + PgsqlHelper.PreparedStringValue(curr.Value.ToString());
+                                keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += "," + PgsqlHelper.PreparedFieldname(curr.Key) + "= null";
+                        keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "= null";
                     }
                 }
                 added++;
@@ -521,7 +524,7 @@ namespace DatabaseWrapper.Postgresql
 
             #region Build-UPDATE-Query-and-Submit
 
-            return Query(PgsqlHelper.UpdateQuery(tableName, keyValueClause, filter));
+            return Query(PostgresqlHelper.UpdateQuery(tableName, keyValueClause, filter));
 
             #endregion
         }
@@ -535,7 +538,7 @@ namespace DatabaseWrapper.Postgresql
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (filter == null) throw new ArgumentNullException(nameof(filter));
-            Query(PgsqlHelper.DeleteQuery(tableName, filter));
+            Query(PostgresqlHelper.DeleteQuery(tableName, filter));
         }
 
         /// <summary>
@@ -545,7 +548,7 @@ namespace DatabaseWrapper.Postgresql
         public void Truncate(string tableName)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            Query(PgsqlHelper.TruncateQuery(tableName));
+            Query(PostgresqlHelper.TruncateQuery(tableName));
         }
 
         /// <summary>
@@ -599,7 +602,7 @@ namespace DatabaseWrapper.Postgresql
         /// <returns>A string with formatted timestamp.</returns>
         public string Timestamp(DateTime ts)
         {
-            return PgsqlHelper.DbTimestamp(ts);
+            return PostgresqlHelper.DbTimestamp(ts);
         }
 
         /// <summary>
@@ -610,7 +613,7 @@ namespace DatabaseWrapper.Postgresql
         public string SanitizeString(string s)
         {
             if (String.IsNullOrEmpty(s)) return s;
-            return PgsqlHelper.SanitizeString(s);
+            return PostgresqlHelper.SanitizeString(s);
         }
          
         #endregion
@@ -647,7 +650,7 @@ namespace DatabaseWrapper.Postgresql
         /// <returns>A string formatted for use with the specified database.</returns>
         public static string DbTimestamp(DateTime ts)
         {
-            return PgsqlHelper.DbTimestamp(ts);
+            return PostgresqlHelper.DbTimestamp(ts);
         }
          
         #endregion

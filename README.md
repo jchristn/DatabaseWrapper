@@ -22,10 +22,11 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v3.0.1
+## New in v3.1.0
 
-- Support for 'Between' operator (thank you @twobytescy) 
-- Migrate to Microsoft.Data.Sqlite for DatabaseWrapper.Sqlite
+- Breaking change: removal of .NET Framework and upgrade to .NET standard 2.1
+- DatabaseSettings class
+- New constructors
 
 ## A Note on Sanitization
 

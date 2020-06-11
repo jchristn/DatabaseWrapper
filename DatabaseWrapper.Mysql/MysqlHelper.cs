@@ -11,7 +11,7 @@ namespace DatabaseWrapper.Mysql
 {
     internal static class MysqlHelper
     {
-        internal static string ConnectionString(string serverIp, int serverPort, string username, string password, string database)
+        internal static string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
 
@@ -19,11 +19,11 @@ namespace DatabaseWrapper.Mysql
             // http://www.connectionstrings.com/mysql/
             //
             // MySQL does not use 'Instance'
-            ret += "Server=" + serverIp + "; ";
-            if (serverPort > 0) ret += "Port=" + serverPort + "; ";
-            ret += "Database=" + database + "; ";
-            if (!String.IsNullOrEmpty(username)) ret += "Uid=" + username + "; ";
-            if (!String.IsNullOrEmpty(password)) ret += "Pwd=" + password + "; ";
+            ret += "Server=" + settings.Hostname + "; ";
+            if (settings.Port > 0) ret += "Port=" + settings.Port + "; ";
+            ret += "Database=" + settings.DatabaseName + "; ";
+            if (!String.IsNullOrEmpty(settings.Username)) ret += "Uid=" + settings.Username + "; ";
+            if (!String.IsNullOrEmpty(settings.Password)) ret += "Pwd=" + settings.Password + "; ";
 
             return ret;
         }

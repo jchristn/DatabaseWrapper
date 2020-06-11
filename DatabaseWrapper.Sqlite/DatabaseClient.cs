@@ -54,8 +54,9 @@ namespace DatabaseWrapper.Sqlite
         private bool _Disposed = false;
         private readonly object _Lock = new object();
         private string _Header = "[DatabaseWrapper.Sqlite] ";
+        private DatabaseSettings _Settings = null;
         private string _ConnectionString = null;
-        private string _SqliteFilename = null;   
+        
         private Random _Random = new Random();
 
         #endregion
@@ -65,12 +66,23 @@ namespace DatabaseWrapper.Sqlite
         /// <summary>
         /// Create an instance of the database client.
         /// </summary>
+        /// <param name="settings">Database settings.</param>
+        public DatabaseClient(DatabaseSettings settings)
+        {
+            _Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            if (_Settings.Type != DbTypes.Sqlite) throw new ArgumentException("Database settings must be of type 'Sqlite'.");
+            _ConnectionString = SqliteHelper.ConnectionString(_Settings);
+        }
+
+        /// <summary>
+        /// Create an instance of the database client.
+        /// </summary>
         /// <param name="filename">Sqlite database filename.</param>
         public DatabaseClient(string filename)
         {
-            if (String.IsNullOrEmpty(filename)) throw new ArgumentNullException(nameof(filename)); 
-            _SqliteFilename = filename;
-            _ConnectionString = SqliteHelper.ConnectionString(_SqliteFilename);
+            if (String.IsNullOrEmpty(filename)) throw new ArgumentNullException(nameof(filename));
+            _Settings = new DatabaseSettings(filename);
+            _ConnectionString = SqliteHelper.ConnectionString(_Settings);
         }
          
         #endregion

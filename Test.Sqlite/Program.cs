@@ -11,8 +11,8 @@ using DatabaseWrapper.Core;
 namespace Test.Sqlite
 {
     class Program
-    { 
-        static string _Filename; 
+    {
+        static DatabaseSettings _Settings;
         static DatabaseClient _Database;
 
         static void Main(string[] args)
@@ -22,9 +22,10 @@ namespace Test.Sqlite
                 #region Setup-Database
 
                 Console.Write("Filename: ");
-                _Filename = Console.ReadLine();
-                if (String.IsNullOrEmpty(_Filename)) return; 
-                _Database = new DatabaseClient(_Filename); 
+                string filename = Console.ReadLine();
+                if (String.IsNullOrEmpty(filename)) return;
+                _Settings = new DatabaseSettings(filename);
+                _Database = new DatabaseClient(_Settings); 
 
                 _Database.Logger = Logger;
                 _Database.LogQueries = true;

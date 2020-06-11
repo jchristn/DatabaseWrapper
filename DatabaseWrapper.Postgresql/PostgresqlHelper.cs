@@ -8,9 +8,9 @@ using DatabaseWrapper.Core;
 
 namespace DatabaseWrapper.Postgresql
 {
-    internal static class PgsqlHelper
+    internal static class PostgresqlHelper
     {
-        internal static string ConnectionString(string serverIp, int serverPort, string username, string password, string database)
+        internal static string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
 
@@ -18,11 +18,11 @@ namespace DatabaseWrapper.Postgresql
             // http://www.connectionstrings.com/postgresql/
             //
             // PgSQL does not use 'Instance'
-            ret += "Server=" + serverIp + "; ";
-            if (serverPort > 0) ret += "Port=" + serverPort + "; ";
-            ret += "Database=" + database + "; ";
-            if (!String.IsNullOrEmpty(username)) ret += "User ID=" + username + "; ";
-            if (!String.IsNullOrEmpty(password)) ret += "Password=" + password + "; ";
+            ret += "Server=" + settings.Hostname + "; ";
+            if (settings.Port > 0) ret += "Port=" + settings.Port + "; ";
+            ret += "Database=" + settings.DatabaseName + "; ";
+            if (!String.IsNullOrEmpty(settings.Username)) ret += "User ID=" + settings.Username + "; ";
+            if (!String.IsNullOrEmpty(settings.Password)) ret += "Password=" + settings.Password + "; ";
 
             return ret;
         }
@@ -437,7 +437,7 @@ namespace DatabaseWrapper.Postgresql
         internal static string PreparedStringValue(string s)
         {
             // uses $xx$ escaping
-            return PgsqlHelper.SanitizeString(s);
+            return PostgresqlHelper.SanitizeString(s);
         }
 
         internal static string PreparedUnicodeValue(string s)

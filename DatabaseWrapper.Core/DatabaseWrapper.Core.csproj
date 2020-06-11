@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <Version>3.0.1.1</Version>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Version>3.1.0</Version>
     <Authors>Joel Christner</Authors>
     <Description>Do not install this package directly.  Core classes for DatabaseWrapper packages.</Description>
     <Copyright>(c)2020 Joel Christner</Copyright>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
-    <PackageReleaseNotes>- Support for 'Between' operator (thank you @twobytescy)</PackageReleaseNotes>
+    <PackageReleaseNotes>Breaking changes, removal of .NET Framework, upgrade to .NET standard 2.1, DatabaseSettings class, new constructors</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 

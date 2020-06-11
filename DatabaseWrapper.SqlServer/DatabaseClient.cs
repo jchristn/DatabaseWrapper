@@ -53,20 +53,26 @@ namespace DatabaseWrapper.SqlServer
 
         private bool _Disposed = false;
         private string _Header = "[DatabaseWrapper.SqlServer] ";
-        private string _ConnectionString = null; 
-        private string _ServerIp = null;
-        private int _ServerPort = 0;
-        private string _Username;
-        private string _Password;
-        private string _Instance;
-        private string _DatabaseName;
-          
+        private DatabaseSettings _Settings = null;
+        private string _ConnectionString = null;
+         
         private Random _Random = new Random();
 
         #endregion
 
         #region Constructors-and-Factories
          
+        /// <summary>
+        /// Create an instance of the database client.
+        /// </summary>
+        /// <param name="settings">Database settings.</param>
+        public DatabaseClient(DatabaseSettings settings)
+        {
+            _Settings = settings ?? throw new ArgumentNullException(nameof(settings)); 
+            if (_Settings.Type != DbTypes.SqlServer) throw new ArgumentException("Database settings must be of type 'SqlServer'."); 
+            _ConnectionString = SqlServerHelper.ConnectionString(_Settings);
+        }
+
         /// <summary>
         /// Create an instance of the database client.
         /// </summary> 
@@ -87,14 +93,9 @@ namespace DatabaseWrapper.SqlServer
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
             if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
             if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
-             
-            _ServerIp = serverIp;
-            _ServerPort = serverPort;
-            _Username = username;
-            _Password = password;
-            _Instance = instance;
-            _DatabaseName = database;
-            _ConnectionString = SqlServerHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _Instance, _DatabaseName);
+
+            _Settings = new DatabaseSettings(serverIp, serverPort, username, password, instance, database); 
+            _ConnectionString = SqlServerHelper.ConnectionString(_Settings);
         }
          
         #endregion
@@ -117,7 +118,7 @@ namespace DatabaseWrapper.SqlServer
         public List<string> ListTables()
         { 
             List<string> tableNames = new List<string>(); 
-            DataTable result = Query(SqlServerHelper.LoadTableNamesQuery(_DatabaseName));
+            DataTable result = Query(SqlServerHelper.LoadTableNamesQuery(_Settings.DatabaseName));
 
             if (result != null && result.Rows.Count > 0)
             { 
@@ -151,7 +152,7 @@ namespace DatabaseWrapper.SqlServer
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName)); 
 
             List<Column> columns = new List<Column>(); 
-            DataTable result = Query(SqlServerHelper.LoadTableColumnsQuery(_DatabaseName, tableName));
+            DataTable result = Query(SqlServerHelper.LoadTableColumnsQuery(_Settings.DatabaseName, tableName));
             if (result != null && result.Rows.Count > 0)
             {
                 foreach (DataRow currColumn in result.Rows)

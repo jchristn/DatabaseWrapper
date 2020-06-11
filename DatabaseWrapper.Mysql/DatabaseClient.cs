@@ -54,18 +54,25 @@ namespace DatabaseWrapper.Mysql
 
         private bool _Disposed = false;
         private string _Header = "[DatabaseWrapper.Mysql] ";
-        private string _ConnectionString = null;
-        private string _ServerIp = null;
-        private int _ServerPort = 0;
-        private string _Username;
-        private string _Password; 
-        private string _DatabaseName;
+        private DatabaseSettings _Settings = null;
+        private string _ConnectionString = null; 
           
         private Random _Random = new Random();
 
         #endregion
 
         #region Constructors-and-Factories
+
+        /// <summary>
+        /// Create an instance of the database client.
+        /// </summary>
+        /// <param name="settings">Database settings.</param>
+        public DatabaseClient(DatabaseSettings settings)
+        {
+            _Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            if (_Settings.Type != DbTypes.Mysql) throw new ArgumentException("Database settings must be of type 'Mysql'.");
+            _ConnectionString = MysqlHelper.ConnectionString(_Settings);
+        }
 
         /// <summary>
         /// Create an instance of the database client.
@@ -85,13 +92,9 @@ namespace DatabaseWrapper.Mysql
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
             if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
             if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
-             
-            _ServerIp = serverIp;
-            _ServerPort = serverPort;
-            _Username = username;
-            _Password = password; 
-            _DatabaseName = database;
-            _ConnectionString = MysqlHelper.ConnectionString(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+
+            _Settings = new DatabaseSettings(DbTypes.Mysql, serverIp, serverPort, username, password, database);
+            _ConnectionString = MysqlHelper.ConnectionString(_Settings);
         }
          
         #endregion
@@ -120,7 +123,7 @@ namespace DatabaseWrapper.Mysql
             {
                 foreach (DataRow curr in result.Rows)
                 {
-                    tableNames.Add(curr["Tables_in_" + _DatabaseName].ToString());
+                    tableNames.Add(curr["Tables_in_" + _Settings.DatabaseName].ToString());
                 }
             }
 
@@ -148,7 +151,7 @@ namespace DatabaseWrapper.Mysql
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
              
             List<Column> columns = new List<Column>(); 
-            DataTable result = Query(MysqlHelper.LoadTableColumnsQuery(_DatabaseName, tableName));
+            DataTable result = Query(MysqlHelper.LoadTableColumnsQuery(_Settings.DatabaseName, tableName));
             if (result != null && result.Rows.Count > 0)
             {
                 foreach (DataRow currColumn in result.Rows)

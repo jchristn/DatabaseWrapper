@@ -27,7 +27,7 @@ namespace DatabaseWrapper
         {
             get
             {
-                return _DbType;
+                return _Settings.Type;
             }
         }
 
@@ -38,7 +38,7 @@ namespace DatabaseWrapper
         { 
             get
             {
-                switch (_DbType)
+                switch (_Settings.Type)
                 {
                     case DbTypes.SqlServer:
                         return _SqlServer.ConnectionString;
@@ -49,7 +49,7 @@ namespace DatabaseWrapper
                     case DbTypes.Sqlite:
                         return _Sqlite.ConnectionString;
                     default:
-                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
                 }
             }
         }
@@ -61,7 +61,7 @@ namespace DatabaseWrapper
         {
             get
             {
-                switch (_DbType)
+                switch (_Settings.Type)
                 {
                     case DbTypes.SqlServer:
                         return _SqlServer.LogQueries;
@@ -72,12 +72,12 @@ namespace DatabaseWrapper
                     case DbTypes.Sqlite:
                         return _Sqlite.LogQueries;
                     default:
-                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
                 }
             }
             set
             {
-                switch (_DbType)
+                switch (_Settings.Type)
                 {
                     case DbTypes.SqlServer:
                         _SqlServer.LogQueries = value;
@@ -92,7 +92,7 @@ namespace DatabaseWrapper
                         _Sqlite.LogQueries = value;
                         break;
                     default:
-                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
                 }
             }
         }
@@ -104,7 +104,7 @@ namespace DatabaseWrapper
         {
             get
             {
-                switch (_DbType)
+                switch (_Settings.Type)
                 {
                     case DbTypes.SqlServer:
                         return _SqlServer.LogResults;
@@ -115,12 +115,12 @@ namespace DatabaseWrapper
                     case DbTypes.Sqlite:
                         return _Sqlite.LogResults;
                     default:
-                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
                 }
             }
             set
             {
-                switch (_DbType)
+                switch (_Settings.Type)
                 {
                     case DbTypes.SqlServer:
                         _SqlServer.LogResults = value;
@@ -135,7 +135,7 @@ namespace DatabaseWrapper
                         _Sqlite.LogResults = value;
                         break;
                     default:
-                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
                 }
             }
         }
@@ -147,7 +147,7 @@ namespace DatabaseWrapper
         {
             get
             {
-                switch (_DbType)
+                switch (_Settings.Type)
                 {
                     case DbTypes.SqlServer:
                         return _SqlServer.Logger;
@@ -158,12 +158,12 @@ namespace DatabaseWrapper
                     case DbTypes.Sqlite:
                         return _Sqlite.Logger;
                     default:
-                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
                 }
             }
             set
             {
-                switch (_DbType)
+                switch (_Settings.Type)
                 {
                     case DbTypes.SqlServer:
                         _SqlServer.Logger = value;
@@ -178,7 +178,7 @@ namespace DatabaseWrapper
                         _Sqlite.Logger = value;
                         break;
                     default:
-                        throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
                 }
             }
         }
@@ -188,16 +188,9 @@ namespace DatabaseWrapper
         #region Private-Members
 
         private bool _Disposed = false;
-        private string _Header = ""; 
-        private string _SqliteFilename = null;
-        private DbTypes _DbType;
-        private string _ServerIp = null;
-        private int _ServerPort = 0;
-        private string _Username;
-        private string _Password;
-        private string _Instance;
-        private string _DatabaseName;
-
+        private string _Header = "";
+        private DatabaseSettings _Settings = null;
+         
         private DatabaseWrapper.Mysql.DatabaseClient        _Mysql = null;
         private DatabaseWrapper.Postgresql.DatabaseClient   _Postgresql = null;
         private DatabaseWrapper.Sqlite.DatabaseClient       _Sqlite = null;
@@ -210,17 +203,49 @@ namespace DatabaseWrapper
         #region Constructors-and-Factories
 
         /// <summary>
+        /// Create an instance of the database client.
+        /// </summary>
+        /// <param name="settings">Database settings.</param>
+        public DatabaseClient(DatabaseSettings settings)
+        {
+            _Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+
+            if (_Settings.Type == DbTypes.Sqlite && String.IsNullOrEmpty(_Settings.Filename))
+                throw new ArgumentException("Filename must be populated in database settings of type 'Sqlite'.");
+
+            if (_Settings.Type != DbTypes.SqlServer && !String.IsNullOrEmpty(_Settings.Instance))
+                throw new ArgumentException("Instance can only be used in database settings of type 'SqlServer'.");
+
+            _Header = "[DatabaseWrapper." + _Settings.Type.ToString() + "] ";
+
+            switch (_Settings.Type)
+            {
+                case DbTypes.Sqlite:
+                    _Sqlite = new Sqlite.DatabaseClient(_Settings);
+                    break;
+                case DbTypes.Mysql:
+                    _Mysql = new Mysql.DatabaseClient(_Settings);
+                    break;
+                case DbTypes.Postgresql:
+                    _Postgresql = new Postgresql.DatabaseClient(_Settings);
+                    break;
+                case DbTypes.SqlServer:
+                    _SqlServer = new SqlServer.DatabaseClient(_Settings);
+                    break;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Create an instance of the database client for a Sqlite database file.
         /// </summary>
-        /// <param name="filename"></param>
+        /// <param name="filename">Sqlite database.</param>
         public DatabaseClient(string filename)
         {
             if (String.IsNullOrEmpty(filename)) throw new ArgumentNullException(nameof(filename));
-
-            _DbType = DbTypes.Sqlite;
-            _SqliteFilename = filename;
-            _Header = "[DatabaseWrapper." + _DbType.ToString() + "] ";
-            
+            _Settings = new DatabaseSettings(filename);
+            _Header = "[DatabaseWrapper." + _Settings.Type.ToString() + "] "; 
             _Sqlite = new Sqlite.DatabaseClient(filename);
         }
 
@@ -243,34 +268,40 @@ namespace DatabaseWrapper
             string instance,
             string database)
         {
+            if (dbType == DbTypes.Sqlite) throw new ArgumentException("Use the filename constructor for Sqlite databases.");
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
             if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
             if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
 
-            _DbType = dbType;
-            _ServerIp = serverIp;
-            _ServerPort = serverPort;
-            _Username = username;
-            _Password = password;
-            _Instance = instance;
-            _DatabaseName = database;
-            _Header = "[DatabaseWrapper." + _DbType.ToString() + "] ";
+            if (dbType == DbTypes.SqlServer)
+            {
+                _Settings = new DatabaseSettings(serverIp, serverPort, username, password, instance, database);
+            }
+            else
+            {
+                if (!String.IsNullOrEmpty(instance))
+                    throw new ArgumentException("Instance can only be used in database settings of type 'SqlServer'.");
 
-            switch (_DbType)
+                _Settings = new DatabaseSettings(dbType, serverIp, serverPort, username, password, database);
+            }
+            
+            _Header = "[DatabaseWrapper." + _Settings.Type.ToString() + "] ";
+
+            switch (_Settings.Type)
             {
                 case DbTypes.Sqlite:
                     throw new ArgumentException("Unable to use this constructor with 'DbTypes.Sqlite'.");
                 case DbTypes.Mysql:
-                    _Mysql = new Mysql.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    _Mysql = new Mysql.DatabaseClient(_Settings);
                     break;
                 case DbTypes.Postgresql:
-                    _Postgresql = new Postgresql.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    _Postgresql = new Postgresql.DatabaseClient(_Settings);
                     break;
                 case DbTypes.SqlServer:
-                    _SqlServer = new SqlServer.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _Instance, _DatabaseName);
+                    _SqlServer = new SqlServer.DatabaseClient(_Settings);
                     break;
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -295,30 +326,24 @@ namespace DatabaseWrapper
             if (serverPort < 0) throw new ArgumentOutOfRangeException(nameof(serverPort));
             if (String.IsNullOrEmpty(database)) throw new ArgumentNullException(nameof(database));
 
-            _DbType = dbType;
-            _ServerIp = serverIp;
-            _ServerPort = serverPort;
-            _Username = username;
-            _Password = password;
-            _Instance = null;
-            _DatabaseName = database;
-            _Header = "[DatabaseWrapper." + _DbType.ToString() + "] ";
+            _Settings = new DatabaseSettings(dbType, serverIp, serverPort, username, password, database); 
+            _Header = "[DatabaseWrapper." + _Settings.Type.ToString() + "] ";
 
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Sqlite:
                     throw new ArgumentException("Unable to use this constructor with 'DbTypes.Sqlite'.");
                 case DbTypes.Mysql:
-                    _Mysql = new Mysql.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    _Mysql = new Mysql.DatabaseClient(_Settings);
                     break;
                 case DbTypes.Postgresql:
-                    _Postgresql = new Postgresql.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, _DatabaseName);
+                    _Postgresql = new Postgresql.DatabaseClient(_Settings);
                     break;
                 case DbTypes.SqlServer:
-                    _SqlServer = new SqlServer.DatabaseClient(_ServerIp, _ServerPort, _Username, _Password, null, _DatabaseName);
+                    _SqlServer = new SqlServer.DatabaseClient(_Settings);
                     break;
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
          
@@ -341,7 +366,7 @@ namespace DatabaseWrapper
         /// <returns>List of strings, each being a table name.</returns>
         public List<string> ListTables()
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.ListTables();
@@ -352,7 +377,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.ListTables();
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'."); 
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'."); 
             } 
         }
 
@@ -363,7 +388,7 @@ namespace DatabaseWrapper
         /// <returns>True if exists.</returns>
         public bool TableExists(string tableName)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.TableExists(tableName);
@@ -374,7 +399,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.TableExists(tableName);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -385,7 +410,7 @@ namespace DatabaseWrapper
         /// <returns>A list of column objects.</returns>
         public List<Column> DescribeTable(string tableName)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.DescribeTable(tableName);
@@ -396,7 +421,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.DescribeTable(tableName);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -406,7 +431,7 @@ namespace DatabaseWrapper
         /// <returns>Dictionary.  Key is table name, value is List of Column objects.</returns>
         public Dictionary<string, List<Column>> DescribeDatabase()
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.DescribeDatabase();
@@ -417,7 +442,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.DescribeDatabase();
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -428,7 +453,7 @@ namespace DatabaseWrapper
         /// <param name="columns">Columns.</param>
         public void CreateTable(string tableName, List<Column> columns)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     _Mysql.CreateTable(tableName, columns);
@@ -443,7 +468,7 @@ namespace DatabaseWrapper
                     _SqlServer.CreateTable(tableName, columns);
                     return;
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -453,7 +478,7 @@ namespace DatabaseWrapper
         /// <param name="tableName">The table to drop.</param>
         public void DropTable(string tableName)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     _Mysql.DropTable(tableName);
@@ -468,7 +493,7 @@ namespace DatabaseWrapper
                     _SqlServer.DropTable(tableName);
                     return;
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -479,7 +504,7 @@ namespace DatabaseWrapper
         /// <returns>A string containing the column name.</returns>
         public string GetPrimaryKeyColumn(string tableName)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.GetPrimaryKeyColumn(tableName);
@@ -490,7 +515,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.GetPrimaryKeyColumn(tableName);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -501,7 +526,7 @@ namespace DatabaseWrapper
         /// <returns>A list of strings containing the column names.</returns>
         public List<string> GetColumnNames(string tableName)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.GetColumnNames(tableName);
@@ -512,7 +537,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.GetColumnNames(tableName);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -525,7 +550,7 @@ namespace DatabaseWrapper
         /// <returns>A DataTable containing at most one row.</returns>
         public DataTable GetUniqueObjectById(string tableName, string columnName, object value)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.GetUniqueObjectById(tableName, columnName, value);
@@ -536,7 +561,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.GetUniqueObjectById(tableName, columnName, value);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -552,7 +577,7 @@ namespace DatabaseWrapper
         /// <returns>A DataTable containing the results.</returns>
         public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
@@ -563,7 +588,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -575,7 +600,7 @@ namespace DatabaseWrapper
         /// <returns>A DataTable containing the results.</returns>
         public DataTable Insert(string tableName, Dictionary<string, object> keyValuePairs)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.Insert(tableName, keyValuePairs);
@@ -586,7 +611,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.Insert(tableName, keyValuePairs);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -601,7 +626,7 @@ namespace DatabaseWrapper
         /// <returns>For Microsoft SQL Server and PostgreSQL, a DataTable containing the results.  For MySQL and Sqlite, null.</returns>
         public DataTable Update(string tableName, Dictionary<string, object> keyValuePairs, Expression filter)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     _Mysql.Update(tableName, keyValuePairs, filter);
@@ -614,7 +639,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.Update(tableName, keyValuePairs, filter);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -625,7 +650,7 @@ namespace DatabaseWrapper
         /// <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param> 
         public void Delete(string tableName, Expression filter)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     _Mysql.Delete(tableName, filter);
@@ -640,7 +665,7 @@ namespace DatabaseWrapper
                     _SqlServer.Delete(tableName, filter);
                     return;
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -650,7 +675,7 @@ namespace DatabaseWrapper
         /// <param name="tableName">The table you wish to TRUNCATE.</param>
         public void Truncate(string tableName)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     _Mysql.Truncate(tableName);
@@ -665,7 +690,7 @@ namespace DatabaseWrapper
                     _SqlServer.Truncate(tableName);
                     return;
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -676,7 +701,7 @@ namespace DatabaseWrapper
         /// <returns>A DataTable containing the results.</returns>
         public DataTable Query(string query)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.Query(query);
@@ -687,7 +712,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.Query(query);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -698,7 +723,7 @@ namespace DatabaseWrapper
         /// <returns>A string with timestamp formatted for the database of the instance type.</returns>
         public string Timestamp(DateTime ts)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.Timestamp(ts);
@@ -709,7 +734,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.Timestamp(ts);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
 
@@ -720,7 +745,7 @@ namespace DatabaseWrapper
         /// <returns>A sanitized string.</returns>
         public string SanitizeString(string s)
         {
-            switch (_DbType)
+            switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
                     return _Mysql.SanitizeString(s);
@@ -731,7 +756,7 @@ namespace DatabaseWrapper
                 case DbTypes.SqlServer:
                     return _SqlServer.SanitizeString(s);
                 default:
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
         }
          
@@ -762,7 +787,7 @@ namespace DatabaseWrapper
                 else if (_SqlServer != null) 
                     _SqlServer.Dispose();
                 else
-                    throw new ArgumentException("Unknown database type '" + _DbType.ToString() + "'.");
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
 
             _Disposed = true;

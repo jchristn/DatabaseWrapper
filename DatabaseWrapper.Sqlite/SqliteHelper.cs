@@ -9,9 +9,9 @@ namespace DatabaseWrapper.Sqlite
 {
     internal static class SqliteHelper
     { 
-        internal static string ConnectionString(string filename)
+        internal static string ConnectionString(DatabaseSettings settings)
         {
-            return "Data Source=" + filename;
+            return "Data Source=" + settings.Filename;
         }
 
         internal static string LoadTableNamesQuery()
