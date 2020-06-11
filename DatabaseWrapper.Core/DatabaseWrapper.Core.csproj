@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>3.1.0</Version>
+    <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
+    <Version>3.1.0.1</Version>
     <Authors>Joel Christner</Authors>
     <Description>Do not install this package directly.  Core classes for DatabaseWrapper packages.</Description>
     <Copyright>(c)2020 Joel Christner</Copyright>

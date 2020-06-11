@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>3.1.0</Version>
+    <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
+    <Version>3.1.0.1</Version>
     <Authors>Joel Christner</Authors>
     <Description>Simple database wrapper for Postgresql written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, Sqlite, and MySQL.</Description>
     <Copyright>(c)2020 Joel Christner</Copyright>
@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Core" Version="3.1.0" />
+    <PackageReference Include="DatabaseWrapper.Core" Version="3.1.0.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
