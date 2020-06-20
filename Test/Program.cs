@@ -12,6 +12,7 @@ namespace Test
 {
     class Program
     {
+        static Random _Random = new Random(DateTime.Now.Millisecond);
         static DatabaseSettings _Settings;
         static DatabaseClient _Database; 
 
@@ -103,7 +104,7 @@ namespace Test
                 columns.Add(new Column("value", false, DataType.Long, 12, null, true));
                 columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
                 columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
-
+                
                 _Database.CreateTable("person", columns);
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
@@ -153,7 +154,7 @@ namespace Test
                 RetrieveRowsByBetween();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
-
+                 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Deleting rows...");
                 DeleteRows();
@@ -192,7 +193,7 @@ namespace Test
                 _Database.Insert("person", d);
             }
         }
-
+          
         static void UpdateRows()
         {
             for (int i = 10; i < 20; i++)

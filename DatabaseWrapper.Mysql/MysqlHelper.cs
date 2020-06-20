@@ -70,7 +70,14 @@ namespace DatabaseWrapper.Mysql
                     ret += "float(" + col.MaxLength + "," + col.Precision + ") ";
                     break;
                 case DataType.DateTime:
-                    ret += "datetime ";
+                    if (col.Precision != null)
+                    {
+                        ret += "datetime(" + col.Precision + ") ";
+                    }
+                    else
+                    {
+                        ret += "datetime ";
+                    }
                     break;
                 default:
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
