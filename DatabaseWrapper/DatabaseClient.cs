@@ -717,6 +717,76 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Determine if records exist by filter.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="filter">Expression.</param>
+        /// <returns>True if records exist.</returns>
+        public bool Exists(string tableName, Expression filter)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypes.Mysql:
+                    return _Mysql.Exists(tableName, filter);
+                case DbTypes.Postgresql:
+                    return _Postgresql.Exists(tableName, filter);
+                case DbTypes.Sqlite:
+                    return _Sqlite.Exists(tableName, filter);
+                case DbTypes.SqlServer:
+                    return _SqlServer.Exists(tableName, filter);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Determine the number of records that exist by filter.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="filter">Expression.</param>
+        /// <returns>The number of records.</returns>
+        public long Count(string tableName, Expression filter)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypes.Mysql:
+                    return _Mysql.Count(tableName, filter);
+                case DbTypes.Postgresql:
+                    return _Postgresql.Count(tableName, filter);
+                case DbTypes.Sqlite:
+                    return _Sqlite.Count(tableName, filter);
+                case DbTypes.SqlServer:
+                    return _SqlServer.Count(tableName, filter);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Determine the sum of a column for records that match the supplied filter.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="fieldName">The name of the field.</param>
+        /// <param name="filter">Expression.</param>
+        /// <returns>The sum of the specified column from the matching rows.</returns>
+        public decimal Sum(string tableName, string fieldName, Expression filter)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypes.Mysql:
+                    return _Mysql.Sum(tableName, fieldName, filter);
+                case DbTypes.Postgresql:
+                    return _Postgresql.Sum(tableName, fieldName, filter);
+                case DbTypes.Sqlite:
+                    return _Sqlite.Sum(tableName, fieldName, filter);
+                case DbTypes.SqlServer:
+                    return _SqlServer.Sum(tableName, fieldName, filter);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Create a string timestamp from the given DateTime for the database of the instance type.
         /// </summary>
         /// <param name="ts">DateTime.</param>

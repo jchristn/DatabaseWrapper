@@ -2,13 +2,17 @@
 
 ## Current Version
 
-v3.1.0.
+v3.2.0
+
+- New APIs: Sum, Count, Exists
+
+## Previous Versions
+
+v3.1.0
 
 - Breaking change: removal of .NET Framework and upgrade to .NET standard 2.1
 - DatabaseSettings class
 - New constructors
-
-## Previous Versions
 
 v3.0.1.2
 

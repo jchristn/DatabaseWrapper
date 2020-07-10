@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
-    <Version>3.1.0.1</Version>
+    <Version>3.2.0</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for SQL Server written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for MySQL, Sqlite, and PostgreSQL.</Description>
@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
-    <PackageReleaseNotes>Breaking changes, removal of .NET Framework, upgrade to .NET standard 2.1, DatabaseSettings class, new constructors</PackageReleaseNotes>
+    <PackageReleaseNotes>New APIs Sum, Count, Exists</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 

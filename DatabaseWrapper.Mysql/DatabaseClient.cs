@@ -642,6 +642,56 @@ namespace DatabaseWrapper.Mysql
         }
 
         /// <summary>
+        /// Determine if records exist by filter.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="filter">Expression.</param>
+        /// <returns>True if records exist.</returns>
+        public bool Exists(string tableName, Expression filter)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+            DataTable result = Query(MysqlHelper.ExistsQuery(tableName, filter));
+            if (result != null && result.Rows.Count > 0) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Determine the number of records that exist by filter.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="filter">Expression.</param>
+        /// <returns>The number of records.</returns>
+        public long Count(string tableName, Expression filter)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+            DataTable result = Query(MysqlHelper.CountQuery(tableName, filter));
+            if (result != null && result.Rows.Count > 0 && result.Rows[0].Table.Columns.Contains("__count__"))
+            {
+                return Convert.ToInt64(result.Rows[0]["__count__"]);
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Determine the sum of a column for records that match the supplied filter.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="fieldName">The name of the field.</param>
+        /// <param name="filter">Expression.</param>
+        /// <returns>The sum of the specified column from the matching rows.</returns>
+        public decimal Sum(string tableName, string fieldName, Expression filter)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+            if (String.IsNullOrEmpty(fieldName)) throw new ArgumentNullException(nameof(fieldName));
+            DataTable result = Query(MysqlHelper.SumQuery(tableName, fieldName, filter));
+            if (result != null && result.Rows.Count > 0 && result.Rows[0].Table.Columns.Contains("__sum__"))
+            {
+                return Convert.ToInt64(result.Rows[0]["__sum__"]);
+            }
+            return 0;
+        }
+
+        /// <summary>
         /// Create a string timestamp from the given DateTime.
         /// </summary>
         /// <param name="ts">DateTime.</param>

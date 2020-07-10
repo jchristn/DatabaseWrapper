@@ -22,11 +22,9 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 
-## New in v3.1.0
+## New in v3.2.0
 
-- Breaking change: removal of .NET Framework and upgrade to .NET standard 2.1
-- DatabaseSettings class
-- New constructors
+- New APIs: Sum, Count, Exists
 
 ## A Note on Sanitization
 

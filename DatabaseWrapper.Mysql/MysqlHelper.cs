@@ -245,6 +245,79 @@ namespace DatabaseWrapper.Mysql
             return "TRUNCATE TABLE `" + SanitizeString(tableName) + "`";
         }
 
+        internal static string ExistsQuery(string tableName, Expression filter)
+        {
+            string query = "";
+            string whereClause = "";
+
+            //
+            // select
+            //
+            query =
+                "SELECT * " +
+                "FROM " + SanitizeString(tableName) + " ";
+
+            //
+            // expressions
+            //
+            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            if (!String.IsNullOrEmpty(whereClause))
+            {
+                query += "WHERE " + whereClause + " ";
+            }
+
+            query += "LIMIT 1";
+            return query;
+        }
+
+        internal static string CountQuery(string tableName, Expression filter)
+        {
+            string query = "";
+            string whereClause = "";
+
+            //
+            // select
+            //
+            query =
+                "SELECT COUNT(*) AS __count__ " +
+                "FROM " + SanitizeString(tableName) + " ";
+
+            //
+            // expressions
+            //
+            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            if (!String.IsNullOrEmpty(whereClause))
+            {
+                query += "WHERE " + whereClause + " ";
+            }
+
+            return query;
+        }
+
+        internal static string SumQuery(string tableName, string fieldName, Expression filter)
+        {
+            string query = "";
+            string whereClause = "";
+
+            //
+            // select
+            //
+            query =
+                "SELECT SUM(" + SanitizeString(fieldName) + ") AS __sum__ " +
+                "FROM " + SanitizeString(tableName) + " ";
+
+            //
+            // expressions
+            //
+            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            if (!String.IsNullOrEmpty(whereClause))
+            {
+                query += "WHERE " + whereClause + " ";
+            }
+
+            return query;
+        }
+
         internal static string PreparedFieldname(string s)
         {
             return "`" + s + "`";

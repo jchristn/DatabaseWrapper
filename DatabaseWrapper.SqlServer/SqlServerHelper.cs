@@ -343,10 +343,83 @@ namespace DatabaseWrapper.SqlServer
             return "TRUNCATE TABLE [" + SanitizeString(tableName) + "]";
         }
 
+        internal static string ExistsQuery(string tableName, Expression filter)
+        {
+            string query = "";
+            string whereClause = "";
+
+            //
+            // select
+            //
+            query =
+                "SELECT TOP 1 * " +
+                "FROM " + SanitizeString(tableName) + " ";
+
+            //
+            // expressions
+            //
+            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            if (!String.IsNullOrEmpty(whereClause))
+            {
+                query += "WHERE " + whereClause + " ";
+            }
+             
+            return query;
+        }
+
+        internal static string CountQuery(string tableName, Expression filter)
+        {
+            string query = "";
+            string whereClause = "";
+
+            //
+            // select
+            //
+            query =
+                "SELECT COUNT(*) AS __count__ " +
+                "FROM " + SanitizeString(tableName) + " ";
+
+            //
+            // expressions
+            //
+            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            if (!String.IsNullOrEmpty(whereClause))
+            {
+                query += "WHERE " + whereClause + " ";
+            }
+
+            return query;
+        }
+
+        internal static string SumQuery(string tableName, string fieldName, Expression filter)
+        {
+            string query = "";
+            string whereClause = "";
+
+            //
+            // select
+            //
+            query =
+                "SELECT SUM(" + SanitizeString(fieldName) + ") AS __sum__ " +
+                "FROM " + SanitizeString(tableName) + " ";
+
+            //
+            // expressions
+            //
+            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            if (!String.IsNullOrEmpty(whereClause))
+            {
+                query += "WHERE " + whereClause + " ";
+            }
+
+            return query;
+        }
+
         internal static string DbTimestamp(DateTime ts)
         {
             return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
         }
+
         internal static string PreparedFieldname(string s)
         {
             return "[" + s + "]";

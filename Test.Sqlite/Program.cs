@@ -82,6 +82,21 @@ namespace Test.Sqlite
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
+                Console.WriteLine("Checking existence...");
+                ExistsRows();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
+                Console.WriteLine("Counting age...");
+                CountAge();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
+                Console.WriteLine("Summing age...");
+                SumAge();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Updating rows...");
                 UpdateRows();
@@ -143,6 +158,24 @@ namespace Test.Sqlite
 
                 _Database.Insert("person", d);
             }
+        }
+
+        static void ExistsRows()
+        {
+            Expression e = new Expression("firstName", Operators.IsNotNull, null);
+            Console.WriteLine("Exists: " + _Database.Exists("person", e));
+        }
+
+        static void CountAge()
+        {
+            Expression e = new Expression("age", Operators.GreaterThan, 25);
+            Console.WriteLine("Age count: " + _Database.Count("person", e));
+        }
+
+        static void SumAge()
+        {
+            Expression e = new Expression("age", Operators.GreaterThan, 0);
+            Console.WriteLine("Age sum: " + _Database.Sum("person", "age", e));
         }
 
         static void UpdateRows()
