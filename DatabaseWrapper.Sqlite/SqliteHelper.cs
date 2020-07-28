@@ -383,7 +383,7 @@ namespace DatabaseWrapper.Sqlite
 
         internal static string DbTimestamp(DateTime ts)
         {
-            return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
+            return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
         }
 
         internal static string PreparedFieldname(string s)

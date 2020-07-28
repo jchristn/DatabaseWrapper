@@ -54,8 +54,8 @@ namespace DatabaseWrapper.SqlServer
         private bool _Disposed = false;
         private string _Header = "[DatabaseWrapper.SqlServer] ";
         private DatabaseSettings _Settings = null;
-        private string _ConnectionString = null;
-         
+        private string _ConnectionString = null; 
+
         private Random _Random = new Random();
 
         #endregion
