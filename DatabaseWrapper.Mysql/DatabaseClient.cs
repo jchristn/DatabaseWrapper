@@ -12,7 +12,7 @@ using DatabaseWrapper.Core;
 namespace DatabaseWrapper.Mysql
 {
     /// <summary>
-    /// Database client for MSSQL, Mysql, and PostgreSQL.
+    /// Database client for Mysql.
     /// </summary>
     public class DatabaseClient : IDisposable
     {

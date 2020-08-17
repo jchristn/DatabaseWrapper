@@ -11,7 +11,7 @@ using DatabaseWrapper.Core;
 namespace DatabaseWrapper.Postgresql
 {
     /// <summary>
-    /// Database client for MSSQL, Mysql, and PostgreSQL.
+    /// Database client for PostgreSQL.
     /// </summary>
     public class DatabaseClient : IDisposable
     {

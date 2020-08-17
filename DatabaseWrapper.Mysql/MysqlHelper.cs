@@ -778,6 +778,6 @@ namespace DatabaseWrapper.Mysql
         internal static string DbTimestamp(DateTime ts)
         {
             return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
-        } 
+        }
     }
 }

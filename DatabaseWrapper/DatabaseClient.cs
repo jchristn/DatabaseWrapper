@@ -14,7 +14,7 @@ using DatabaseWrapper.SqlServer;
 namespace DatabaseWrapper
 {
     /// <summary>
-    /// Database client for MSSQL, Mysql, PostgreSQL, and Sqlite.
+    /// Database client for Microsoft SQL Server, Mysql, PostgreSQL, and Sqlite.
     /// </summary>
     public class DatabaseClient : IDisposable
     {

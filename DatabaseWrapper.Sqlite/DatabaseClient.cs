@@ -11,7 +11,7 @@ using DatabaseWrapper.Core;
 namespace DatabaseWrapper.Sqlite
 {
     /// <summary>
-    /// Database client for MSSQL, Mysql, and PostgreSQL.
+    /// Database client for Sqlite.
     /// </summary>
     public class DatabaseClient : IDisposable
     {
