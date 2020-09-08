@@ -713,7 +713,7 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + (PreparedStringValue(expr.RightTerm.ToString() + "%")) +
                             ")";
                     }
                     else
@@ -732,7 +732,7 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + (PreparedStringValue(expr.RightTerm.ToString() + "%")) +
                             ")";
                     }
                     else
@@ -751,7 +751,7 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + "%" + PreparedStringValue(expr.RightTerm.ToString()) +
+                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else
@@ -770,7 +770,7 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + "%" + PreparedStringValue(expr.RightTerm.ToString()) +
+                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else
