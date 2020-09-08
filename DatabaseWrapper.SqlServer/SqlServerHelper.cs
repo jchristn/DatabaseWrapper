@@ -459,7 +459,9 @@ namespace DatabaseWrapper.SqlServer
                 if (expr.Operator != Operators.Contains
                     && expr.Operator != Operators.ContainsNot
                     && expr.Operator != Operators.StartsWith
-                    && expr.Operator != Operators.EndsWith)
+                    && expr.Operator != Operators.StartsWithNot
+                    && expr.Operator != Operators.EndsWith
+                    && expr.Operator != Operators.EndsWithNot)
                 {
                     //
                     // These operators will add the left term
@@ -722,6 +724,25 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
+                case Operators.StartsWithNot:
+                    #region StartsWithNot
+
+                    if (expr.RightTerm == null) return null;
+                    if (expr.RightTerm is string)
+                    {
+                        clause +=
+                            "(" +
+                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            ")";
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                    break;
+
+                #endregion
+
                 case Operators.EndsWith:
                     #region EndsWith
 
@@ -731,6 +752,25 @@ namespace DatabaseWrapper.SqlServer
                         clause +=
                             "(" +
                             PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + "%" + PreparedStringValue(expr.RightTerm.ToString()) +
+                            ")";
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                    break;
+
+                #endregion
+
+                case Operators.EndsWithNot:
+                    #region EndsWithNot
+
+                    if (expr.RightTerm == null) return null;
+                    if (expr.RightTerm is string)
+                    {
+                        clause +=
+                            "(" +
+                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + "%" + PreparedStringValue(expr.RightTerm.ToString()) +
                             ")";
                     }
                     else

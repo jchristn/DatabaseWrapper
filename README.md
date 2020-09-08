@@ -21,10 +21,12 @@ Core features:
 - Support for SELECT, INSERT, UPDATE, DELETE, TRUNCATE, CREATE, DROP or raw queries
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
+- Support for .NET Standard, .NET Core, and .NET Framework
 
 ## New in v3.2.0
 
 - New APIs: Sum, Count, Exists
+- New operators: StartsWithNot, EndsWithNot
 
 ## A Note on Sanitization
 
@@ -150,7 +152,7 @@ DatabaseClient client = new DatabaseClient(DbTypes.SqlServer, "[hostname]", [por
 
 ### Sqlite
 
-- Sqlite has only shown to work well with .NET Core and not .NET Framework.  If you have a solution for making it work more reliably with .NET Framework, please let me know.
+- Sqlite may not work out of the box with .NET Framework.  In order to use Sqlite with .NET Framework, you'll need to manually copy the ```runtimes``` folder into your project output directory.  This directory is automatically created when building for .NET Core.  To get this folder, build the ```Test.Sqlite``` project and navigate to the ```bin/debug/netcoreapp*``` directory.  Then copy the ```runtimes``` folder into the project output directory of your .NET Framework application. 
 
 ## Version history
 
