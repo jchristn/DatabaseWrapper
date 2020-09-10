@@ -244,6 +244,14 @@ namespace DatabaseWrapper.SqlServer
             query = "SELECT ";
 
             //
+            // top
+            //
+            if (maxResults != null && indexStart == null)
+            {
+                query += "TOP " + maxResults + " ";
+            }
+
+            //
             // fields
             //
             if (returnFields == null || returnFields.Count < 1) query += "* ";
