@@ -454,7 +454,7 @@ namespace DatabaseWrapper.Postgresql
             return query;
         }
 
-        internal static string CountQuery(string tableName, Expression filter)
+        internal static string CountQuery(string tableName, string countColumnName, Expression filter)
         {
             string query = "";
             string whereClause = "";
@@ -463,7 +463,7 @@ namespace DatabaseWrapper.Postgresql
             // select
             //
             query =
-                "SELECT COUNT(*) AS __count__ " +
+                "SELECT COUNT(*) AS " + countColumnName + " " +
                 "FROM " + SanitizeFieldname(tableName) + " ";
 
             //
@@ -478,7 +478,7 @@ namespace DatabaseWrapper.Postgresql
             return query;
         }
 
-        internal static string SumQuery(string tableName, string fieldName, Expression filter)
+        internal static string SumQuery(string tableName, string fieldName, string sumColumnName, Expression filter)
         {
             string query = "";
             string whereClause = "";
@@ -487,7 +487,7 @@ namespace DatabaseWrapper.Postgresql
             // select
             //
             query =
-                "SELECT SUM(" + SanitizeFieldname(fieldName) + ") AS __sum__ " +
+                "SELECT SUM(" + SanitizeFieldname(fieldName) + ") AS " + sumColumnName + " " +
                 "FROM " + SanitizeFieldname(tableName) + " ";
 
             //

@@ -59,6 +59,9 @@ namespace DatabaseWrapper.Mysql
           
         private Random _Random = new Random();
 
+        private string _CountColumnName = "__count__";
+        private string _SumColumnName = "__sum__";
+
         #endregion
 
         #region Constructors-and-Factories
@@ -664,10 +667,14 @@ namespace DatabaseWrapper.Mysql
         public long Count(string tableName, Expression filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            DataTable result = Query(MysqlHelper.CountQuery(tableName, filter));
-            if (result != null && result.Rows.Count > 0 && result.Rows[0].Table.Columns.Contains("__count__"))
+            DataTable result = Query(MysqlHelper.CountQuery(tableName, _CountColumnName, filter));
+            if (result != null
+                && result.Rows.Count > 0
+                && result.Rows[0].Table.Columns.Contains(_CountColumnName)
+                && result.Rows[0][_CountColumnName] != null
+                && result.Rows[0][_CountColumnName] != DBNull.Value)
             {
-                return Convert.ToInt64(result.Rows[0]["__count__"]);
+                return Convert.ToInt64(result.Rows[0][_CountColumnName]);
             }
             return 0;
         }
@@ -683,12 +690,16 @@ namespace DatabaseWrapper.Mysql
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (String.IsNullOrEmpty(fieldName)) throw new ArgumentNullException(nameof(fieldName));
-            DataTable result = Query(MysqlHelper.SumQuery(tableName, fieldName, filter));
-            if (result != null && result.Rows.Count > 0 && result.Rows[0].Table.Columns.Contains("__sum__"))
+            DataTable result = Query(MysqlHelper.SumQuery(tableName, fieldName, _SumColumnName, filter));
+            if (result != null
+                && result.Rows.Count > 0
+                && result.Rows[0].Table.Columns.Contains(_SumColumnName)
+                && result.Rows[0][_SumColumnName] != null
+                && result.Rows[0][_SumColumnName] != DBNull.Value)
             {
-                return Convert.ToInt64(result.Rows[0]["__sum__"]);
+                return Convert.ToDecimal(result.Rows[0][_SumColumnName]);
             }
-            return 0;
+            return 0m;
         }
 
         /// <summary>

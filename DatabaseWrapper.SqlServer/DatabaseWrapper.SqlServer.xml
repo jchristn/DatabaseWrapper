@@ -6,7 +6,7 @@
     <members>
         <member name="T:DatabaseWrapper.SqlServer.DatabaseClient">
             <summary>
-            Database client for MSSQL, Mysql, and PostgreSQL.
+            Database client for Microsoft SQL Server.
             </summary>
         </member>
         <member name="P:DatabaseWrapper.SqlServer.DatabaseClient.ConnectionString">
@@ -162,6 +162,31 @@
             </summary>
             <param name="query">Database query defined outside of the database client.</param>
             <returns>A DataTable containing the results.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.Exists(System.String,DatabaseWrapper.Core.Expression)">
+            <summary>
+            Determine if records exist by filter.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="filter">Expression.</param>
+            <returns>True if records exist.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.Count(System.String,DatabaseWrapper.Core.Expression)">
+            <summary>
+            Determine the number of records that exist by filter.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="filter">Expression.</param>
+            <returns>The number of records.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.Sum(System.String,System.String,DatabaseWrapper.Core.Expression)">
+            <summary>
+            Determine the sum of a column for records that match the supplied filter.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="fieldName">The name of the field.</param>
+            <param name="filter">Expression.</param>
+            <returns>The sum of the specified column from the matching rows.</returns>
         </member>
         <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.Timestamp(System.DateTime)">
             <summary>

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netcoreapp2.0;net461</TargetFrameworks>
-    <Version>3.2.0.2</Version>
+    <Version>3.2.0.4</Version>
     <Authors>Joel Christner</Authors>
     <Description>Simple database wrapper for Postgresql written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, Sqlite, and MySQL.</Description>
     <Copyright>(c)2020 Joel Christner</Copyright>
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-    <DocumentationFile>C:\Code\Misc\DatabaseWrapper-3.0\DatabaseWrapper.Postgresql\DatabaseWrapper.Postgresql.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.Postgresql.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

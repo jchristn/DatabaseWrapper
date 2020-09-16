@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netcoreapp2.0;net461</TargetFrameworks>
-    <Version>3.2.1.3</Version>
+    <Version>3.2.1.5</Version>
     <Authors>Joel Christner</Authors>
     <Description>Simple database wrapper for Sqlite written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, MySQL, and PostgreSQL.</Description>
     <Copyright>(c)2020 Joel Christner</Copyright>
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-    <DocumentationFile>C:\Code\Misc\DatabaseWrapper-3.0\DatabaseWrapper.Sqlite\DatabaseWrapper.Sqlite.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.Sqlite.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

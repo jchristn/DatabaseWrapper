@@ -375,7 +375,7 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string CountQuery(string tableName, Expression filter)
+        internal static string CountQuery(string tableName, string countColumnName, Expression filter)
         {
             string query = "";
             string whereClause = "";
@@ -384,7 +384,7 @@ namespace DatabaseWrapper.SqlServer
             // select
             //
             query =
-                "SELECT COUNT(*) AS __count__ " +
+                "SELECT COUNT(*) AS " + countColumnName + " " +
                 "FROM " + SanitizeString(tableName) + " ";
 
             //
@@ -399,7 +399,7 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string SumQuery(string tableName, string fieldName, Expression filter)
+        internal static string SumQuery(string tableName, string fieldName, string sumColumnName, Expression filter)
         {
             string query = "";
             string whereClause = "";
@@ -408,7 +408,7 @@ namespace DatabaseWrapper.SqlServer
             // select
             //
             query =
-                "SELECT SUM(" + SanitizeString(fieldName) + ") AS __sum__ " +
+                "SELECT SUM(" + SanitizeString(fieldName) + ") AS " + sumColumnName + " " +
                 "FROM " + SanitizeString(tableName) + " ";
 
             //

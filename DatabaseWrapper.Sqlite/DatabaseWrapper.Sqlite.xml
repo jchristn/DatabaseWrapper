@@ -6,7 +6,7 @@
     <members>
         <member name="T:DatabaseWrapper.Sqlite.DatabaseClient">
             <summary>
-            Database client for MSSQL, Mysql, and PostgreSQL.
+            Database client for Sqlite.
             </summary>
         </member>
         <member name="P:DatabaseWrapper.Sqlite.DatabaseClient.ConnectionString">
@@ -28,6 +28,12 @@
             <summary>
             Method to invoke when sending a log message.
             </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">
+            <summary>
+            Create an instance of the database client.
+            </summary>
+            <param name="settings">Database settings.</param>
         </member>
         <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.#ctor(System.String)">
             <summary>
@@ -149,6 +155,31 @@
             </summary>
             <param name="query">Database query defined outside of the database client.</param>
             <returns>A DataTable containing the results.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.Exists(System.String,DatabaseWrapper.Core.Expression)">
+            <summary>
+            Determine if records exist by filter.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="filter">Expression.</param>
+            <returns>True if records exist.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.Count(System.String,DatabaseWrapper.Core.Expression)">
+            <summary>
+            Determine the number of records that exist by filter.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="filter">Expression.</param>
+            <returns>The number of records.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.Sum(System.String,System.String,DatabaseWrapper.Core.Expression)">
+            <summary>
+            Determine the sum of a column for records that match the supplied filter.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="fieldName">The name of the field.</param>
+            <param name="filter">Expression.</param>
+            <returns>The sum of the specified column from the matching rows.</returns>
         </member>
         <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.Timestamp(System.DateTime)">
             <summary>
