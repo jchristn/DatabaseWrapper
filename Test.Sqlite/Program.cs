@@ -122,6 +122,12 @@ namespace Test.Sqlite
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
+                Console.WriteLine("Retrieving sorted rows...");
+                RetrieveRowsSorted();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Deleting rows...");
                 DeleteRows();
                 Console.WriteLine("Press ENTER to continue");
@@ -210,7 +216,7 @@ namespace Test.Sqlite
                 // is here to show how to build a nested expression
                 //
 
-                _Database.Select("person", 0, 3, returnFields, e, "ORDER BY id ASC");
+                _Database.Select("person", null, 3, returnFields, e);
             }
         }
 
@@ -232,7 +238,10 @@ namespace Test.Sqlite
                 // is here to show how to build a nested expression
                 //
 
-                _Database.Select("person", (i - 10), 5, returnFields, e, "ORDER BY age DESC");
+                ResultOrder[] order = new ResultOrder[1];
+                order[0] = new ResultOrder("id", OrderDirection.Ascending);
+
+                _Database.Select("person", (i - 10), 5, returnFields, e);
             }
         }
 
@@ -241,7 +250,18 @@ namespace Test.Sqlite
             List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
             Expression e = Expression.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
-            _Database.Select("person", null, null, returnFields, e, "ORDER BY age DESC");
+            _Database.Select("person", null, null, returnFields, e);
+        }
+
+        static void RetrieveRowsSorted()
+        {
+            List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
+            Expression e = Expression.Between("id", new List<object> { 10, 20 });
+            Console.WriteLine("Expression: " + e.ToString());
+            ResultOrder[] resultOrder = new ResultOrder[2];
+            resultOrder[0] = new ResultOrder("id", OrderDirection.Descending);
+            resultOrder[1] = new ResultOrder("firstName", OrderDirection.Ascending);
+            _Database.Select("person", null, null, returnFields, e, resultOrder);
         }
 
         private static void DeleteRows()

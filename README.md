@@ -23,10 +23,9 @@ Core features:
 - Built-in sanitization
 - Support for .NET Standard, .NET Core, and .NET Framework
 
-## New in v3.2.0
+## New in v3.2.2
 
-- New APIs: Sum, Count, Exists
-- New operators: StartsWithNot, EndsWithNot
+- Breaking change: ```ResultOrder``` class for SELECT
 
 ## A Note on Sanitization
 
@@ -76,7 +75,9 @@ result = client.Update("person", d, e);
 // retrieve 10 records
 fields = new List<string> { "firstName", "lastName" }; // leave null for *
 e = new Expression("lastName", Operators.Equals, "Christner"); 
-result = client.Select("person", 0, 10, fields, e, "ORDER BY personId ASC");
+ResultOrder[] order = new ResultOrder[1];
+order = new ResultOrder("firstName", OrderDirection.Ascending)
+result = client.Select("person", 0, 10, fields, e, order);
 
 // delete a record
 e = new Expression("firstName", Operators.Equals, "Joel"); 
@@ -99,11 +100,14 @@ Expression e = new Expression {
 
 ## Select with Pagination
 
-Use indexStart, maxResults, and orderByClause to retrieve paginated results.  The query will retrieve maxResults records starting at row number indexStart using an ordering based on orderByClause.  See the example in the DatabaseWrapperTest project.
+Use ```IndexStart```, ```MaxResults```, and ```ResultOrder[]``` to retrieve paginated results.  The query will retrieve maxResults records starting at row number indexStart using an ordering based on orderByClause.  See the example in the DatabaseWrapperTest project.
 
-IMPORTANT: When doing pagination, you MUST specify an ```orderByClause```.
+IMPORTANT: When doing pagination with SQL Server, you MUST specify an ```ResultOrder[]```.
+
 ```
-DataTable result = client.Select("person", 5, 10, null, e, "ORDER BY age DESC");
+ResultOrder[] order = new ResultOrder[1];
+order = new ResultOrder("firstName", OrderDirection.Ascending);
+DataTable result = client.Select("person", 5, 10, null, e, order);
 ```
 
 ## Need a Timestamp?
@@ -149,6 +153,10 @@ DatabaseClient client = new DatabaseClient(DbTypes.SqlServer, "[hostname]", [por
 ### PostgreSQL
 
 - Cleansing of strings in PostgreSQL uses the dollar-quote style.  Fieldnames are always encapsulated in double-quotes for PostgreSQL.
+
+### SQL Server
+
+- Pagination where ```IndexStart``` and ```MaxResults``` are supplied demands use of ```ResultOrder[]```.
 
 ### Sqlite
 

@@ -569,24 +569,50 @@ namespace DatabaseWrapper
         /// Execute a SELECT query.
         /// </summary>
         /// <param name="tableName">The table from which you wish to SELECT.</param>
-        /// <param name="indexStart">The starting index for retrieval; used for pagination in conjunction with maxResults and orderByClause.  orderByClause example: ORDER BY created DESC.</param>
+        /// <param name="indexStart">The starting index for retrieval.</param>
         /// <param name="maxResults">The maximum number of results to retrieve.</param>
         /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
-        /// <param name="orderByClause">Specify an ORDER BY clause if desired.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter)
         {
             switch (_Settings.Type)
             {
                 case DbTypes.Mysql:
-                    return _Mysql.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
+                    return _Mysql.Select(tableName, indexStart, maxResults, returnFields, filter, null);
                 case DbTypes.Postgresql:
-                    return _Postgresql.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
+                    return _Postgresql.Select(tableName, indexStart, maxResults, returnFields, filter, null);
                 case DbTypes.Sqlite:
-                    return _Sqlite.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
+                    return _Sqlite.Select(tableName, indexStart, maxResults, returnFields, filter, null);
                 case DbTypes.SqlServer:
-                    return _SqlServer.Select(tableName, indexStart, maxResults, returnFields, filter, orderByClause);
+                    return _SqlServer.Select(tableName, indexStart, maxResults, returnFields, filter, null);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Execute a SELECT query.
+        /// </summary>
+        /// <param name="tableName">The table from which you wish to SELECT.</param>
+        /// <param name="indexStart">The starting index for retrieval.</param>
+        /// <param name="maxResults">The maximum number of results to retrieve.</param>
+        /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
+        /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
+        /// <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypes.Mysql:
+                    return _Mysql.Select(tableName, indexStart, maxResults, returnFields, filter, resultOrder);
+                case DbTypes.Postgresql:
+                    return _Postgresql.Select(tableName, indexStart, maxResults, returnFields, filter, resultOrder);
+                case DbTypes.Sqlite:
+                    return _Sqlite.Select(tableName, indexStart, maxResults, returnFields, filter, resultOrder);
+                case DbTypes.SqlServer:
+                    return _SqlServer.Select(tableName, indexStart, maxResults, returnFields, filter, resultOrder);
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }

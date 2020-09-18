@@ -98,8 +98,8 @@ namespace Test
                 Console.WriteLine("Creating table 'person'...");
                 List<Column> columns = new List<Column>();
                 columns.Add(new Column("id", true, DataType.Int, 11, null, false));
-                columns.Add(new Column("firstName", false, DataType.Nvarchar, 30, null, false));
-                columns.Add(new Column("lastName", false, DataType.Nvarchar, 30, null, false));
+                columns.Add(new Column("firstname", false, DataType.Nvarchar, 30, null, false));
+                columns.Add(new Column("lastname", false, DataType.Nvarchar, 30, null, false));
                 columns.Add(new Column("age", false, DataType.Int, 11, null, true));
                 columns.Add(new Column("value", false, DataType.Long, 12, null, true));
                 columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
@@ -169,7 +169,13 @@ namespace Test
                 RetrieveRowsByBetween();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
-                 
+
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
+                Console.WriteLine("Retrieving sorted rows...");
+                RetrieveRowsSorted();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Deleting rows...");
                 DeleteRows();
@@ -198,8 +204,8 @@ namespace Test
             for (int i = 0; i < 50; i++)
             {
                 Dictionary<string, object> d = new Dictionary<string, object>();
-                d.Add("firstName", "first" + i);
-                d.Add("lastName", "last" + i);
+                d.Add("firstname", "first" + i);
+                d.Add("lastname", "last" + i);
                 d.Add("age", i);
                 d.Add("value", i * 1000);
                 d.Add("birthday", DateTime.Now);
@@ -211,7 +217,7 @@ namespace Test
 
         static void ExistsRows()
         {
-            Expression e = new Expression("firstName", Operators.IsNotNull, null);
+            Expression e = new Expression("firstname", Operators.IsNotNull, null);
             Console.WriteLine("Exists: " + _Database.Exists("person", e));
         }
 
@@ -232,8 +238,8 @@ namespace Test
             for (int i = 10; i < 20; i++)
             {
                 Dictionary<string, object> d = new Dictionary<string, object>();
-                d.Add("firstName", "first" + i + "-updated");
-                d.Add("lastName", "last" + i + "-updated");
+                d.Add("firstname", "first" + i + "-updated");
+                d.Add("lastname", "last" + i + "-updated");
                 d.Add("age", i); 
 
                 Expression e = new Expression("id", Operators.Equals, i);
@@ -243,7 +249,7 @@ namespace Test
 
         static void RetrieveRows()
         {
-            List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
+            List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
 
             for (int i = 30; i < 40; i++)
             {
@@ -259,13 +265,13 @@ namespace Test
                 // is here to show how to build a nested expression
                 //
 
-                _Database.Select("person", 0, 3, returnFields, e, "ORDER BY id ASC");
+                _Database.Select("person", null, 3, returnFields, e);
             }
         }
 
         static void RetrieveRowsByIndex()
         {
-            List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
+            List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
 
             for (int i = 10; i < 20; i++)
             {
@@ -281,16 +287,29 @@ namespace Test
                 // is here to show how to build a nested expression
                 //
 
-                _Database.Select("person", (i - 10), 5, returnFields, e, "ORDER BY age DESC");
+                ResultOrder[] resultOrder = new ResultOrder[1];
+                resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
+
+                _Database.Select("person", (i - 10), 5, returnFields, e, resultOrder);
             }
         }
 
         static void RetrieveRowsByBetween()
         {
-            List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
+            List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
             Expression e = Expression.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
-            _Database.Select("person", null, null, returnFields, e, "ORDER BY age DESC");
+            _Database.Select("person", null, null, returnFields, e);
+        }
+
+        static void RetrieveRowsSorted()
+        {
+            List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
+            Expression e = Expression.Between("id", new List<object> { 10, 20 });
+            Console.WriteLine("Expression: " + e.ToString());
+            ResultOrder[] resultOrder = new ResultOrder[1]; 
+            resultOrder[0] = new ResultOrder("firstname", OrderDirection.Ascending);
+            _Database.Select("person", null, null, returnFields, e, resultOrder);
         }
 
         private static void DeleteRows()

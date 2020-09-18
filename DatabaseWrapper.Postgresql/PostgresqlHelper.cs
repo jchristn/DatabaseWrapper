@@ -245,20 +245,20 @@ namespace DatabaseWrapper.Postgresql
             return query;
         }
 
-        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
+        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
         {
-            string outerQuery = "";
+            string query = "";
             string whereClause = "";
 
             //
             // SELECT
             //
-            outerQuery += "SELECT ";
+            query += "SELECT ";
 
             //
             // fields
             //
-            if (returnFields == null || returnFields.Count < 1) outerQuery += "* ";
+            if (returnFields == null || returnFields.Count < 1) query += "* ";
             else
             {
                 int fieldsAdded = 0;
@@ -266,22 +266,22 @@ namespace DatabaseWrapper.Postgresql
                 {
                     if (fieldsAdded == 0)
                     {
-                        outerQuery += "\"" + SanitizeFieldname(curr) + "\"";
+                        query += "\"" + SanitizeFieldname(curr) + "\"";
                         fieldsAdded++;
                     }
                     else
                     {
-                        outerQuery += ",\"" + SanitizeFieldname(curr) + "\"";
+                        query += ",\"" + SanitizeFieldname(curr) + "\"";
                         fieldsAdded++;
                     }
                 }
             }
-            outerQuery += " ";
+            query += " ";
 
             //
             // table
             //
-            outerQuery += "FROM " + SanitizeFieldname(tableName) + " ";
+            query += "FROM " + SanitizeFieldname(tableName) + " ";
 
             //
             // expressions
@@ -289,13 +289,13 @@ namespace DatabaseWrapper.Postgresql
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
-                outerQuery += "WHERE " + whereClause + " ";
+                query += "WHERE " + whereClause + " ";
             }
 
             // 
             // order clause
-            //
-            if (!String.IsNullOrEmpty(orderByClause)) outerQuery += PreparedOrderByClause(orderByClause) + " ";
+            // 
+            query += BuildOrderByClause(resultOrder);
 
             //
             // limit
@@ -304,15 +304,15 @@ namespace DatabaseWrapper.Postgresql
             {
                 if (indexStart != null && indexStart >= 0)
                 {
-                    outerQuery += "OFFSET " + indexStart + " LIMIT " + maxResults;
+                    query += "OFFSET " + indexStart + " LIMIT " + maxResults;
                 }
                 else
                 {
-                    outerQuery += "LIMIT " + maxResults;
+                    query += "LIMIT " + maxResults;
                 }
             }
 
-            return outerQuery;
+            return query;
         }
 
         internal static string PreparedOrderByClause(string val)
@@ -1003,6 +1003,24 @@ namespace DatabaseWrapper.Postgresql
         internal static string DbTimestamp(DateTime ts)
         {
             return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
-        } 
+        }
+
+        private static string BuildOrderByClause(ResultOrder[] resultOrder)
+        {
+            if (resultOrder == null || resultOrder.Length < 0) return null;
+
+            string ret = "ORDER BY ";
+
+            for (int i = 0; i < resultOrder.Length; i++)
+            {
+                if (i > 0) ret += ", ";
+                ret += SanitizeFieldname(resultOrder[i].ColumnName) + " ";
+                if (resultOrder[i].Direction == OrderDirection.Ascending) ret += "ASC";
+                else if (resultOrder[i].Direction == OrderDirection.Descending) ret += "DESC";
+            }
+
+            ret += " ";
+            return ret;
+        }
     }
 }

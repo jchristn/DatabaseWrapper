@@ -135,20 +135,20 @@ namespace DatabaseWrapper.Mysql
             return query;
         }
 
-        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
+        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
         { 
-            string outerQuery = "";
+            string query = "";
             string whereClause = "";
 
             //
             // SELECT
             //
-            outerQuery += "SELECT ";
+            query += "SELECT ";
 
             //
             // fields
             //
-            if (returnFields == null || returnFields.Count < 1) outerQuery += "* ";
+            if (returnFields == null || returnFields.Count < 1) query += "* ";
             else
             {
                 int fieldsAdded = 0;
@@ -156,22 +156,22 @@ namespace DatabaseWrapper.Mysql
                 {
                     if (fieldsAdded == 0)
                     {
-                        outerQuery += SanitizeString(curr);
+                        query += SanitizeString(curr);
                         fieldsAdded++;
                     }
                     else
                     {
-                        outerQuery += "," + SanitizeString(curr);
+                        query += "," + SanitizeString(curr);
                         fieldsAdded++;
                     }
                 }
             }
-            outerQuery += " ";
+            query += " ";
 
             //
             // table
             //
-            outerQuery += "FROM `" + SanitizeString(tableName) + "` ";
+            query += "FROM `" + SanitizeString(tableName) + "` ";
 
             //
             // expressions
@@ -179,13 +179,13 @@ namespace DatabaseWrapper.Mysql
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
-                outerQuery += "WHERE " + whereClause + " ";
+                query += "WHERE " + whereClause + " ";
             }
 
             // 
             // order clause
-            //
-            if (!String.IsNullOrEmpty(orderByClause)) outerQuery += SanitizeString(orderByClause) + " ";
+            // 
+            query += BuildOrderByClause(resultOrder);
 
             //
             // limit
@@ -194,15 +194,15 @@ namespace DatabaseWrapper.Mysql
             {
                 if (indexStart != null && indexStart >= 0)
                 {
-                    outerQuery += "LIMIT " + indexStart + "," + maxResults;
+                    query += "LIMIT " + indexStart + "," + maxResults;
                 }
                 else
                 {
-                    outerQuery += "LIMIT " + maxResults;
+                    query += "LIMIT " + maxResults;
                 }
             }
 
-            return outerQuery;
+            return query;
         }
 
         internal static string InsertQuery(string tableName, string keys, string values)
@@ -818,6 +818,24 @@ namespace DatabaseWrapper.Mysql
         internal static string DbTimestamp(DateTime ts)
         {
             return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
+        }
+
+        private static string BuildOrderByClause(ResultOrder[] resultOrder)
+        {
+            if (resultOrder == null || resultOrder.Length < 0) return null;
+
+            string ret = "ORDER BY ";
+
+            for (int i = 0; i < resultOrder.Length; i++)
+            {
+                if (i > 0) ret += ", ";
+                ret += SanitizeString(resultOrder[i].ColumnName) + " ";
+                if (resultOrder[i].Direction == OrderDirection.Ascending) ret += "ASC";
+                else if (resultOrder[i].Direction == OrderDirection.Descending) ret += "DESC";
+            }
+
+            ret += " ";
+            return ret;
         }
     }
 }

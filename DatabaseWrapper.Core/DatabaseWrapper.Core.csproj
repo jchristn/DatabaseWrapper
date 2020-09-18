@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netcoreapp2.0;net461</TargetFrameworks>
-    <Version>3.1.0.2</Version>
+    <Version>3.2.0.5</Version>
     <Authors>Joel Christner</Authors>
     <Description>Do not install this package directly.  Core classes for DatabaseWrapper packages.</Description>
     <Copyright>(c)2020 Joel Christner</Copyright>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
-    <PackageReleaseNotes>StartsWithNot, EndsWithNot</PackageReleaseNotes>
+    <PackageReleaseNotes>ResultOrder and OrderDirection</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 

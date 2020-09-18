@@ -112,16 +112,27 @@
             <param name="value">The value to match in the key or unique field column.  This should be an object that can be cast to a string value.</param>
             <returns>A DataTable containing at most one row.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},DatabaseWrapper.Core.Expression,System.String)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},DatabaseWrapper.Core.Expression)">
             <summary>
             Execute a SELECT query.
             </summary>
             <param name="tableName">The table from which you wish to SELECT.</param>
-            <param name="indexStart">The starting index for retrieval; used for pagination in conjunction with maxResults and orderByClause.  orderByClause example: ORDER BY created DESC.</param>
+            <param name="indexStart">The starting index for retrieval.</param>
             <param name="maxResults">The maximum number of results to retrieve.</param>
             <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
             <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
-            <param name="orderByClause">Specify an ORDER BY clause if desired.</param>
+            <returns>A DataTable containing the results.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},DatabaseWrapper.Core.Expression,DatabaseWrapper.Core.ResultOrder[])">
+            <summary>
+            Execute a SELECT query.
+            </summary>
+            <param name="tableName">The table from which you wish to SELECT.</param>
+            <param name="indexStart">The starting index for retrieval.</param>
+            <param name="maxResults">The maximum number of results to retrieve.</param>
+            <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
+            <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
+            <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
         <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Insert(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">

@@ -328,16 +328,31 @@ namespace DatabaseWrapper.Mysql
         /// Execute a SELECT query.
         /// </summary>
         /// <param name="tableName">The table from which you wish to SELECT.</param>
-        /// <param name="indexStart">The starting index for retrieval; used for pagination in conjunction with maxResults and orderByClause.  orderByClause example: ORDER BY created DESC.</param>
+        /// <param name="indexStart">The starting index for retrieval.</param>
         /// <param name="maxResults">The maximum number of results to retrieve.</param>
         /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
-        /// <param name="orderByClause">Specify an ORDER BY clause if desired.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter)
         {
-            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName)); 
-            return Query(MysqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, orderByClause)); 
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+            return Query(MysqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, null));
+        }
+
+        /// <summary>
+        /// Execute a SELECT query.
+        /// </summary>
+        /// <param name="tableName">The table from which you wish to SELECT.</param>
+        /// <param name="indexStart">The starting index for retrieval.</param>
+        /// <param name="maxResults">The maximum number of results to retrieve.</param>
+        /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
+        /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
+        /// <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+            return Query(MysqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, resultOrder));
         }
 
         /// <summary>

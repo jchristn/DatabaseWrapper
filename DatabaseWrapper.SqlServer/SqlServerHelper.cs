@@ -228,16 +228,11 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, string orderByClause)
+        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
         {
             string query = "";
             string whereClause = "";
-
-            if (indexStart != null || maxResults != null)
-            {
-                if (String.IsNullOrEmpty(orderByClause)) throw new ArgumentNullException(nameof(orderByClause));
-            }
-
+             
             //
             // select
             //
@@ -291,11 +286,8 @@ namespace DatabaseWrapper.SqlServer
             // 
             // order clause
             // 
-            if (!String.IsNullOrEmpty(orderByClause))
-            {
-                query += SanitizeString(orderByClause) + " ";
-            }
-            
+            query += BuildOrderByClause(resultOrder);
+
             //
             // pagination
             //
@@ -923,6 +915,24 @@ namespace DatabaseWrapper.SqlServer
             clause += ")";
 
             return clause;
-        } 
+        }
+
+        private static string BuildOrderByClause(ResultOrder[] resultOrder)
+        {
+            if (resultOrder == null || resultOrder.Length < 0) return null;
+
+            string ret = "ORDER BY ";
+
+            for (int i = 0; i < resultOrder.Length; i++)
+            {
+                if (i > 0) ret += ", ";
+                ret += SanitizeString(resultOrder[i].ColumnName) + " ";
+                if (resultOrder[i].Direction == OrderDirection.Ascending) ret += "ASC";
+                else if (resultOrder[i].Direction == OrderDirection.Descending) ret += "DESC";
+            }
+
+            ret += " ";
+            return ret;
+        }
     }
 }
