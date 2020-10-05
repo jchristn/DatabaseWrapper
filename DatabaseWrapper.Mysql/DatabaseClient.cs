@@ -618,45 +618,53 @@ namespace DatabaseWrapper.Mysql
             DataTable result = new DataTable();
 
             if (LogQueries && Logger != null) Logger(_Header + "query: " + query);
-             
-            using (MySqlConnection conn = new MySqlConnection(_ConnectionString))
+
+            try
             {
-                conn.Open();
-                MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = conn;
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                cmd.CommandText = query;
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                MySqlDataAdapter sda = new MySqlDataAdapter(cmd);
-                DataSet ds = new DataSet();
-                sda.Fill(ds);
-                if (ds != null)
+                using (MySqlConnection conn = new MySqlConnection(_ConnectionString))
                 {
-                    if (ds.Tables != null)
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand();
+                    cmd.Connection = conn;
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+                    cmd.CommandText = query;
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+                    MySqlDataAdapter sda = new MySqlDataAdapter(cmd);
+                    DataSet ds = new DataSet();
+                    sda.Fill(ds);
+                    if (ds != null)
                     {
-                        if (ds.Tables.Count > 0)
+                        if (ds.Tables != null)
                         {
-                            result = ds.Tables[0];
+                            if (ds.Tables.Count > 0)
+                            {
+                                result = ds.Tables[0];
+                            }
                         }
+                    }
+
+                    conn.Close();
+                }
+
+                if (LogResults && Logger != null)
+                {
+                    if (result != null)
+                    {
+                        Logger(_Header + "result: " + result.Rows.Count + " rows");
+                    }
+                    else
+                    {
+                        Logger(_Header + "result: null");
                     }
                 }
 
-                conn.Close();
+                return result;
             }
-
-            if (LogResults && Logger != null)
+            catch (Exception e)
             {
-                if (result != null)
-                {
-                    Logger(_Header + "result: " + result.Rows.Count + " rows");
-                }
-                else
-                {
-                    Logger(_Header + "result: null");
-                }
+                e.Data.Add("Query", query);
+                throw;
             }
-
-            return result;
         }
 
         /// <summary>

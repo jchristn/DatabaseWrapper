@@ -135,6 +135,23 @@ namespace Test.Sqlite
 
                 #endregion
 
+                #region Cause-Exception
+
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
+                Console.WriteLine("Testing exception...");
+
+                try
+                {
+                    _Database.Query("SELECT * FROM person(((");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Caught exception: " + e.Message);
+                    Console.WriteLine("Query: " + e.Data["Query"]);
+                }
+
+                #endregion
+
                 #region Drop-Table
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
@@ -142,7 +159,7 @@ namespace Test.Sqlite
                 _Database.DropTable("person");
                 Console.ReadLine();
 
-                #endregion
+                #endregion 
             }
             catch (Exception e)
             {

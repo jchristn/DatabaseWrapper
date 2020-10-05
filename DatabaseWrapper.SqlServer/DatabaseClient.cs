@@ -337,7 +337,7 @@ namespace DatabaseWrapper.SqlServer
         public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
-            if (indexStart != null) throw new ArgumentException("For SQL Server, use the Select API including ResultOrder[] and supply a ResultOrder[] when using index start and max results.");
+            if (indexStart != null) throw new ArgumentException("For SQL Server, use the Select API including result order when using a starting index.");
             return Query(SqlServerHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, null));
         }
 
@@ -354,6 +354,7 @@ namespace DatabaseWrapper.SqlServer
         public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+            if (indexStart != null && (resultOrder == null || resultOrder.Length < 1)) throw new ArgumentException("For SQL Server, result order must be populated when using a starting index.");
             return Query(SqlServerHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, resultOrder));
         }
 
@@ -583,31 +584,39 @@ namespace DatabaseWrapper.SqlServer
             DataTable result = new DataTable();
              
             if (LogQueries && Logger != null) Logger(_Header + "query: " + query);
-             
-            using (SqlConnection conn = new SqlConnection(_ConnectionString))
+
+            try
             {
-                conn.Open();
+                using (SqlConnection conn = new SqlConnection(_ConnectionString))
+                {
+                    conn.Open();
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                SqlDataAdapter sda = new SqlDataAdapter(query, conn);
+                    SqlDataAdapter sda = new SqlDataAdapter(query, conn);
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                sda.Fill(result);
-                conn.Dispose();
-                conn.Close();
-            }  
+                    sda.Fill(result);
+                    conn.Dispose();
+                    conn.Close();
+                }
 
-            if (LogResults && Logger != null)
-            {
-                if (result != null)
-                { 
-                    Logger(_Header + "result: " + result.Rows.Count + " rows");
+                if (LogResults && Logger != null)
+                {
+                    if (result != null)
+                    {
+                        Logger(_Header + "result: " + result.Rows.Count + " rows");
+                    }
+                    else
+                    {
+                        Logger(_Header + "result: null");
+                    }
                 }
-                else
-                { 
-                    Logger(_Header + "result: null");
-                }
+
+                return result;
             }
-
-            return result;
+            catch (Exception e)
+            {
+                e.Data.Add("Query", query);
+                throw;
+            }
         }
 
         /// <summary>

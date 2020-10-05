@@ -580,37 +580,45 @@ namespace DatabaseWrapper.Postgresql
             DataTable result = new DataTable();
 
             if (LogQueries && Logger != null) Logger(_Header + "query: " + query);
-             
-            using (NpgsqlConnection conn = new NpgsqlConnection(_ConnectionString))
+
+            try
             {
-                conn.Open();
+                using (NpgsqlConnection conn = new NpgsqlConnection(_ConnectionString))
+                {
+                    conn.Open();
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn);
+                    NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn);
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                DataSet ds = new DataSet();
-                da.Fill(ds);
+                    DataSet ds = new DataSet();
+                    da.Fill(ds);
 
-                if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
-                {
-                    result = ds.Tables[0];
+                    if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
+                    {
+                        result = ds.Tables[0];
+                    }
+
+                    conn.Close();
                 }
 
-                conn.Close();
-            } 
+                if (LogResults && Logger != null)
+                {
+                    if (result != null)
+                    {
+                        Logger(_Header + "result: " + result.Rows.Count + " rows");
+                    }
+                    else
+                    {
+                        Logger(_Header + "result: null");
+                    }
+                }
 
-            if (LogResults && Logger != null)
-            {
-                if (result != null)
-                {
-                    Logger(_Header + "result: " + result.Rows.Count + " rows");
-                }
-                else
-                {
-                    Logger(_Header + "result: null");
-                }
+                return result;
             }
-
-            return result;
+            catch (Exception e)
+            {
+                e.Data.Add("Query", query);
+                throw;
+            }
         }
 
         /// <summary>

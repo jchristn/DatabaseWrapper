@@ -626,37 +626,45 @@ namespace DatabaseWrapper.Sqlite
             DataTable result = new DataTable();
 
             if (LogQueries && Logger != null) Logger(_Header + "query: " + query);
-             
-            using (SqliteConnection conn = new SqliteConnection(_ConnectionString))
+
+            try
             {
-                conn.Open();
+                using (SqliteConnection conn = new SqliteConnection(_ConnectionString))
+                {
+                    conn.Open();
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                using (SqliteCommand cmd = new SqliteCommand(query, conn))
+                    using (SqliteCommand cmd = new SqliteCommand(query, conn))
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                {
-                    using (SqliteDataReader rdr = cmd.ExecuteReader())
                     {
-                        result.Load(rdr);
+                        using (SqliteDataReader rdr = cmd.ExecuteReader())
+                        {
+                            result.Load(rdr);
+                        }
+                    }
+
+                    conn.Close();
+                }
+
+                if (LogResults && Logger != null)
+                {
+                    if (result != null)
+                    {
+                        Logger(_Header + "result: " + result.Rows.Count + " rows");
+                    }
+                    else
+                    {
+                        Logger(_Header + "result: null");
                     }
                 }
 
-                conn.Close();
-            } 
-
-            if (LogResults && Logger != null)
-            {
-                if (result != null)
-                {
-                    Logger(_Header + "result: " + result.Rows.Count + " rows");
-                }
-                else
-                {
-                    Logger(_Header + "result: null");
-                }
+                return result;
             }
-
-            return result;
+            catch (Exception e)
+            {
+                e.Data.Add("Query", query);
+                throw;
+            }
         }
 
         /// <summary>

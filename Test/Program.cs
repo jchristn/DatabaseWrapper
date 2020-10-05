@@ -184,6 +184,23 @@ namespace Test
 
                 #endregion
 
+                #region Cause-Exception
+
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
+                Console.WriteLine("Testing exception...");
+
+                try
+                {
+                    _Database.Query("SELECT * FROM person(((");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Caught exception: " + e.Message);
+                    Console.WriteLine("Query: " + e.Data["Query"]);
+                }
+
+                #endregion
+
                 #region Drop-Table
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
@@ -265,7 +282,10 @@ namespace Test
                 // is here to show how to build a nested expression
                 //
 
-                _Database.Select("person", null, 3, returnFields, e);
+                ResultOrder[] resultOrder = new ResultOrder[1];
+                resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
+
+                _Database.Select("person", 0, 3, returnFields, e, resultOrder);
             }
         }
 
