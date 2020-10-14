@@ -36,7 +36,7 @@ If you find an injection attack that will defeat the sanitization layer built in
 ## Simple Example
 
 Refer to the test project for a more complete example with sample table setup scripts.
-```
+```csharp
 using DatabaseWrapper;
 using DatabaseWrapper.Core;
 
@@ -90,7 +90,7 @@ result = client.RawQuery("SELECT customer_id FROM customer WHERE customer_id > 1
 ## Sample Compound Expression
 
 Expressions can be nested in either the LeftTerm or RightTerm.  Conversion from Expression to a WHERE clause uses recursion, so you should have a good degree of flexibility in building your expressions in terms of depth.
-```
+```csharp
 Expression e = new Expression {
 	LeftTerm = new Expression("age", Operators.GreaterThan, 30),
 	Operator = Operators.And,
@@ -104,7 +104,7 @@ Use ```IndexStart```, ```MaxResults```, and ```ResultOrder[]``` to retrieve pagi
 
 IMPORTANT: When doing pagination with SQL Server, you MUST specify an ```ResultOrder[]```.
 
-```
+```csharp
 ResultOrder[] order = new ResultOrder[1];
 order = new ResultOrder("firstName", OrderDirection.Ascending);
 DataTable result = client.Select("person", 5, 10, null, e, order);
@@ -113,7 +113,7 @@ DataTable result = client.Select("person", 5, 10, null, e, order);
 ## Need a Timestamp?
 
 We added a simple static method for this which you can use when building expressions (or elsewhere).  An object method exists as well.
-```
+```csharp
 string SqlServer1 = DatabaseClient.DbTimestamp(DbTypes.SqlServer, DateTime.Now));
 string SqlServer2 = client.Timestamp(DateTime.Now);
 // 08/23/2016 05:34:32.4349034 PM
@@ -130,19 +130,19 @@ string mysql2 = client.Timestamp(DateTime.Now);
 When using database-specific classes ```DatabaseWrapper.Mysql```, ```DatabaseWrapper.Postgresql```, ```DatabaseWrapper.SqlServer```, or ```DatabaseWrapper.Sqlite```, the constructor is simplified from what is shown above.
 
 For Sqlite:
-```
+```csharp
 DatabaseClient client = new DatabaseClient("[databasefilename]");
 ```
 
 For SQL Server, MySQL, or PostgreSQL:
-```
+```csharp
 DatabaseClient client = new DatabaseClient(DbTypes.SqlServer,  "[hostname]", [port], "[user]", "[password]", "[databasename]");
 DatabaseClient client = new DatabaseClient(DbTypes.Mysql,      "[hostname]", [port], "[user]", "[password]", "[databasename]");
 DatabaseClient client = new DatabaseClient(DbTypes.Postgresql, "[hostname]", [port], "[user]", "[password]", "[databasename]");
 ```
 
-For SQL Express:
-```
+For SQL Server Express:
+```csharp
 DatabaseClient client = new DatabaseClient(DbTypes.SqlServer, "[hostname]", [port], "[user]", "[password]", "[instance]", "[databasename]");
 ```
 

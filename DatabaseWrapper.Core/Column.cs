@@ -70,6 +70,9 @@ namespace DatabaseWrapper.Core
         public Column(string name, bool primaryKey, DataType dt, int? maxLen, int? precision, bool nullable)
         {
             if (String.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+            if (primaryKey && nullable) throw new ArgumentException("Primary key column '" + name + "' cannot be nullable.");
+            if (maxLen != null && maxLen < 1) throw new ArgumentException("Column '" + name + "' must have a maximum length greater than zero.");
+            if (precision != null && precision < 1) throw new ArgumentException("Column '" + name + "' must have a precision greater than zero.");
 
             Name = name;
             PrimaryKey = primaryKey;
@@ -77,6 +80,34 @@ namespace DatabaseWrapper.Core
             MaxLength = maxLen;
             Precision = precision;
             Nullable = nullable;
+
+            List<DataType> lengthAndPrecisionRequired = new List<DataType>
+            {
+                DataType.Decimal,
+                DataType.Double
+            };
+
+            List<DataType> lengthRequired = new List<DataType>
+            {
+                DataType.Nvarchar,
+                DataType.Varchar
+            };
+
+            if (lengthAndPrecisionRequired.Contains(dt))
+            {
+                if (maxLen == null || precision == null)
+                {
+                    throw new ArgumentException("Column '" + name + "' must include both maximum length and precision.");
+                }
+            }
+
+            if (lengthRequired.Contains(dt))
+            {
+                if (maxLen == null)
+                {
+                    throw new ArgumentException("Column '" + name + "' must include a maximum length.");
+                }
+            }
         }
 
         #endregion
