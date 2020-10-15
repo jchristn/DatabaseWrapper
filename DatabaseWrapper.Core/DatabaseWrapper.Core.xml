@@ -44,6 +44,15 @@
             Instantiate the object.
             </summary>
         </member>
+        <member name="M:DatabaseWrapper.Core.Column.#ctor(System.String,System.Boolean,DatabaseWrapper.Core.DataType,System.Boolean)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="name">Name of the column.</param>
+            <param name="primaryKey">Indicate if this column is the primary key.</param>
+            <param name="dt">DataType for the column.</param>
+            <param name="nullable">Indicate if this column is nullable.</param>
+        </member>
         <member name="M:DatabaseWrapper.Core.Column.#ctor(System.String,System.Boolean,DatabaseWrapper.Core.DataType,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Boolean)">
             <summary>
             Instantiate the object.
@@ -477,9 +486,19 @@
             Value starts with the specified value
             </summary>
         </member>
+        <member name="F:DatabaseWrapper.Core.Operators.StartsWithNot">
+            <summary>
+            Value does not start with the specified value
+            </summary>
+        </member>
         <member name="F:DatabaseWrapper.Core.Operators.EndsWith">
             <summary>
             Value ends with the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.EndsWithNot">
+            <summary>
+            Value does not end with the specified value
             </summary>
         </member>
         <member name="F:DatabaseWrapper.Core.Operators.GreaterThan">
@@ -511,6 +530,48 @@
             <summary>
             Value is not null
             </summary>
+        </member>
+        <member name="T:DatabaseWrapper.Core.OrderDirection">
+            <summary>
+            Direction by which results should be returned.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.OrderDirection.Ascending">
+            <summary>
+            Return results in ascending order.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.OrderDirection.Descending">
+            <summary>
+            Return results in descending order.
+            </summary>
+        </member>
+        <member name="T:DatabaseWrapper.Core.ResultOrder">
+            <summary>
+            Describe on which columns and in which direction results should be ordered.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.ResultOrder.ColumnName">
+            <summary>
+            Column name on which to order results.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.ResultOrder.Direction">
+            <summary>
+            Direction by which results should be returned.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.ResultOrder.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.ResultOrder.#ctor(System.String,DatabaseWrapper.Core.OrderDirection)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="columnName">Column name on which to order results.</param>
+            <param name="direction">Direction by which results should be returned.</param>
         </member>
         <member name="T:DatabaseWrapper.Core.Sanitizer">
             <summary>

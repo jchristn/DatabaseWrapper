@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netcoreapp2.0;net461</TargetFrameworks>
-    <Version>3.2.0.5</Version>
+    <Version>3.2.0.6</Version>
     <Authors>Joel Christner</Authors>
     <Description>Do not install this package directly.  Core classes for DatabaseWrapper packages.</Description>
     <Copyright>(c)2020 Joel Christner</Copyright>
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-    <DocumentationFile>C:\Code\Misc\DatabaseWrapper-3.0\DatabaseWrapper.Core\DatabaseWrapper.Core.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.Core.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

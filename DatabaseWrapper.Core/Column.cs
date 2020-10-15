@@ -16,36 +16,48 @@ namespace DatabaseWrapper.Core
         /// <summary>
         /// The name of the column.
         /// </summary>
-        public string Name;
+        public string Name = null;
 
         /// <summary>
         /// Whether or not the column is the table's primary key.
         /// </summary>
-        public bool PrimaryKey;
+        public bool PrimaryKey = false;
 
         /// <summary>
         /// The data type of the column.
         /// </summary>
-        public DataType Type;
+        public DataType Type = DataType.Varchar;
 
         /// <summary>
         /// The maximum character length of the data contained within the column.
         /// </summary>
-        public int? MaxLength;
+        public int? MaxLength = null;
 
         /// <summary>
         /// For precision, i.e. number of places after the decimal.
         /// </summary>
-        public int? Precision;
+        public int? Precision = null;
 
         /// <summary>
         /// Whether or not the column can contain NULL.
         /// </summary>
-        public bool Nullable;
+        public bool Nullable = true;
 
         #endregion
 
         #region Private-Members
+
+        private List<DataType> _RequiresLengthAndPrecision = new List<DataType>
+        {
+            DataType.Decimal,
+            DataType.Double
+        };
+
+        private List<DataType> _RequiresLength = new List<DataType>
+        {
+            DataType.Nvarchar,
+            DataType.Varchar
+        };
 
         #endregion
 
@@ -64,6 +76,34 @@ namespace DatabaseWrapper.Core
         /// <param name="name">Name of the column.</param>
         /// <param name="primaryKey">Indicate if this column is the primary key.</param>
         /// <param name="dt">DataType for the column.</param>
+        /// <param name="nullable">Indicate if this column is nullable.</param>
+        public Column(string name, bool primaryKey, DataType dt, bool nullable)
+        {
+            if (String.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+            if (primaryKey && nullable) throw new ArgumentException("Primary key column '" + name + "' cannot be nullable.");
+
+            Name = name;
+            PrimaryKey = primaryKey;
+            Type = dt; 
+            Nullable = nullable;
+             
+            if (_RequiresLengthAndPrecision.Contains(dt))
+            {
+                throw new ArgumentException("Column '" + name + "' must include both maximum length and precision; use the constructor that allows these values to be specified.");
+            }
+
+            if (_RequiresLength.Contains(dt))
+            {
+                throw new ArgumentException("Column '" + name + "' must include a maximum length; use the constructor that allows these values to be specified.");
+            }
+        }
+
+        /// <summary>
+        /// Instantiate the object.
+        /// </summary>
+        /// <param name="name">Name of the column.</param>
+        /// <param name="primaryKey">Indicate if this column is the primary key.</param>
+        /// <param name="dt">DataType for the column.</param>
         /// <param name="maxLen">Max length for the column.</param>
         /// <param name="precision">Precision for the column.</param>
         /// <param name="nullable">Indicate if this column is nullable.</param>
@@ -71,8 +111,8 @@ namespace DatabaseWrapper.Core
         {
             if (String.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             if (primaryKey && nullable) throw new ArgumentException("Primary key column '" + name + "' cannot be nullable.");
-            if (maxLen != null && maxLen < 1) throw new ArgumentException("Column '" + name + "' must have a maximum length greater than zero.");
-            if (precision != null && precision < 1) throw new ArgumentException("Column '" + name + "' must have a precision greater than zero.");
+            if (maxLen != null && maxLen < 1) throw new ArgumentException("Column '" + name + "' maximum length must be greater than zero if not null.");
+            if (precision != null && precision < 1) throw new ArgumentException("Column '" + name + "' preicision must be greater than zero if not null.");
 
             Name = name;
             PrimaryKey = primaryKey;
@@ -80,32 +120,20 @@ namespace DatabaseWrapper.Core
             MaxLength = maxLen;
             Precision = precision;
             Nullable = nullable;
-
-            List<DataType> lengthAndPrecisionRequired = new List<DataType>
+             
+            if (_RequiresLengthAndPrecision.Contains(dt))
             {
-                DataType.Decimal,
-                DataType.Double
-            };
-
-            List<DataType> lengthRequired = new List<DataType>
-            {
-                DataType.Nvarchar,
-                DataType.Varchar
-            };
-
-            if (lengthAndPrecisionRequired.Contains(dt))
-            {
-                if (maxLen == null || precision == null)
+                if (maxLen == null || precision == null || maxLen < 1 || precision < 1)
                 {
-                    throw new ArgumentException("Column '" + name + "' must include both maximum length and precision.");
+                    throw new ArgumentException("Column '" + name + "' must include both maximum length and precision, and both must be greater than zero.");
                 }
             }
 
-            if (lengthRequired.Contains(dt))
+            if (_RequiresLength.Contains(dt))
             {
-                if (maxLen == null)
+                if (maxLen == null || maxLen < 1)
                 {
-                    throw new ArgumentException("Column '" + name + "' must include a maximum length.");
+                    throw new ArgumentException("Column '" + name + "' must include a maximum length, and both must be greater than zero.");
                 }
             }
         }
@@ -121,13 +149,13 @@ namespace DatabaseWrapper.Core
         public override string ToString()
         {
             string ret =
-                "  [" + Name + "] ";
+                " [Column " + Name + "] ";
 
             if (PrimaryKey) ret += "PK ";
             ret += "Type: " + Type + " ";
             if (MaxLength != null) ret += "MaxLen: " + MaxLength + " ";
             if (Precision != null) ret += "Precision: " + Precision + " ";
-            ret += "Null: " + Nullable;
+            ret += "Nullable: " + Nullable;
 
             return ret;
         }
