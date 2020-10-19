@@ -61,7 +61,8 @@ namespace DatabaseWrapper.Mysql
                     break;
                 case DataType.Int:
                 case DataType.Long:
-                    ret += "int(" + col.MaxLength + ") ";
+                    if (col.MaxLength != null) ret += "int(" + col.MaxLength + ") ";
+                    else ret += "int ";
                     break;
                 case DataType.Decimal:
                     ret += "decimal(" + col.MaxLength + "," + col.Precision + ") ";
