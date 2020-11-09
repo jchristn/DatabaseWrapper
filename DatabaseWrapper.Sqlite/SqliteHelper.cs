@@ -552,33 +552,25 @@ namespace DatabaseWrapper.Sqlite
                     int inAdded = 0;
                     if (!Helper.IsList(expr.RightTerm)) return null;
                     List<object> inTempList = Helper.ObjectToList(expr.RightTerm);
-                    clause += " IN ";
-                    if (expr.RightTerm is Expression)
+                    clause += " IN (";
+                    foreach (object currObj in inTempList)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
-                    }
-                    else
-                    {
-                        clause += "(";
-                        foreach (object currObj in inTempList)
+                        if (inAdded > 0) clause += ",";
+                        if (currObj is DateTime || currObj is DateTime?)
                         {
-                            if (inAdded > 0) clause += ",";
-                            if (currObj is DateTime || currObj is DateTime?)
-                            {
-                                clause += "'" + DbTimestamp(Convert.ToDateTime(currObj)) + "'";
-                            }
-                            else if (currObj is int || currObj is long || currObj is decimal)
-                            {
-                                clause += currObj.ToString();
-                            }
-                            else
-                            {
-                                clause += PreparedStringValue(currObj.ToString());
-                            }
-                            inAdded++;
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(currObj)) + "'";
                         }
-                        clause += ")";
+                        else if (currObj is int || currObj is long || currObj is decimal)
+                        {
+                            clause += currObj.ToString();
+                        }
+                        else
+                        {
+                            clause += PreparedStringValue(currObj.ToString());
+                        }
+                        inAdded++;
                     }
+                    clause += ")"; 
                     break;
 
                 #endregion
@@ -590,33 +582,25 @@ namespace DatabaseWrapper.Sqlite
                     int notInAdded = 0;
                     if (!Helper.IsList(expr.RightTerm)) return null;
                     List<object> notInTempList = Helper.ObjectToList(expr.RightTerm);
-                    clause += " NOT IN ";
-                    if (expr.RightTerm is Expression)
+                    clause += " NOT IN (";
+                    foreach (object currObj in notInTempList)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
-                    }
-                    else
-                    {
-                        clause += "(";
-                        foreach (object currObj in notInTempList)
+                        if (notInAdded > 0) clause += ",";
+                        if (currObj is DateTime || currObj is DateTime?)
                         {
-                            if (notInAdded > 0) clause += ",";
-                            if (currObj is DateTime || currObj is DateTime?)
-                            {
-                                clause += "'" + DbTimestamp(Convert.ToDateTime(currObj)) + "'";
-                            }
-                            else if (currObj is int || currObj is long || currObj is decimal)
-                            {
-                                clause += currObj.ToString();
-                            }
-                            else
-                            {
-                                clause += PreparedStringValue(currObj.ToString());
-                            }
-                            notInAdded++;
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(currObj)) + "'";
                         }
-                        clause += ")";
+                        else if (currObj is int || currObj is long || currObj is decimal)
+                        {
+                            clause += currObj.ToString();
+                        }
+                        else
+                        {
+                            clause += PreparedStringValue(currObj.ToString());
+                        }
+                        notInAdded++;
                     }
+                    clause += ")"; 
                     break;
 
                 #endregion

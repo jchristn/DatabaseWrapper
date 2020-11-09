@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netcoreapp2.0;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.2.2.7</Version>
+    <Version>3.2.2.8</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite. written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages if you only need support for one database type.</Description>
@@ -26,14 +26,14 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
     <CodeAnalysisRuleSet />
-    <DocumentationFile>C:\Code\Misc\DatabaseWrapper-1.4\DatabaseWrapper\DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Mysql" Version="3.2.2.7" />
-    <PackageReference Include="DatabaseWrapper.Postgresql" Version="3.2.2.6" />
-    <PackageReference Include="DatabaseWrapper.Sqlite" Version="3.2.2.6" />
-    <PackageReference Include="DatabaseWrapper.SqlServer" Version="3.2.2.6" />
+    <PackageReference Include="DatabaseWrapper.Mysql" Version="3.2.2.8" />
+    <PackageReference Include="DatabaseWrapper.Postgresql" Version="3.2.2.8" />
+    <PackageReference Include="DatabaseWrapper.Sqlite" Version="3.2.2.8" />
+    <PackageReference Include="DatabaseWrapper.SqlServer" Version="3.2.2.8" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.9" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.1" />
