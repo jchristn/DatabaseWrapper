@@ -15,8 +15,4 @@
     <WarningsAsErrors />
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DatabaseWrapper\DatabaseWrapper.csproj" />
-  </ItemGroup>
-
 </Project>

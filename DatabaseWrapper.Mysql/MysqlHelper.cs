@@ -496,6 +496,7 @@ namespace DatabaseWrapper.Mysql
                     clause += " IN (";
                     foreach (object currObj in inTempList)
                     {
+                        if (currObj == null) continue;
                         if (inAdded > 0) clause += ",";
                         if (currObj is DateTime || currObj is DateTime?)
                         {
@@ -526,6 +527,7 @@ namespace DatabaseWrapper.Mysql
                     clause += " NOT IN (";
                     foreach (object currObj in notInTempList)
                     {
+                        if (currObj == null) continue;
                         if (notInAdded > 0) clause += ",";
                         if (currObj is DateTime || currObj is DateTime?)
                         {

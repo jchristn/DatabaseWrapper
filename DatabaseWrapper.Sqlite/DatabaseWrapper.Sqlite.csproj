@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netcoreapp2.0;net461</TargetFrameworks>
-    <Version>3.2.2.8</Version>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0;netcoreapp3.1;net461;net5.0</TargetFrameworks>
+    <Version>3.2.2.10</Version>
     <Authors>Joel Christner</Authors>
     <Description>Simple database wrapper for Sqlite written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, MySQL, and PostgreSQL.</Description>
     <Copyright>(c)2020 Joel Christner</Copyright>
@@ -27,8 +27,8 @@
   <ItemGroup>
     <PackageReference Include="DatabaseWrapper.Core" Version="3.2.0.6" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.9" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.9" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 

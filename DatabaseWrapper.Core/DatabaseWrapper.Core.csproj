@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netcoreapp2.0;net461</TargetFrameworks>
-    <Version>3.2.0.6</Version>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0;netcoreapp3.1;net461;net5.0</TargetFrameworks>
+    <Version>3.2.2.10</Version>
     <Authors>Joel Christner</Authors>
     <Description>Do not install this package directly.  Core classes for DatabaseWrapper packages.</Description>
     <Copyright>(c)2020 Joel Christner</Copyright>
@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
