@@ -142,7 +142,7 @@ namespace DatabaseWrapper.SqlServer
         public bool TableExists(string tableName)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName)); 
-            return ListTables().Contains(tableName);
+            return ListTables().Contains(SqlServerHelper.ExtractTableName(tableName));
         }
 
         /// <summary>
@@ -382,7 +382,7 @@ namespace DatabaseWrapper.SqlServer
                 {
                     #region First
 
-                    keys += SqlServerHelper.PreparedFieldname(curr.Key);
+                    keys += SqlServerHelper.PreparedFieldName(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
@@ -416,7 +416,7 @@ namespace DatabaseWrapper.SqlServer
                 {
                     #region Subsequent
 
-                    keys += "," + SqlServerHelper.PreparedFieldname(curr.Key);
+                    keys += "," + SqlServerHelper.PreparedFieldName(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
@@ -487,27 +487,27 @@ namespace DatabaseWrapper.SqlServer
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            keyValueClause += SqlServerHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                            keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
                         }
                         else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                         {
-                            keyValueClause += SqlServerHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
+                            keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += SqlServerHelper.PreparedFieldname(curr.Key) + "=" + SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += SqlServerHelper.PreparedFieldname(curr.Key) + "=" + SqlServerHelper.PreparedStringValue(curr.Value.ToString());
+                                keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += SqlServerHelper.PreparedFieldname(curr.Key) + "= null";
+                        keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "= null";
                     }
                 }
                 else
@@ -516,27 +516,27 @@ namespace DatabaseWrapper.SqlServer
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            keyValueClause += "," + SqlServerHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                            keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
                         }
                         else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                         {
-                            keyValueClause += "," + SqlServerHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
+                            keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += "," + SqlServerHelper.PreparedFieldname(curr.Key) + "=" + SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += "," + SqlServerHelper.PreparedFieldname(curr.Key) + "=" + SqlServerHelper.PreparedStringValue(curr.Value.ToString());
+                                keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += "," + SqlServerHelper.PreparedFieldname(curr.Key) + "= null";
+                        keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "= null";
                     }
                 }
                 added++;

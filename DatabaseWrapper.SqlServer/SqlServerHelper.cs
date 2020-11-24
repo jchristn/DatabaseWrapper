@@ -44,7 +44,7 @@ namespace DatabaseWrapper.SqlServer
 
         internal static string LoadTableNamesQuery(string database)
         {
-            return "SELECT TABLE_NAME FROM " + database + ".INFORMATION_SCHEMA.Tables WHERE TABLE_TYPE = 'BASE TABLE'";
+            return "SELECT TABLE_NAME FROM " + SanitizeString(database) + ".INFORMATION_SCHEMA.Tables WHERE TABLE_TYPE = 'BASE TABLE'";
         }
 
         internal static string LoadTableColumnsQuery(string database, string table)
@@ -54,8 +54,8 @@ namespace DatabaseWrapper.SqlServer
                 "  col.TABLE_NAME, col.COLUMN_NAME, col.IS_NULLABLE, col.DATA_TYPE, col.CHARACTER_MAXIMUM_LENGTH, con.CONSTRAINT_NAME " +
                 "FROM INFORMATION_SCHEMA.COLUMNS col " +
                 "LEFT JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE con ON con.COLUMN_NAME = col.COLUMN_NAME AND con.TABLE_NAME = col.TABLE_NAME " +
-                "WHERE col.TABLE_NAME='" + table + "' " +
-                "AND col.TABLE_CATALOG='" + database + "'";
+                "WHERE col.TABLE_NAME='" + ExtractTableName(table) + "' " +
+                "AND col.TABLE_CATALOG='" + SanitizeString(database) + "'";
         }
 
         internal static string SanitizeString(string val)
@@ -184,7 +184,7 @@ namespace DatabaseWrapper.SqlServer
         internal static string CreateTableQuery(string tableName, List<Column> columns)
         {
             string query =
-                "CREATE TABLE [" + SanitizeString(tableName) + "] " +
+                "CREATE TABLE " + PreparedTableName(tableName) + " " +
                 "(";
 
             int added = 0;
@@ -200,7 +200,7 @@ namespace DatabaseWrapper.SqlServer
             {
                 query +=
                     ", " +
-                    "CONSTRAINT [PK_" + SanitizeString(tableName) + "] PRIMARY KEY CLUSTERED " +
+                    "CONSTRAINT [PK_" + ExtractTableName(tableName) + "] PRIMARY KEY CLUSTERED " +
                     "(" +
                     "  [" + SanitizeString(primaryKey.Name) + "] ASC " +
                     ") " +
@@ -224,7 +224,7 @@ namespace DatabaseWrapper.SqlServer
 
         internal static string DropTableQuery(string tableName)
         {
-            string query = "IF OBJECT_ID('dbo." + SanitizeString(tableName) + "', 'U') IS NOT NULL DROP TABLE [" + SanitizeString(tableName) + "]";
+            string query = "IF OBJECT_ID('" + PreparedTableNameUnenclosed(tableName) + "', 'U') IS NOT NULL DROP TABLE " + PreparedTableName(tableName);
             return query;
         }
 
@@ -232,23 +232,17 @@ namespace DatabaseWrapper.SqlServer
         {
             string query = "";
             string whereClause = "";
-             
-            //
-            // select
-            //
+              
+            // select 
             query = "SELECT ";
-
-            //
-            // top
-            //
+             
+            // top 
             if (maxResults != null && indexStart == null)
             {
                 query += "TOP " + maxResults + " ";
             }
-
-            //
-            // fields
-            //
+             
+            // fields 
             if (returnFields == null || returnFields.Count < 1) query += "* ";
             else
             {
@@ -269,28 +263,20 @@ namespace DatabaseWrapper.SqlServer
             }
             query += " ";
 
-            //
             // table
-            //
-            query += "FROM [" + SanitizeString(tableName) + "] ";
+            query += "FROM " + PreparedTableName(tableName) + " ";
 
-            //
             // expressions
-            //
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
                 query += "WHERE " + whereClause + " ";
             }
 
-            // 
             // order clause
-            // 
             query += BuildOrderByClause(resultOrder);
 
-            //
             // pagination
-            //
             if (indexStart != null && maxResults != null)
             {
                 query += "OFFSET " + indexStart + " ROWS ";
@@ -307,7 +293,7 @@ namespace DatabaseWrapper.SqlServer
         internal static string InsertQuery(string tableName, string keys, string values)
         {
             string ret = 
-                "INSERT INTO [" + SanitizeString(tableName) + "] WITH (ROWLOCK) " + 
+                "INSERT INTO " + PreparedTableName(tableName) + " WITH (ROWLOCK) " + 
                 "(" + keys + ") " + 
                 "OUTPUT INSERTED.* " + 
                 "VALUES " + 
@@ -319,7 +305,7 @@ namespace DatabaseWrapper.SqlServer
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
-                "UPDATE [" + SanitizeString(tableName) + "] WITH (ROWLOCK) SET " +
+                "UPDATE " + PreparedTableName(tableName) + " WITH (ROWLOCK) SET " +
                 keyValueClause + " " +
                 "OUTPUT INSERTED.* ";
 
@@ -331,7 +317,7 @@ namespace DatabaseWrapper.SqlServer
         internal static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
-                "DELETE FROM [" + SanitizeString(tableName) + "] WITH (ROWLOCK) ";
+                "DELETE FROM " + PreparedTableName(tableName) + " WITH (ROWLOCK) ";
 
             if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter) + " ";
 
@@ -340,24 +326,20 @@ namespace DatabaseWrapper.SqlServer
 
         internal static string TruncateQuery(string tableName)
         {
-            return "TRUNCATE TABLE [" + SanitizeString(tableName) + "]";
+            return "TRUNCATE TABLE " + PreparedTableName(tableName);
         }
 
         internal static string ExistsQuery(string tableName, Expression filter)
         {
             string query = "";
             string whereClause = "";
-
-            //
-            // select
-            //
+             
+            // select 
             query =
                 "SELECT TOP 1 * " +
-                "FROM " + SanitizeString(tableName) + " ";
-
-            //
-            // expressions
-            //
+                "FROM " + PreparedTableName(tableName) + " ";
+             
+            // expressions 
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
@@ -371,17 +353,13 @@ namespace DatabaseWrapper.SqlServer
         {
             string query = "";
             string whereClause = "";
-
-            //
-            // select
-            //
+             
+            // select 
             query =
                 "SELECT COUNT(*) AS " + countColumnName + " " +
-                "FROM " + SanitizeString(tableName) + " ";
-
-            //
-            // expressions
-            //
+                "FROM " + PreparedTableName(tableName) + " ";
+             
+            // expressions 
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
@@ -395,17 +373,13 @@ namespace DatabaseWrapper.SqlServer
         {
             string query = "";
             string whereClause = "";
-
-            //
-            // select
-            //
+             
+            // select 
             query =
                 "SELECT SUM(" + SanitizeString(fieldName) + ") AS " + sumColumnName + " " +
-                "FROM " + SanitizeString(tableName) + " ";
-
-            //
-            // expressions
-            //
+                "FROM " + PreparedTableName(tableName) + " ";
+             
+            // expressions 
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
@@ -420,7 +394,7 @@ namespace DatabaseWrapper.SqlServer
             return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
         }
 
-        internal static string PreparedFieldname(string s)
+        internal static string PreparedFieldName(string s)
         {
             return "[" + s + "]";
         }
@@ -428,6 +402,66 @@ namespace DatabaseWrapper.SqlServer
         internal static string PreparedStringValue(string s)
         {
             return "'" + SqlServerHelper.SanitizeString(s) + "'";
+        }
+
+        internal static string PreparedTableName(string s)
+        {
+            s = s.Replace("[", "");
+            s = s.Replace("]", "");
+            if (s.Contains("."))
+            {
+                string[] parts = s.Split('.');
+                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
+                return
+                    "[" +
+                    SanitizeString(parts[0]) +
+                    "].[" +
+                    SanitizeString(parts[1]) +
+                    "]";
+            }
+            else
+            {
+                return
+                    "[" +
+                    SanitizeString(s) +
+                    "]";
+            }
+        }
+
+        internal static string PreparedTableNameUnenclosed(string s)
+        {
+            s = s.Replace("[", "");
+            s = s.Replace("]", "");
+            if (s.Contains("."))
+            {
+                string[] parts = s.Split('.');
+                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
+                return
+                    SanitizeString(parts[0]) +
+                    "." +
+                    SanitizeString(parts[1]);
+            }
+            else
+            {
+                return
+                    SanitizeString(s);
+            }
+        }
+
+        internal static string ExtractTableName(string s)
+        {
+            s = s.Replace("[", "");
+            s = s.Replace("]", "");
+            if (s.Contains("."))
+            {
+                string[] parts = s.Split('.');
+                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
+                return SanitizeString(parts[1]);
+            }
+            else
+            {
+                return SanitizeString(s);
+            }
         }
 
         internal static string PreparedUnicodeValue(string s)
@@ -466,7 +500,7 @@ namespace DatabaseWrapper.SqlServer
                     //
                     // These operators will add the left term
                     //
-                    clause += PreparedFieldname(expr.LeftTerm.ToString()) + " ";
+                    clause += PreparedFieldName(expr.LeftTerm.ToString()) + " ";
                 }
             }
 
@@ -657,9 +691,9 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -678,9 +712,9 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -699,7 +733,7 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + (PreparedStringValue(expr.RightTerm.ToString() + "%")) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + (PreparedStringValue(expr.RightTerm.ToString() + "%")) +
                             ")";
                     }
                     else
@@ -718,7 +752,7 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + (PreparedStringValue(expr.RightTerm.ToString() + "%")) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + (PreparedStringValue(expr.RightTerm.ToString() + "%")) +
                             ")";
                     }
                     else
@@ -737,7 +771,7 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else
@@ -756,7 +790,7 @@ namespace DatabaseWrapper.SqlServer
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else
