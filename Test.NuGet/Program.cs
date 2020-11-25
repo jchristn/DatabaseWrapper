@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DatabaseWrapper.SqlServer;
+using DatabaseWrapper;
 using DatabaseWrapper.Core;
 
 namespace Test
@@ -15,10 +15,6 @@ namespace Test
         static Random _Random = new Random(DateTime.Now.Millisecond);
         static DatabaseSettings _Settings;
         static DatabaseClient _Database;
-
-        // To use dbo.person, change _Table to either 'dbo.person' or just 'person'
-        // To use with a specific schema, use 'schema.table', i.e. 'foo.person'
-        static string _Table = "foo.person";
 
         static void Main(string[] args)
         {
@@ -33,15 +29,52 @@ namespace Test
                  * 
                  * 
                  */
-                  
-                Console.Write("User: ");
-                string user = Console.ReadLine();
 
-                Console.Write("Password: ");
-                string pass = Console.ReadLine();
-                 
-                _Settings = new DatabaseSettings("localhost", 1433, user, pass, null, "test");
-                _Database = new DatabaseClient(_Settings); 
+                Console.Write("DB type [sqlserver|mysql|postgresql|sqlite]: ");
+                string dbType = Console.ReadLine();
+                if (String.IsNullOrEmpty(dbType)) return;
+                dbType = dbType.ToLower();
+
+                if (dbType.Equals("sqlserver") || dbType.Equals("mysql") || dbType.Equals("postgresql"))
+                {
+                    Console.Write("User: ");
+                    string user = Console.ReadLine();
+
+                    Console.Write("Password: ");
+                    string pass = Console.ReadLine();
+
+                    switch (dbType)
+                    {
+                        case "sqlserver":
+                            _Settings = new DatabaseSettings("localhost", 1433, user, pass, null, "test");
+                            _Database = new DatabaseClient(_Settings);
+                            break;
+                        case "mysql":
+                            _Settings = new DatabaseSettings(DbTypes.Mysql, "localhost", 3306, user, pass, "test");
+                            _Database = new DatabaseClient(_Settings);
+                            break;
+                        case "postgresql":
+                            _Settings = new DatabaseSettings(DbTypes.Postgresql, "localhost", 5432, user, pass, "test");
+                            _Database = new DatabaseClient(_Settings);
+                            break;
+                        default:
+                            return;
+                    }
+                }
+                else if (dbType.Equals("sqlite"))
+                {
+                    Console.Write("Filename: ");
+                    string filename = Console.ReadLine();
+                    if (String.IsNullOrEmpty(filename)) return;
+
+                    _Settings = new DatabaseSettings(filename);
+                    _Database = new DatabaseClient(_Settings);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid database type.");
+                    return;
+                }
 
                 _Database.Logger = Logger;
                 _Database.LogQueries = true;
@@ -52,8 +85,8 @@ namespace Test
                 #region Drop-Table
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
-                Console.WriteLine("Dropping table '" + _Table + "'...");
-                _Database.DropTable(_Table);
+                Console.WriteLine("Dropping table 'person'...");
+                _Database.DropTable("person");
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -62,7 +95,7 @@ namespace Test
                 #region Create-Table
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
-                Console.WriteLine("Creating table '" + _Table + "'...");
+                Console.WriteLine("Creating table 'person'...");
                 List<Column> columns = new List<Column>();
                 columns.Add(new Column("id", true, DataType.Int, 11, null, false));
                 columns.Add(new Column("firstname", false, DataType.Nvarchar, 30, null, false));
@@ -72,7 +105,7 @@ namespace Test
                 columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
                 columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
 
-                _Database.CreateTable(_Table, columns);
+                _Database.CreateTable("person", columns);
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -81,9 +114,9 @@ namespace Test
                 #region Check-Existence-and-Describe
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
-                Console.WriteLine("Table '" + _Table + "' exists: " + _Database.TableExists(_Table));
-                Console.WriteLine("Table '" + _Table + "' configuration:");
-                columns = _Database.DescribeTable(_Table);
+                Console.WriteLine("Table 'person' exists: " + _Database.TableExists("person"));
+                Console.WriteLine("Table 'person' configuration:");
+                columns = _Database.DescribeTable("person");
                 foreach (Column col in columns) Console.WriteLine(col.ToString());
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
@@ -158,7 +191,7 @@ namespace Test
 
                 try
                 {
-                    _Database.Query("SELECT * FROM " + _Table + "(((");
+                    _Database.Query("SELECT * FROM person(((");
                 }
                 catch (Exception e)
                 {
@@ -172,7 +205,7 @@ namespace Test
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Dropping table...");
-                _Database.DropTable(_Table);
+                _Database.DropTable("person");
                 Console.ReadLine();
 
                 #endregion
@@ -195,26 +228,26 @@ namespace Test
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
 
-                _Database.Insert(_Table, d);
+                _Database.Insert("person", d);
             }
         }
 
         static void ExistsRows()
         {
             Expression e = new Expression("firstname", Operators.IsNotNull, null);
-            Console.WriteLine("Exists: " + _Database.Exists(_Table, e));
+            Console.WriteLine("Exists: " + _Database.Exists("person", e));
         }
 
         static void CountAge()
         {
             Expression e = new Expression("age", Operators.GreaterThan, 25);
-            Console.WriteLine("Age count: " + _Database.Count(_Table, e));
+            Console.WriteLine("Age count: " + _Database.Count("person", e));
         }
 
         static void SumAge()
         {
             Expression e = new Expression("age", Operators.GreaterThan, 0);
-            Console.WriteLine("Age sum: " + _Database.Sum(_Table, "age", e));
+            Console.WriteLine("Age sum: " + _Database.Sum("person", "age", e));
         }
 
         static void UpdateRows()
@@ -227,7 +260,7 @@ namespace Test
                 d.Add("age", i);
 
                 Expression e = new Expression("id", Operators.Equals, i);
-                _Database.Update(_Table, d, e);
+                _Database.Update("person", d, e);
             }
         }
 
@@ -252,7 +285,7 @@ namespace Test
                 ResultOrder[] resultOrder = new ResultOrder[1];
                 resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
 
-                _Database.Select(_Table, 0, 3, returnFields, e, resultOrder);
+                _Database.Select("person", 0, 3, returnFields, e, resultOrder);
             }
         }
 
@@ -277,7 +310,7 @@ namespace Test
                 ResultOrder[] resultOrder = new ResultOrder[1];
                 resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
 
-                _Database.Select(_Table, (i - 10), 5, returnFields, e, resultOrder);
+                _Database.Select("person", (i - 10), 5, returnFields, e, resultOrder);
             }
         }
 
@@ -286,7 +319,7 @@ namespace Test
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
             Expression e = Expression.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
-            _Database.Select(_Table, null, null, returnFields, e);
+            _Database.Select("person", null, null, returnFields, e);
         }
 
         static void RetrieveRowsSorted()
@@ -296,7 +329,7 @@ namespace Test
             Console.WriteLine("Expression: " + e.ToString());
             ResultOrder[] resultOrder = new ResultOrder[1];
             resultOrder[0] = new ResultOrder("firstname", OrderDirection.Ascending);
-            _Database.Select(_Table, null, null, returnFields, e, resultOrder);
+            _Database.Select("person", null, null, returnFields, e, resultOrder);
         }
 
         private static void DeleteRows()
@@ -304,7 +337,7 @@ namespace Test
             for (int i = 20; i < 30; i++)
             {
                 Expression e = new Expression("id", Operators.Equals, i);
-                _Database.Delete(_Table, e);
+                _Database.Delete("person", e);
             }
         }
 

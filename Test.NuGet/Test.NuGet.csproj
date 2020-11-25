@@ -6,8 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DatabaseWrapper.Core\DatabaseWrapper.Core.csproj" />
-    <ProjectReference Include="..\DatabaseWrapper\DatabaseWrapper.csproj" />
+    <PackageReference Include="DatabaseWrapper" Version="3.2.2.11" />
   </ItemGroup>
 
 </Project>

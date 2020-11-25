@@ -45,7 +45,7 @@ namespace DatabaseWrapper.Postgresql
                 "  END AS IS_PRIMARY_KEY " +
                 "FROM test.INFORMATION_SCHEMA.COLUMNS cols " +
                 "LEFT JOIN " + database + ".INFORMATION_SCHEMA.KEY_COLUMN_USAGE cons ON cols.COLUMN_NAME = cons.COLUMN_NAME " +
-                "WHERE cols.TABLE_NAME = '" + table + "';";
+                "WHERE cols.TABLE_NAME = '" + ExtractTableName(table) + "';";
         }
 
         internal static string SanitizeString(string val)
@@ -166,7 +166,7 @@ namespace DatabaseWrapper.Postgresql
             return ret;
         }
 
-        internal static string ColumnToCreateString(string tableName, Column col)
+        internal static string ColumnToCreateString(Column col)
         {
             string ret =
                 "\"" + SanitizeFieldname(col.Name) + "\" ";
@@ -218,14 +218,14 @@ namespace DatabaseWrapper.Postgresql
         internal static string CreateTableQuery(string tableName, List<Column> columns)
         {
             string query =
-                "CREATE TABLE " + SanitizeFieldname(tableName) + " " +
+                "CREATE TABLE " + PreparedTableName(tableName) + " " +
                 "(";
 
             int added = 0;
             foreach (Column curr in columns)
             {
                 if (added > 0) query += ", ";
-                query += ColumnToCreateString(tableName, curr);
+                query += ColumnToCreateString(curr);
                 added++;
             }
              
@@ -241,7 +241,7 @@ namespace DatabaseWrapper.Postgresql
 
         internal static string DropTableQuery(string tableName)
         {
-            string query = "DROP TABLE IF EXISTS " + SanitizeFieldname(tableName) + " ";
+            string query = "DROP TABLE IF EXISTS " + PreparedTableName(tableName) + " ";
             return query;
         }
 
@@ -249,15 +249,11 @@ namespace DatabaseWrapper.Postgresql
         {
             string query = "";
             string whereClause = "";
-
-            //
-            // SELECT
-            //
+             
+            // SELECT 
             query += "SELECT ";
-
-            //
-            // fields
-            //
+             
+            // fields 
             if (returnFields == null || returnFields.Count < 1) query += "* ";
             else
             {
@@ -277,29 +273,21 @@ namespace DatabaseWrapper.Postgresql
                 }
             }
             query += " ";
-
-            //
-            // table
-            //
-            query += "FROM " + SanitizeFieldname(tableName) + " ";
-
-            //
-            // expressions
-            //
+             
+            // table 
+            query += "FROM " + PreparedTableName(tableName) + " ";
+             
+            // expressions 
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
                 query += "WHERE " + whereClause + " ";
             }
-
-            // 
-            // order clause
-            // 
+             
+            // order clause 
             query += BuildOrderByClause(resultOrder);
-
-            //
-            // limit
-            //
+             
+            // limit 
             if (maxResults > 0)
             {
                 if (indexStart != null && indexStart >= 0)
@@ -394,7 +382,7 @@ namespace DatabaseWrapper.Postgresql
         internal static string InsertQuery(string tableName, string keys, string values)
         {
             string ret =
-                "INSERT INTO " + SanitizeFieldname(tableName) + " " +
+                "INSERT INTO " + PreparedTableName(tableName) + " " +
                 "(" + keys + ") " +
                 "VALUES " +
                 "(" + values + ") " +
@@ -405,7 +393,7 @@ namespace DatabaseWrapper.Postgresql
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
-                "UPDATE " + SanitizeFieldname(tableName) + " SET " +
+                "UPDATE " + PreparedTableName(tableName) + " SET " +
                 keyValueClause + " ";
 
             if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter) + " ";
@@ -417,7 +405,7 @@ namespace DatabaseWrapper.Postgresql
         internal static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
-                "DELETE FROM " + SanitizeFieldname(tableName) + " ";
+                "DELETE FROM " + PreparedTableName(tableName) + " ";
 
             if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter) + " ";
 
@@ -426,24 +414,20 @@ namespace DatabaseWrapper.Postgresql
 
         internal static string TruncateQuery(string tableName)
         {
-            return "TRUNCATE TABLE " + SanitizeFieldname(tableName) + " ";
+            return "TRUNCATE TABLE " + PreparedTableName(tableName) + " ";
         }
 
         internal static string ExistsQuery(string tableName, Expression filter)
         {
             string query = "";
             string whereClause = "";
-
-            //
-            // select
-            //
+             
+            // select 
             query =
                 "SELECT * " +
-                "FROM " + SanitizeFieldname(tableName) + " ";
-
-            //
-            // expressions
-            //
+                "FROM " + PreparedTableName(tableName) + " ";
+             
+            // expressions 
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
@@ -458,17 +442,13 @@ namespace DatabaseWrapper.Postgresql
         {
             string query = "";
             string whereClause = "";
-
-            //
-            // select
-            //
+             
+            // select 
             query =
                 "SELECT COUNT(*) AS " + countColumnName + " " +
-                "FROM " + SanitizeFieldname(tableName) + " ";
-
-            //
-            // expressions
-            //
+                "FROM " + PreparedTableName(tableName) + " ";
+             
+            // expressions 
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
@@ -480,19 +460,14 @@ namespace DatabaseWrapper.Postgresql
 
         internal static string SumQuery(string tableName, string fieldName, string sumColumnName, Expression filter)
         {
-            string query = "";
             string whereClause = "";
-
-            //
-            // select
-            //
-            query =
+             
+            // select 
+            string query =
                 "SELECT SUM(" + SanitizeFieldname(fieldName) + ") AS " + sumColumnName + " " +
-                "FROM " + SanitizeFieldname(tableName) + " ";
-
-            //
-            // expressions
-            //
+                "FROM " + PreparedTableName(tableName) + " ";
+             
+            // expressions 
             if (filter != null) whereClause = ExpressionToWhereClause(filter);
             if (!String.IsNullOrEmpty(whereClause))
             {
@@ -502,7 +477,7 @@ namespace DatabaseWrapper.Postgresql
             return query;
         }
 
-        internal static string PreparedFieldname(string s)
+        internal static string PreparedFieldName(string s)
         {
             return "\"" + s + "\"";
         }
@@ -511,6 +486,42 @@ namespace DatabaseWrapper.Postgresql
         {
             // uses $xx$ escaping
             return PostgresqlHelper.SanitizeString(s);
+        }
+
+        internal static string PreparedTableName(string s)
+        {
+            s = s.Replace("[", "");
+            s = s.Replace("]", "");
+            if (s.Contains("."))
+            {
+                string[] parts = s.Split('.');
+                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
+                return
+                    SanitizeStringInternal(parts[0]) +
+                    "." +
+                    SanitizeStringInternal(parts[1]);
+            }
+            else
+            {
+                return
+                    SanitizeStringInternal(s);
+            }
+        }
+         
+        internal static string ExtractTableName(string s)
+        {
+            s = s.Replace("[", "");
+            s = s.Replace("]", "");
+            if (s.Contains("."))
+            {
+                string[] parts = s.Split('.');
+                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
+                return SanitizeStringInternal(parts[1]);
+            }
+            else
+            {
+                return SanitizeStringInternal(s);
+            }
         }
 
         internal static string PreparedUnicodeValue(string s)
@@ -549,7 +560,7 @@ namespace DatabaseWrapper.Postgresql
                     //
                     // These operators will add the left term
                     //
-                    clause += PreparedFieldname(expr.LeftTerm.ToString()) + " ";
+                    clause += PreparedFieldName(expr.LeftTerm.ToString()) + " ";
                 }
             }
 
@@ -740,9 +751,9 @@ namespace DatabaseWrapper.Postgresql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -761,9 +772,9 @@ namespace DatabaseWrapper.Postgresql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -782,7 +793,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -801,7 +812,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -820,7 +831,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else
@@ -839,7 +850,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else
@@ -1008,5 +1019,82 @@ namespace DatabaseWrapper.Postgresql
             ret += " ";
             return ret;
         }
+         
+        private static string SanitizeStringInternal(string val)
+        {
+            string ret = "";
+
+            //
+            // null, below ASCII range, above ASCII range
+            //
+            for (int i = 0; i < val.Length; i++)
+            {
+                if (((int)(val[i]) == 10) ||      // Preserve carriage return
+                    ((int)(val[i]) == 13))        // and line feed
+                {
+                    ret += val[i];
+                }
+                else if ((int)(val[i]) < 32)
+                {
+                    continue;
+                }
+                else
+                {
+                    ret += val[i];
+                }
+            }
+
+            //
+            // double dash
+            //
+            int doubleDash = 0;
+            while (true)
+            {
+                doubleDash = ret.IndexOf("--");
+                if (doubleDash < 0)
+                {
+                    break;
+                }
+                else
+                {
+                    ret = ret.Remove(doubleDash, 2);
+                }
+            }
+
+            //
+            // open comment
+            // 
+            int openComment = 0;
+            while (true)
+            {
+                openComment = ret.IndexOf("/*");
+                if (openComment < 0) break;
+                else
+                {
+                    ret = ret.Remove(openComment, 2);
+                }
+            }
+
+            //
+            // close comment
+            //
+            int closeComment = 0;
+            while (true)
+            {
+                closeComment = ret.IndexOf("*/");
+                if (closeComment < 0) break;
+                else
+                {
+                    ret = ret.Remove(closeComment, 2);
+                }
+            }
+
+            //
+            // in-string replacement
+            //
+            ret = ret.Replace("'", "''");
+            return ret;
+        }
+
     }
 }

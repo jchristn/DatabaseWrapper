@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DatabaseWrapper.SqlServer;
+using DatabaseWrapper.Postgresql;
 using DatabaseWrapper.Core;
 
 namespace Test
@@ -33,15 +33,15 @@ namespace Test
                  * 
                  * 
                  */
-                  
+
                 Console.Write("User: ");
                 string user = Console.ReadLine();
 
                 Console.Write("Password: ");
                 string pass = Console.ReadLine();
-                 
-                _Settings = new DatabaseSettings("localhost", 1433, user, pass, null, "test");
-                _Database = new DatabaseClient(_Settings); 
+
+                _Settings = new DatabaseSettings(DbTypes.Postgresql, "localhost", 5432, user, pass, "test");
+                _Database = new DatabaseClient(_Settings);
 
                 _Database.Logger = Logger;
                 _Database.LogQueries = true;

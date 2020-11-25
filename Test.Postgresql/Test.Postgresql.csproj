@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DatabaseWrapper.Sqlite\DatabaseWrapper.Sqlite.csproj" />
+    <ProjectReference Include="..\DatabaseWrapper.Postgresql\DatabaseWrapper.Postgresql.csproj" />
   </ItemGroup>
 
 </Project>

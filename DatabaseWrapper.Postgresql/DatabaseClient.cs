@@ -140,7 +140,7 @@ namespace DatabaseWrapper.Postgresql
         public bool TableExists(string tableName)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName)); 
-            return ListTables().Contains(tableName);
+            return ListTables().Contains(PostgresqlHelper.ExtractTableName(tableName));
         }
 
         /// <summary>
@@ -378,7 +378,7 @@ namespace DatabaseWrapper.Postgresql
                 {
                     #region First
 
-                    keys += PostgresqlHelper.PreparedFieldname(curr.Key);
+                    keys += PostgresqlHelper.PreparedFieldName(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
@@ -412,7 +412,7 @@ namespace DatabaseWrapper.Postgresql
                 {
                     #region Subsequent
 
-                    keys += "," + PostgresqlHelper.PreparedFieldname(curr.Key);
+                    keys += "," + PostgresqlHelper.PreparedFieldName(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
@@ -483,27 +483,27 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                            keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
                         }
                         else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                         {
-                            keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
+                            keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
+                                keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += PostgresqlHelper.PreparedFieldname(curr.Key) + "= null";
+                        keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "= null";
                     }
                 }
                 else
@@ -512,27 +512,27 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                            keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
                         }
                         else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                         {
-                            keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
+                            keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
+                                keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += "," + PostgresqlHelper.PreparedFieldname(curr.Key) + "= null";
+                        keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "= null";
                     }
                 }
                 added++;
