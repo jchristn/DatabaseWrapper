@@ -8,7 +8,9 @@ using DatabaseWrapper.Core;
 namespace DatabaseWrapper.Sqlite
 {
     internal static class SqliteHelper
-    { 
+    {
+        internal static string TimestampFormat = "yyyy-MM-dd HH:mm:ss.ffffff";
+
         internal static string ConnectionString(DatabaseSettings settings)
         {
             return "Data Source=" + settings.Filename;
@@ -275,6 +277,28 @@ namespace DatabaseWrapper.Sqlite
                 "SELECT last_insert_rowid() AS id; ";
         }
 
+        internal static string InsertMultipleQuery(string tableName, string keys, List<string> values)
+        {
+            string ret =
+                "BEGIN TRANSACTION; " +
+                "  INSERT INTO " + SanitizeString(tableName) + " " +
+                "  (" + keys + ") " +
+                "  VALUES ";
+
+            int added = 0;
+            foreach (string value in values)
+            {
+                if (added > 0) ret += ",";
+                ret += "  (" + value + ")";
+                added++;
+            }
+
+            ret +=
+                ";COMMIT;";
+
+            return ret;
+        }
+
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret = 
@@ -375,10 +399,10 @@ namespace DatabaseWrapper.Sqlite
 
         internal static string DbTimestamp(DateTime ts)
         {
-            return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
+            return ts.ToString(TimestampFormat);
         }
 
-        internal static string PreparedFieldname(string s)
+        internal static string PreparedFieldName(string s)
         {
             return "`" + s + "`";
         }
@@ -424,7 +448,7 @@ namespace DatabaseWrapper.Sqlite
                     //
                     // These operators will add the left term
                     //
-                    clause += PreparedFieldname(expr.LeftTerm.ToString()) + " ";
+                    clause += PreparedFieldName(expr.LeftTerm.ToString()) + " ";
                 }
             }
 
@@ -615,9 +639,9 @@ namespace DatabaseWrapper.Sqlite
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -636,9 +660,9 @@ namespace DatabaseWrapper.Sqlite
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -657,7 +681,7 @@ namespace DatabaseWrapper.Sqlite
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -676,7 +700,7 @@ namespace DatabaseWrapper.Sqlite
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -695,7 +719,7 @@ namespace DatabaseWrapper.Sqlite
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else
@@ -714,7 +738,7 @@ namespace DatabaseWrapper.Sqlite
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else

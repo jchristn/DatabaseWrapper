@@ -98,6 +98,12 @@ namespace Test
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
+                Console.WriteLine("Loading multiple rows...");
+                LoadMultipleRows();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
                 Console.WriteLine("Checking existence...");
                 ExistsRows();
                 Console.WriteLine("Press ENTER to continue...");
@@ -197,6 +203,41 @@ namespace Test
 
                 _Database.Insert(_Table, d);
             }
+        }
+
+        static void LoadMultipleRows()
+        {
+            List<Dictionary<string, object>> dicts = new List<Dictionary<string, object>>();
+
+            for (int i = 0; i < 50; i++)
+            {
+                Dictionary<string, object> d = new Dictionary<string, object>();
+                d.Add("firstname", "firstmultiple" + i);
+                d.Add("lastname", "lastmultiple" + i);
+                d.Add("age", i);
+                d.Add("value", i * 1000);
+                d.Add("birthday", DateTime.Now);
+                d.Add("hourly", 123.456);
+                dicts.Add(d);
+            }
+
+            /*
+             * 
+             * Uncomment this block if you wish to validate that inconsistent dictionary keys
+             * will throw an argument exception.
+             * 
+            Dictionary<string, object> e = new Dictionary<string, object>();
+            e.Add("firstnamefoo", "firstmultiple" + 1000);
+            e.Add("lastname", "lastmultiple" + 1000);
+            e.Add("age", 100);
+            e.Add("value", 1000);
+            e.Add("birthday", DateTime.Now);
+            e.Add("hourly", 123.456);
+            dicts.Add(e);
+             *
+             */
+
+            _Database.InsertMultiple(_Table, dicts);
         }
 
         static void ExistsRows()

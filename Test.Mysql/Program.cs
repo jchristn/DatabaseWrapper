@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DatabaseWrapper.Postgresql;
+using DatabaseWrapper.Mysql;
 using DatabaseWrapper.Core;
 
 namespace Test
@@ -15,10 +15,7 @@ namespace Test
         static Random _Random = new Random(DateTime.Now.Millisecond);
         static DatabaseSettings _Settings;
         static DatabaseClient _Database;
-
-        // To use dbo.person, change _Table to either 'dbo.person' or just 'person'
-        // To use with a specific schema, use 'schema.table', i.e. 'foo.person'
-        static string _Table = "foo.person";
+        static string _Table = "person";
 
         static void Main(string[] args)
         {
@@ -40,7 +37,7 @@ namespace Test
                 Console.Write("Password: ");
                 string pass = Console.ReadLine();
 
-                _Settings = new DatabaseSettings(DbTypes.Postgresql, "localhost", 5432, user, pass, "test");
+                _Settings = new DatabaseSettings(DbTypes.Mysql, "localhost", 3306, user, pass, "test");
                 _Database = new DatabaseClient(_Settings);
 
                 _Database.Logger = Logger;

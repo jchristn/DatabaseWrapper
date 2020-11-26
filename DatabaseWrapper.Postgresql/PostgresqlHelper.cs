@@ -10,6 +10,8 @@ namespace DatabaseWrapper.Postgresql
 {
     internal static class PostgresqlHelper
     {
+        internal static string TimestampFormat = "MM/dd/yyyy hh:mm:ss.fffffff tt";
+
         internal static string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
@@ -387,6 +389,28 @@ namespace DatabaseWrapper.Postgresql
                 "VALUES " +
                 "(" + values + ") " +
                 "RETURNING *;"; 
+            return ret;
+        }
+
+        internal static string InsertMultipleQuery(string tableName, string keys, List<string> values)
+        {
+            string ret =
+                "BEGIN TRANSACTION;" +
+                "  INSERT INTO " + PreparedTableName(tableName) + " " +
+                "  (" + keys + ") " +
+                "  VALUES ";
+
+            int added = 0;
+            foreach (string value in values)
+            {
+                if (added > 0) ret += ",";
+                ret += "  (" + value + ")";
+                added++;
+            }
+
+            ret +=
+                ";  COMMIT; ";
+
             return ret;
         }
 
@@ -999,7 +1023,7 @@ namespace DatabaseWrapper.Postgresql
 
         internal static string DbTimestamp(DateTime ts)
         {
-            return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
+            return ts.ToString(TimestampFormat);
         }
 
         private static string BuildOrderByClause(ResultOrder[] resultOrder)
@@ -1095,6 +1119,5 @@ namespace DatabaseWrapper.Postgresql
             ret = ret.Replace("'", "''");
             return ret;
         }
-
     }
 }

@@ -11,6 +11,8 @@ namespace DatabaseWrapper.Mysql
 {
     internal static class MysqlHelper
     {
+        internal static string TimestampFormat = "yyyy-MM-dd HH:mm:ss.ffffff";
+
         internal static string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
@@ -220,6 +222,28 @@ namespace DatabaseWrapper.Mysql
             return ret;
         }
 
+        internal static string InsertMultipleQuery(string tableName, string keys, List<string> values)
+        {
+            string ret =
+                "START TRANSACTION;" +
+                "  INSERT INTO " + SanitizeString(tableName) + " " +
+                "  (" + keys + ") " +
+                "  VALUES ";
+
+            int added = 0;
+            foreach (string value in values)
+            {
+                if (added > 0) ret += ",";
+                ret += "  (" + value + ")";
+                added++;
+            }
+
+            ret +=
+                ";  COMMIT; ";
+
+            return ret;
+        }
+
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
@@ -319,7 +343,7 @@ namespace DatabaseWrapper.Mysql
             return query;
         }
 
-        internal static string PreparedFieldname(string s)
+        internal static string PreparedFieldName(string s)
         {
             return "`" + s + "`";
         }
@@ -365,7 +389,7 @@ namespace DatabaseWrapper.Mysql
                     //
                     // These operators will add the left term
                     //
-                    clause += PreparedFieldname(expr.LeftTerm.ToString()) + " ";
+                    clause += PreparedFieldName(expr.LeftTerm.ToString()) + " ";
                 }
             }
 
@@ -556,9 +580,9 @@ namespace DatabaseWrapper.Mysql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -577,9 +601,9 @@ namespace DatabaseWrapper.Mysql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -598,7 +622,7 @@ namespace DatabaseWrapper.Mysql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -617,7 +641,7 @@ namespace DatabaseWrapper.Mysql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
                             ")";
                     }
                     else
@@ -636,7 +660,7 @@ namespace DatabaseWrapper.Mysql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else
@@ -655,7 +679,7 @@ namespace DatabaseWrapper.Mysql
                     {
                         clause +=
                             "(" +
-                            PreparedFieldname(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
                             ")";
                     }
                     else
@@ -804,7 +828,7 @@ namespace DatabaseWrapper.Mysql
 
         internal static string DbTimestamp(DateTime ts)
         {
-            return ts.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
+            return ts.ToString(TimestampFormat);
         }
 
         private static string BuildOrderByClause(ResultOrder[] resultOrder)

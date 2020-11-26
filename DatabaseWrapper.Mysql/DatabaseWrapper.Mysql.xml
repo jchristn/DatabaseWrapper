@@ -29,6 +29,12 @@
             Method to invoke when sending a log message.
             </summary>
         </member>
+        <member name="P:DatabaseWrapper.Mysql.DatabaseClient.TimestampFormat">
+            <summary>
+            Timestamp format.
+            Default is yyyy-MM-dd HH:mm:ss.ffffff.
+            </summary>
+        </member>
         <member name="M:DatabaseWrapper.Mysql.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">
             <summary>
             Create an instance of the database client.
@@ -142,6 +148,13 @@
             <param name="tableName">The table in which you wish to INSERT.</param>
             <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
             <returns>A DataTable containing the results.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.InsertMultiple(System.String,System.Collections.Generic.List{System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Execute an INSERT query with multiple values within a transaction.
+            </summary>
+            <param name="tableName">The table in which you wish to INSERT.</param>
+            <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
         </member>
         <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Update(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},DatabaseWrapper.Core.Expression)">
             <summary>

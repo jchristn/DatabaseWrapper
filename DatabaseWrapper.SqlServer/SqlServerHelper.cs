@@ -9,6 +9,8 @@ namespace DatabaseWrapper.SqlServer
 {
     internal static class SqlServerHelper
     {
+        internal static string TimestampFormat = "MM/dd/yyyy hh:mm:ss.fffffff tt";
+
         internal static string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
@@ -302,6 +304,33 @@ namespace DatabaseWrapper.SqlServer
             return ret;
         }
 
+        internal static string InsertMultipleQuery(string tableName, string keys, List<string> values)
+        {
+            string ret =
+                "BEGIN TRANSACTION [transaction1] " +
+                " BEGIN TRY " +
+                "  INSERT INTO " + PreparedTableName(tableName) + " WITH (ROWLOCK) " +
+                "  (" + keys + ") " +
+                "  VALUES ";
+
+            int added = 0;
+            foreach (string value in values)
+            {
+                if (added > 0) ret += ",";
+                ret += "  (" + value + ")";
+                added++;
+            }
+
+            ret +=
+                "  COMMIT TRANSACTION [transaction1] " +
+                " END TRY " +
+                " BEGIN CATCH " +
+                "  ROLLBACK TRANSACTION [transaction1] " +
+                " END CATCH ";
+
+            return ret;
+        }
+
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret =
@@ -391,7 +420,7 @@ namespace DatabaseWrapper.SqlServer
 
         internal static string DbTimestamp(DateTime ts)
         {
-            return ts.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
+            return ts.ToString(TimestampFormat);
         }
 
         internal static string PreparedFieldName(string s)

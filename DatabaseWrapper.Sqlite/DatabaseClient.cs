@@ -47,6 +47,23 @@ namespace DatabaseWrapper.Sqlite
         /// </summary>
         public Action<string> Logger = null;
 
+        /// <summary>
+        /// Timestamp format.
+        /// Default is yyyy-MM-dd HH:mm:ss.ffffff.
+        /// </summary>
+        public string TimestampFormat
+        {
+            get
+            {
+                return SqliteHelper.TimestampFormat;
+            }
+            set
+            {
+                if (String.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(TimestampFormat));
+                SqliteHelper.TimestampFormat = value;
+            }
+        }
+
         #endregion
 
         #region Private-Members
@@ -389,7 +406,7 @@ namespace DatabaseWrapper.Sqlite
                 {
                     #region First
 
-                    keys += SqliteHelper.PreparedFieldname(curr.Key);
+                    keys += SqliteHelper.PreparedFieldName(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
@@ -423,7 +440,7 @@ namespace DatabaseWrapper.Sqlite
                 {
                     #region Subsequent
 
-                    keys += "," + SqliteHelper.PreparedFieldname(curr.Key);
+                    keys += "," + SqliteHelper.PreparedFieldName(curr.Key);
                     if (curr.Value != null)
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
@@ -500,6 +517,102 @@ namespace DatabaseWrapper.Sqlite
         }
 
         /// <summary>
+        /// Execute an INSERT query with multiple values within a transaction.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
+        public void InsertMultiple(string tableName, List<Dictionary<string, object>> keyValuePairList)
+        {
+            if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
+            if (keyValuePairList == null || keyValuePairList.Count < 1) throw new ArgumentNullException(nameof(keyValuePairList));
+
+            #region Validate-Inputs
+
+            Dictionary<string, object> reference = keyValuePairList[0];
+
+            if (keyValuePairList.Count > 1)
+            {
+                foreach (Dictionary<string, object> dict in keyValuePairList)
+                {
+                    if (!(reference.Count == dict.Count) || !(reference.Keys.SequenceEqual(dict.Keys)))
+                    {
+                        throw new ArgumentException("All supplied dictionaries must contain exactly the same keys.");
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Build-Keys
+
+            string keys = "";
+            int keysAdded = 0;
+            foreach (KeyValuePair<string, object> curr in reference)
+            {
+                if (keysAdded > 0) keys += ",";
+                keys += SqliteHelper.PreparedFieldName(curr.Key);
+                keysAdded++;
+            }
+
+            #endregion
+
+            #region Build-Values
+
+            List<string> values = new List<string>();
+
+            foreach (Dictionary<string, object> currDict in keyValuePairList)
+            {
+                string vals = "";
+                int valsAdded = 0;
+
+                foreach (KeyValuePair<string, object> currKvp in currDict)
+                {
+                    if (valsAdded > 0) vals += ",";
+
+                    if (currKvp.Value != null)
+                    {
+                        if (currKvp.Value is DateTime || currKvp.Value is DateTime?)
+                        {
+                            vals += "'" + DbTimestamp((DateTime)currKvp.Value) + "'";
+                        }
+                        else if (currKvp.Value is int || currKvp.Value is long || currKvp.Value is decimal)
+                        {
+                            vals += currKvp.Value.ToString();
+                        }
+                        else
+                        {
+                            if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                            {
+                                vals += SqliteHelper.PreparedUnicodeValue(currKvp.Value.ToString());
+                            }
+                            else
+                            {
+                                vals += SqliteHelper.PreparedStringValue(currKvp.Value.ToString());
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        vals += "null";
+                    }
+
+                    valsAdded++;
+                }
+
+                values.Add(vals);
+            }
+
+            #endregion
+
+            #region Build-INSERT-Query-and-Submit
+
+            Query(SqliteHelper.InsertMultipleQuery(tableName, keys, values));
+
+            #endregion
+        }
+
+        /// <summary>
         /// Execute an UPDATE query. 
         /// </summary>
         /// <param name="tableName">The table in which you wish to UPDATE.</param>
@@ -529,27 +642,27 @@ namespace DatabaseWrapper.Sqlite
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            keyValueClause += SqliteHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                            keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
                         }
                         else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                         {
-                            keyValueClause += SqliteHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
+                            keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += SqliteHelper.PreparedFieldname(curr.Key) + "=" + SqliteHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += SqliteHelper.PreparedFieldname(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
+                                keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += SqliteHelper.PreparedFieldname(curr.Key) + "= null";
+                        keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "= null";
                     }
                 }
                 else
@@ -558,27 +671,27 @@ namespace DatabaseWrapper.Sqlite
                     {
                         if (curr.Value is DateTime || curr.Value is DateTime?)
                         {
-                            keyValueClause += "," + SqliteHelper.PreparedFieldname(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                            keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
                         }
                         else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                         {
-                            keyValueClause += "," + SqliteHelper.PreparedFieldname(curr.Key) + "=" + curr.Value.ToString();
+                            keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
                         }
                         else
                         {
                             if (Helper.IsExtendedCharacters(curr.Value.ToString()))
                             {
-                                keyValueClause += "," + SqliteHelper.PreparedFieldname(curr.Key) + "=" + SqliteHelper.PreparedUnicodeValue(curr.Value.ToString());
+                                keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedUnicodeValue(curr.Value.ToString());
                             }
                             else
                             {
-                                keyValueClause += "," + SqliteHelper.PreparedFieldname(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
+                                keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
                             }
                         }
                     }
                     else
                     {
-                        keyValueClause += "," + SqliteHelper.PreparedFieldname(curr.Key) + "= null";
+                        keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "= null";
                     }
                 }
                 added++;

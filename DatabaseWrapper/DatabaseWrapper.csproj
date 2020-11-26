@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0;netcoreapp3.1;net461;net5.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.2.2.12</Version>
+    <Version>3.2.2.15</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite. written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages if you only need support for one database type.</Description>
@@ -30,10 +30,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Mysql" Version="3.2.2.10" />
-    <PackageReference Include="DatabaseWrapper.Postgresql" Version="3.2.2.11" />
-    <PackageReference Include="DatabaseWrapper.Sqlite" Version="3.2.2.10" />
-    <PackageReference Include="DatabaseWrapper.SqlServer" Version="3.2.2.11" />
+    <PackageReference Include="DatabaseWrapper.Mysql" Version="3.2.2.15" />
+    <PackageReference Include="DatabaseWrapper.Postgresql" Version="3.2.2.15" />
+    <PackageReference Include="DatabaseWrapper.Sqlite" Version="3.2.2.15" />
+    <PackageReference Include="DatabaseWrapper.SqlServer" Version="3.2.2.15" />
   </ItemGroup>
  
   <ItemGroup>

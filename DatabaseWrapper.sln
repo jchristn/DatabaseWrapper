@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SqlServer", "Test.SqlS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.NuGet", "Test.NuGet\Test.NuGet.csproj", "{BD8FEA20-8C4D-4645-BB28-8C80618FCD11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Postgresql", "Test.Postgresql\Test.Postgresql.csproj", "{F3654C22-82BB-4A84-B378-265103D44900}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Postgresql", "Test.Postgresql\Test.Postgresql.csproj", "{F3654C22-82BB-4A84-B378-265103D44900}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Mysql", "Test.Mysql\Test.Mysql.csproj", "{D90D908B-BB94-45B2-B801-82F95C60337C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{F3654C22-82BB-4A84-B378-265103D44900}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3654C22-82BB-4A84-B378-265103D44900}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3654C22-82BB-4A84-B378-265103D44900}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D90D908B-BB94-45B2-B801-82F95C60337C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D90D908B-BB94-45B2-B801-82F95C60337C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D90D908B-BB94-45B2-B801-82F95C60337C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D90D908B-BB94-45B2-B801-82F95C60337C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
