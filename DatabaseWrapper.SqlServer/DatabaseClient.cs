@@ -64,6 +64,18 @@ namespace DatabaseWrapper.SqlServer
             }
         }
 
+        /// <summary>
+        /// Maximum supported statement length.
+        /// </summary>
+        public int MaxStatementLength
+        {
+            get
+            {
+                // https://docs.microsoft.com/en-us/sql/sql-server/maximum-capacity-specifications-for-sql-server
+                return 65536 * 4096;
+            }
+        }
+
         #endregion
 
         #region Private-Members
@@ -694,6 +706,8 @@ namespace DatabaseWrapper.SqlServer
         public DataTable Query(string query)
         {
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
+            if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
+
             DataTable result = new DataTable();
              
             if (LogQueries && Logger != null) Logger(_Header + "query: " + query);

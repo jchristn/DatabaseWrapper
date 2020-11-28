@@ -64,6 +64,18 @@ namespace DatabaseWrapper.Postgresql
             }
         }
 
+        /// <summary>
+        /// Maximum supported statement length.
+        /// </summary>
+        public int MaxStatementLength
+        {
+            get
+            {
+                // https://github.com/postgres/postgres/blob/master/src/common/stringinfo.c
+                return 1073741823;
+            }
+        }
+
         #endregion
 
         #region Private-Members
@@ -690,6 +702,8 @@ namespace DatabaseWrapper.Postgresql
         public DataTable Query(string query)
         {
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
+            if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
+
             DataTable result = new DataTable();
 
             if (LogQueries && Logger != null) Logger(_Header + "query: " + query);

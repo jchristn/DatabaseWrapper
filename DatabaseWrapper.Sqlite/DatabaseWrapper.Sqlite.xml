@@ -35,6 +35,11 @@
             Default is yyyy-MM-dd HH:mm:ss.ffffff.
             </summary>
         </member>
+        <member name="P:DatabaseWrapper.Sqlite.DatabaseClient.MaxStatementLength">
+            <summary>
+            Maximum supported statement length.
+            </summary>
+        </member>
         <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">
             <summary>
             Create an instance of the database client.

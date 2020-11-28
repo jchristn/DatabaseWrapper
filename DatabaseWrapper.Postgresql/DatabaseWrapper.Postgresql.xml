@@ -35,6 +35,11 @@
             Default is MM/dd/yyyy hh:mm:ss.fffffff tt.
             </summary>
         </member>
+        <member name="P:DatabaseWrapper.Postgresql.DatabaseClient.MaxStatementLength">
+            <summary>
+            Maximum supported statement length.
+            </summary>
+        </member>
         <member name="M:DatabaseWrapper.Postgresql.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">
             <summary>
             Create an instance of the database client.

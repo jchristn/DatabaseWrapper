@@ -65,6 +65,17 @@ namespace DatabaseWrapper.Mysql
             }
         }
 
+        /// <summary>
+        /// Maximum supported statement length.
+        /// </summary>
+        public int MaxStatementLength
+        {
+            get
+            {
+                return _MaxStatementLength;
+            }
+        }
+
         #endregion
 
         #region Private-Members
@@ -72,8 +83,9 @@ namespace DatabaseWrapper.Mysql
         private bool _Disposed = false;
         private string _Header = "[DatabaseWrapper.Mysql] ";
         private DatabaseSettings _Settings = null;
-        private string _ConnectionString = null; 
-          
+        private string _ConnectionString = null;
+        private int _MaxStatementLength = 4194304;
+
         private Random _Random = new Random();
 
         private string _CountColumnName = "__count__";
@@ -92,6 +104,8 @@ namespace DatabaseWrapper.Mysql
             _Settings = settings ?? throw new ArgumentNullException(nameof(settings));
             if (_Settings.Type != DbTypes.Mysql) throw new ArgumentException("Database settings must be of type 'Mysql'.");
             _ConnectionString = MysqlHelper.ConnectionString(_Settings);
+
+            SetMaxStatementLength();
         }
 
         /// <summary>
@@ -115,6 +129,8 @@ namespace DatabaseWrapper.Mysql
 
             _Settings = new DatabaseSettings(DbTypes.Mysql, serverIp, serverPort, username, password, database);
             _ConnectionString = MysqlHelper.ConnectionString(_Settings);
+
+            SetMaxStatementLength();
         }
          
         #endregion
@@ -728,6 +744,8 @@ namespace DatabaseWrapper.Mysql
         public DataTable Query(string query)
         {
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
+            if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
+
             DataTable result = new DataTable();
 
             if (LogQueries && Logger != null) Logger(_Header + "query: " + query);
@@ -882,6 +900,18 @@ namespace DatabaseWrapper.Mysql
             _Disposed = true;
         }
          
+        private void SetMaxStatementLength()
+        {
+            // https://stackoverflow.com/questions/16335011/what-is-maximum-query-size-for-mysql
+            DataTable dt = Query("SHOW VARIABLES LIKE 'max_allowed_packet'");
+            if (dt != null 
+                && dt.Rows.Count == 1 
+                && dt.Columns.Contains("Value"))
+            {
+                _MaxStatementLength = Convert.ToInt32(dt.Rows[0]["Value"]);
+            }
+        }
+
         #endregion
 
         #region Public-Static-Methods

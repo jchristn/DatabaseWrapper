@@ -64,6 +64,18 @@ namespace DatabaseWrapper.Sqlite
             }
         }
 
+        /// <summary>
+        /// Maximum supported statement length.
+        /// </summary>
+        public int MaxStatementLength
+        {
+            get
+            {
+                // https://www.sqlite.org/limits.html
+                return 1000000;
+            }
+        }
+
         #endregion
 
         #region Private-Members
@@ -736,6 +748,8 @@ namespace DatabaseWrapper.Sqlite
         public DataTable Query(string query)
         {
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
+            if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
+
             DataTable result = new DataTable();
 
             if (LogQueries && Logger != null) Logger(_Header + "query: " + query);
