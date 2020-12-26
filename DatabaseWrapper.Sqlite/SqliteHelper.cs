@@ -414,7 +414,9 @@ namespace DatabaseWrapper.Sqlite
 
         internal static string PreparedUnicodeValue(string s)
         {
-            return "N" + PreparedStringValue(s);
+            //return "N" + PreparedStringValue(s);
+
+            return PreparedStringValue(s);
         }
 
         internal static string ExpressionToWhereClause(Expression expr)
