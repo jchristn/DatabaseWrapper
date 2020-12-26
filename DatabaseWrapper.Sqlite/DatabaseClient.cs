@@ -431,14 +431,7 @@ namespace DatabaseWrapper.Sqlite
                         }
                         else
                         {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                values += SqliteHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                values += SqliteHelper.PreparedStringValue(curr.Value.ToString());
-                            }
+                            values += SqliteHelper.PreparedStringValue(curr.Value.ToString());  
                         }
                     }
                     else
@@ -465,16 +458,8 @@ namespace DatabaseWrapper.Sqlite
                         }
                         else
                         {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                values += "," + SqliteHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                values += "," + SqliteHelper.PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
-
+                            values += "," + SqliteHelper.PreparedStringValue(curr.Value.ToString());
+                        } 
                     }
                     else
                     {
@@ -593,14 +578,7 @@ namespace DatabaseWrapper.Sqlite
                         }
                         else
                         {
-                            if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
-                            {
-                                vals += SqliteHelper.PreparedUnicodeValue(currKvp.Value.ToString());
-                            }
-                            else
-                            {
-                                vals += SqliteHelper.PreparedStringValue(currKvp.Value.ToString());
-                            }
+                            vals += SqliteHelper.PreparedStringValue(currKvp.Value.ToString());
                         }
 
                     }
@@ -662,14 +640,7 @@ namespace DatabaseWrapper.Sqlite
                         }
                         else
                         {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
-                            }
+                            keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
                         }
                     }
                     else
@@ -691,14 +662,7 @@ namespace DatabaseWrapper.Sqlite
                         }
                         else
                         {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
-                            }
+                            keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
                         }
                     }
                     else

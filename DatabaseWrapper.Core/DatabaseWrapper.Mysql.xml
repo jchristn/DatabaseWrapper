@@ -1,0 +1,610 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DatabaseWrapper.Core</name>
+    </assembly>
+    <members>
+        <member name="T:DatabaseWrapper.Core.Column">
+            <summary>
+            Database table column.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Column.Name">
+            <summary>
+            The name of the column.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Column.PrimaryKey">
+            <summary>
+            Whether or not the column is the table's primary key.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Column.Type">
+            <summary>
+            The data type of the column.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Column.MaxLength">
+            <summary>
+            The maximum character length of the data contained within the column.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Column.Precision">
+            <summary>
+            For precision, i.e. number of places after the decimal.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Column.Nullable">
+            <summary>
+            Whether or not the column can contain NULL.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Column.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Column.#ctor(System.String,System.Boolean,DatabaseWrapper.Core.DataType,System.Boolean)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="name">Name of the column.</param>
+            <param name="primaryKey">Indicate if this column is the primary key.</param>
+            <param name="dt">DataType for the column.</param>
+            <param name="nullable">Indicate if this column is nullable.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Column.#ctor(System.String,System.Boolean,DatabaseWrapper.Core.DataType,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Boolean)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="name">Name of the column.</param>
+            <param name="primaryKey">Indicate if this column is the primary key.</param>
+            <param name="dt">DataType for the column.</param>
+            <param name="maxLen">Max length for the column.</param>
+            <param name="precision">Precision for the column.</param>
+            <param name="nullable">Indicate if this column is nullable.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Column.ToString">
+            <summary>
+            Produce a human-readable string of the object.
+            </summary>
+            <returns>String.</returns>
+        </member>
+        <member name="T:DatabaseWrapper.Core.DatabaseSettings">
+            <summary>
+            Database settings.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Filename">
+            <summary>
+            Filename, if using Sqlite.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Type">
+            <summary>
+            The type of database.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Hostname">
+            <summary>
+            The hostname of the database server.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Port">
+            <summary>
+            The TCP port number on which the server is listening.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Username">
+            <summary>
+            The username to use when accessing the database.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Password">
+            <summary>
+            The password to use when accessing the database.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Instance">
+            <summary>
+            For SQL Server Express, the instance name.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.DatabaseName">
+            <summary>
+            The name of the database.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor(System.String)">
+            <summary>
+            Instantiate the object using Sqlite.
+            </summary>
+            <param name="filename">The Sqlite database filename.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor(System.String,System.String,System.Int32,System.String,System.String,System.String)">
+            <summary>
+            Instantiate the object using SQL Server, MySQL, or PostgreSQL.
+            </summary>
+            <param name="dbType">The type of database.</param>
+            <param name="hostname">The hostname of the database server.</param>
+            <param name="port">The TCP port number on which the server is listening.</param>
+            <param name="username">The username to use when accessing the database.</param>
+            <param name="password">The password to use when accessing the database.</param> 
+            <param name="dbName">The name of the database.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor(DatabaseWrapper.Core.DbTypes,System.String,System.Int32,System.String,System.String,System.String)">
+            <summary>
+            Instantiate the object using SQL Server, MySQL, or PostgreSQL.
+            </summary>
+            <param name="dbType">The type of database.</param>
+            <param name="hostname">The hostname of the database server.</param>
+            <param name="port">The TCP port number on which the server is listening.</param>
+            <param name="username">The username to use when accessing the database.</param>
+            <param name="password">The password to use when accessing the database.</param> 
+            <param name="dbName">The name of the database.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor(System.String,System.Int32,System.String,System.String,System.String,System.String)">
+            <summary>
+            Instantiate the object for SQL Server Express.
+            </summary> 
+            <param name="hostname">The hostname of the database server.</param>
+            <param name="port">The TCP port number on which the server is listening.</param>
+            <param name="username">The username to use when accessing the database.</param>
+            <param name="password">The password to use when accessing the database.</param>
+            <param name="instance">For SQL Server Express, the instance name.</param>
+            <param name="dbName">The name of the database.</param>
+        </member>
+        <member name="T:DatabaseWrapper.Core.DataType">
+            <summary>
+            Type of data contained in the column.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DataType.Varchar">
+            <summary>
+            Variable-length character.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DataType.Nvarchar">
+            <summary>
+            Variable-length unicode character.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DataType.Int">
+            <summary>
+            Integer.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DataType.Long">
+            <summary>
+            Long
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DataType.Decimal">
+            <summary>
+            Decimal
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DataType.Double">
+            <summary>
+            Double
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DataType.DateTime">
+            <summary>
+            Timestamp
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DataType.Blob">
+            <summary>
+            Blob
+            </summary>
+        </member>
+        <member name="T:DatabaseWrapper.Core.DbTypes">
+            <summary>
+            Enumeration containing the supported database types.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DbTypes.SqlServer">
+            <summary>
+            Microsoft SQL Server
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DbTypes.Mysql">
+            <summary>
+            MySQL
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DbTypes.Postgresql">
+            <summary>
+            PostgreSQL
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DbTypes.Sqlite">
+            <summary>
+            Sqlite
+            </summary>
+        </member>
+        <member name="T:DatabaseWrapper.Core.Expression">
+            <summary>
+            Boolean expression.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.#ctor">
+            <summary>
+            A structure in the form of term-operator-term that defines a Boolean evaluation within a WHERE clause.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.#ctor(System.Object,DatabaseWrapper.Core.Operators,System.Object)">
+            <summary>
+            A structure in the form of term-operator-term that defines a Boolean evaluation within a WHERE clause.
+            </summary>
+            <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param>
+            <param name="oper">The operator.</param>
+            <param name="right">The right term of the expression; can either be an object for comparison or a nested Expression.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.Between(System.Object,System.Collections.Generic.List{System.Object})">
+            <summary>
+            An Expression that allows you to determine if an object is between two values, i.e. GreaterThanOrEqualTo the first value, and LessThanOrEqualTo the second value.
+            </summary>
+            <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param> 
+            <param name="right">List of two values where the first value is the lower value and the second value is the higher value.</param>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Expression.LeftTerm">
+            <summary>
+            The left term of the expression; can either be a string term or a nested Expression.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Expression.Operator">
+            <summary>
+            The operator.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Expression.RightTerm">
+            <summary>
+            The right term of the expression; can either be an object for comparison or a nested Expression.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.ToString">
+            <summary>
+            Display Expression in a human-readable string.
+            </summary>
+            <returns>String containing human-readable version of the Expression.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.PrependAnd(System.Object,DatabaseWrapper.Core.Operators,System.Object)">
+            <summary>
+            Prepends a new Expression using the supplied left term, operator, and right term using an AND clause.
+            </summary>
+            <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param>
+            <param name="oper">The operator.</param>
+            <param name="right">The right term of the expression; can either be an object for comparison or a nested Expression.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.PrependAnd(DatabaseWrapper.Core.Expression)">
+            <summary>
+            Prepends the Expression with the supplied Expression using an AND clause.
+            </summary>
+            <param name="prepend">The Expression to prepend.</param> 
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.PrependOr(System.Object,DatabaseWrapper.Core.Operators,System.Object)">
+            <summary>
+            Prepends a new Expression using the supplied left term, operator, and right term using an OR clause.
+            </summary>
+            <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param>
+            <param name="oper">The operator.</param>
+            <param name="right">The right term of the expression; can either be an object for comparison or a nested Expression.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.PrependOr(DatabaseWrapper.Core.Expression)">
+            <summary>
+            Prepends the Expression with the supplied Expression using an OR clause.
+            </summary>
+            <param name="prepend">The Expression to prepend.</param> 
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.PrependAndClause(DatabaseWrapper.Core.Expression,DatabaseWrapper.Core.Expression)">
+            <summary>
+            Prepends the Expression in prepend to the Expression original using an AND clause.
+            </summary>
+            <param name="prepend">The Expression to prepend.</param>
+            <param name="original">The original Expression.</param>
+            <returns>A new Expression.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.PrependOrClause(DatabaseWrapper.Core.Expression,DatabaseWrapper.Core.Expression)">
+            <summary>
+            Prepends the Expression in prepend to the Expression original using an OR clause.
+            </summary>
+            <param name="prepend">The Expression to prepend.</param>
+            <param name="original">The original Expression.</param>
+            <returns>A new Expression.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.ListToNestedAndExpression(System.Collections.Generic.List{DatabaseWrapper.Core.Expression})">
+            <summary>
+            Convert a List of Expression objects to a nested Expression containing AND between each Expression in the list. 
+            </summary>
+            <param name="exprList">List of Expression objects.</param>
+            <returns>A nested Expression.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Expression.ListToNestedOrExpression(System.Collections.Generic.List{DatabaseWrapper.Core.Expression})">
+            <summary>
+            Convert a List of Expression objects to a nested Expression containing OR between each Expression in the list. 
+            </summary>
+            <param name="exprList">List of Expression objects.</param>
+            <returns>A nested Expression.</returns>
+        </member>
+        <member name="T:DatabaseWrapper.Core.Helper">
+            <summary>
+            Static helper methods for DatabaseWrapper.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.IsList(System.Object)">
+            <summary>
+            Determines if an object is of a List type.
+            </summary>
+            <param name="o">Object.</param>
+            <returns>True if the object is of a List type.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.ObjectToList(System.Object)">
+            <summary>
+            Convert an object to a List object.
+            </summary>
+            <param name="obj">Object.</param>
+            <returns>List object.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DataTableIsNullOrEmpty(System.Data.DataTable)">
+            <summary>
+            Determine if a DataTable is null or has no rows.
+            </summary>
+            <param name="table">DataTable.</param>
+            <returns>True if DataTable is null or has no rows.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DataTableToObject``1(System.Data.DataTable)">
+            <summary>
+            Convert a DataTable to an object.
+            </summary>
+            <typeparam name="T">Type of object.</typeparam>
+            <param name="table">DataTable.</param>
+            <returns>Object of specified type.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DataRowToObject``1(System.Data.DataRow)">
+            <summary>
+            Convert a DataRow to an object.
+            </summary>
+            <typeparam name="T">Type of object.</typeparam>
+            <param name="row">DataRow.</param>
+            <returns>Object of specified type.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DataTableToListDynamic(System.Data.DataTable)">
+            <summary>
+            Convert a DataTable to a List of dynamic objects.
+            </summary>
+            <param name="table">DataTable.</param>
+            <returns>List of dynamic objects.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DataTableToDynamic(System.Data.DataTable)">
+            <summary>
+            Convert a DataTable to a dynamic object.
+            </summary>
+            <param name="table">DataTable.</param>
+            <returns>Dynamic object.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DataTableToListDictionary(System.Data.DataTable)">
+            <summary>
+            Convert a DataTable to a List Dictionary.
+            </summary>
+            <param name="table">DataTable.</param>
+            <returns>List Dictionary.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DataTableToDictionary(System.Data.DataTable)">
+            <summary>
+            Convert a DataTable to a Dictionary.
+            </summary>
+            <param name="table">DataTable.</param>
+            <returns>Dictionary.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DeserializeJson``1(System.String)">
+            <summary>
+            Deserialize JSON to an object.
+            </summary>
+            <typeparam name="T">Type of object.</typeparam>
+            <param name="json">JSON string.</param>
+            <returns>Object of specified type.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DeserializeJson``1(System.Byte[])">
+            <summary>
+            Deserialize JSON to an object.
+            </summary>
+            <typeparam name="T">Type of object.</typeparam>
+            <param name="bytes">JSON bytes.</param>
+            <returns>Object of specified type.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.SerializeJson(System.Object,System.Boolean)">
+            <summary>
+            Serialize an object to JSON.
+            </summary>
+            <param name="obj">Object.</param>
+            <param name="pretty">Enable or disable pretty printing.</param>
+            <returns>JSON string.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.IsExtendedCharacters(System.String)">
+            <summary>
+            Determine if string contains extended characters.
+            </summary>
+            <param name="data">String.</param>
+            <returns>True if string contains extended characters.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.DataTypeFromString(System.String)">
+            <summary>
+            Retrieve the DataType from the column type.
+            </summary>
+            <param name="s">String containing column type.</param>
+            <returns>DataType.</returns>
+        </member>
+        <member name="T:DatabaseWrapper.Core.Operators">
+            <summary>
+            Enumeration containing the supported WHERE clause operators.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.And">
+            <summary>
+            Boolean AND
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.Or">
+            <summary>
+            Boolean OR
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.Equals">
+            <summary>
+            Values are equal to one another
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.NotEquals">
+            <summary>
+            Values are not equal to one another
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.In">
+            <summary>
+            Value is contained within a list
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.NotIn">
+            <summary>
+            Value is not contained within a list
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.Contains">
+            <summary>
+            Value contains the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.ContainsNot">
+            <summary>
+            Value does not contain the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.StartsWith">
+            <summary>
+            Value starts with the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.StartsWithNot">
+            <summary>
+            Value does not start with the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.EndsWith">
+            <summary>
+            Value ends with the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.EndsWithNot">
+            <summary>
+            Value does not end with the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.GreaterThan">
+            <summary>
+            Value is greater than the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.GreaterThanOrEqualTo">
+            <summary>
+            Value is greater than or equal to the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.LessThan">
+            <summary>
+            Value is less than the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.LessThanOrEqualTo">
+            <summary>
+            Value is less than or equal to the specified value
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.IsNull">
+            <summary>
+            Value is null
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.Operators.IsNotNull">
+            <summary>
+            Value is not null
+            </summary>
+        </member>
+        <member name="T:DatabaseWrapper.Core.OrderDirection">
+            <summary>
+            Direction by which results should be returned.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.OrderDirection.Ascending">
+            <summary>
+            Return results in ascending order.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.OrderDirection.Descending">
+            <summary>
+            Return results in descending order.
+            </summary>
+        </member>
+        <member name="T:DatabaseWrapper.Core.ResultOrder">
+            <summary>
+            Describe on which columns and in which direction results should be ordered.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.ResultOrder.ColumnName">
+            <summary>
+            Column name on which to order results.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.ResultOrder.Direction">
+            <summary>
+            Direction by which results should be returned.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.ResultOrder.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.ResultOrder.#ctor(System.String,DatabaseWrapper.Core.OrderDirection)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="columnName">Column name on which to order results.</param>
+            <param name="direction">Direction by which results should be returned.</param>
+        </member>
+        <member name="T:DatabaseWrapper.Core.Sanitizer">
+            <summary>
+            Sanitization methods.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Sanitizer.SqlServerSanitizer(System.String)">
+            <summary>
+            SQL Server sanitizer.
+            </summary>
+            <param name="val">String.</param>
+            <returns>Sanitized string.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Sanitizer.MysqlSanitizer(System.String)">
+            <summary>
+            MySQL sanitizer.
+            </summary>
+            <param name="val">String.</param>
+            <returns>Sanitized string.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Sanitizer.PostgresqlSanitizer(System.String)">
+            <summary>
+            PostgreSQL sanitizer.
+            </summary>
+            <param name="val">String.</param>
+            <returns>Sanitized string.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Sanitizer.SqliteSanitizer(System.String)">
+            <summary>
+            Sqlite sanitizer.
+            </summary>
+            <param name="val">String.</param>
+            <returns>Sanitized string.</returns>
+        </member>
+    </members>
+</doc>

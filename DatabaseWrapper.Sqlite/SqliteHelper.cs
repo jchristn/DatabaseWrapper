@@ -411,12 +411,7 @@ namespace DatabaseWrapper.Sqlite
         {
             return "'" + SqliteHelper.SanitizeString(s) + "'";
         }
-
-        internal static string PreparedUnicodeValue(string s)
-        {
-            return "N" + PreparedStringValue(s);
-        }
-
+         
         internal static string ExpressionToWhereClause(Expression expr)
         {
             if (expr == null) return null;
