@@ -306,8 +306,9 @@ namespace DatabaseWrapper.SqlServer
 
         internal static string InsertMultipleQuery(string tableName, string keys, List<string> values)
         {
+            string txn = "txn_" + RandomCharacters(12);
             string ret =
-                "BEGIN TRANSACTION [transaction1] " +
+                "BEGIN TRANSACTION [" + txn + "] " +
                 " BEGIN TRY " +
                 "  INSERT INTO " + PreparedTableName(tableName) + " WITH (ROWLOCK) " +
                 "  (" + keys + ") " +
@@ -322,10 +323,10 @@ namespace DatabaseWrapper.SqlServer
             }
 
             ret +=
-                "  COMMIT TRANSACTION [transaction1] " +
+                "  COMMIT TRANSACTION [" + txn + "] " +
                 " END TRY " +
                 " BEGIN CATCH " +
-                "  ROLLBACK TRANSACTION [transaction1] " +
+                "  ROLLBACK TRANSACTION [" + txn + "] " +
                 " END CATCH ";
 
             return ret;
@@ -982,6 +983,19 @@ namespace DatabaseWrapper.SqlServer
 
             ret += " ";
             return ret;
+        }
+
+        private static string RandomCharacters(int len)
+        {
+            char[] letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+            Random rand = new Random();
+            string word = "";
+            for (int i = 0; i < len; i++)
+            {
+                int num = rand.Next(0, letters.Length - 1);
+                word += letters[num];
+            }
+            return word;
         }
     }
 }

@@ -226,7 +226,7 @@ namespace DatabaseWrapper.Mysql
         {
             string ret =
                 "START TRANSACTION;" +
-                "  INSERT INTO " + SanitizeString(tableName) + " " +
+                "  INSERT INTO `" + SanitizeString(tableName) + "` " +
                 "  (" + keys + ") " +
                 "  VALUES ";
 
@@ -280,7 +280,7 @@ namespace DatabaseWrapper.Mysql
             //
             query =
                 "SELECT * " +
-                "FROM " + SanitizeString(tableName) + " ";
+                "FROM `" + SanitizeString(tableName) + "` ";
 
             //
             // expressions
@@ -305,7 +305,7 @@ namespace DatabaseWrapper.Mysql
             //
             query =
                 "SELECT COUNT(*) AS " + countColumnName + " " +
-                "FROM " + SanitizeString(tableName) + " ";
+                "FROM `" + SanitizeString(tableName) + "` ";
 
             //
             // expressions
@@ -329,7 +329,7 @@ namespace DatabaseWrapper.Mysql
             //
             query =
                 "SELECT SUM(" + SanitizeString(fieldName) + ") AS " + sumColumnName + " " +
-                "FROM " + SanitizeString(tableName) + " ";
+                "FROM `" + SanitizeString(tableName) + "` ";
 
             //
             // expressions

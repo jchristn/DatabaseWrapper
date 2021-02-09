@@ -178,7 +178,7 @@ namespace DatabaseWrapper.Sqlite
         internal static string CreateTableQuery(string tableName, List<Column> columns)
         {
             string ret =
-                "CREATE TABLE IF NOT EXISTS " + SanitizeString(tableName) + " " +
+                "CREATE TABLE IF NOT EXISTS '" + SanitizeString(tableName) + "' " +
                 "(";
 
             int added = 0;
@@ -235,7 +235,7 @@ namespace DatabaseWrapper.Sqlite
             //
             // table
             //
-            query += "FROM " + SanitizeString(tableName) + " ";
+            query += "FROM '" + SanitizeString(tableName) + "' ";
 
             //
             // expressions
@@ -270,7 +270,7 @@ namespace DatabaseWrapper.Sqlite
         internal static string InsertQuery(string tableName, string keys, string values)
         {
             return
-                "INSERT INTO " + SanitizeString(tableName) + " " +
+                "INSERT INTO '" + SanitizeString(tableName) + "' " +
                 "(" + keys + ") " +
                 "VALUES " +
                 "(" + values + "); " +
@@ -281,7 +281,7 @@ namespace DatabaseWrapper.Sqlite
         {
             string ret =
                 "BEGIN TRANSACTION; " +
-                "  INSERT INTO " + SanitizeString(tableName) + " " +
+                "  INSERT INTO '" + SanitizeString(tableName) + "' " +
                 "  (" + keys + ") " +
                 "  VALUES ";
 
@@ -302,7 +302,7 @@ namespace DatabaseWrapper.Sqlite
         internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
         {
             string ret = 
-                "UPDATE " + SanitizeString(tableName) + " SET " +
+                "UPDATE '" + SanitizeString(tableName) + "' SET " +
                 keyValueClause + " ";
 
             if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter) + " "; 
@@ -312,7 +312,7 @@ namespace DatabaseWrapper.Sqlite
         internal static string DeleteQuery(string tableName, Expression filter)
         {
             string ret =
-                "DELETE FROM " + SanitizeString(tableName) + " ";
+                "DELETE FROM '" + SanitizeString(tableName) + "' ";
 
             if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter) + " ";
 
@@ -321,7 +321,7 @@ namespace DatabaseWrapper.Sqlite
 
         internal static string TruncateQuery(string tableName)
         {
-            return "DELETE FROM " + SanitizeString(tableName);
+            return "DELETE FROM '" + SanitizeString(tableName) + "'";
         }
 
         internal static string ExistsQuery(string tableName, Expression filter)
@@ -334,7 +334,7 @@ namespace DatabaseWrapper.Sqlite
             //
             query =
                 "SELECT * " +
-                "FROM " + SanitizeString(tableName) + " ";
+                "FROM '" + SanitizeString(tableName) + "' ";
 
             //
             // expressions
@@ -359,7 +359,7 @@ namespace DatabaseWrapper.Sqlite
             //
             query =
                 "SELECT COUNT(*) AS " + countColumnName + " " +
-                "FROM " + SanitizeString(tableName) + " ";
+                "FROM '" + SanitizeString(tableName) + "' ";
 
             //
             // expressions
@@ -383,7 +383,7 @@ namespace DatabaseWrapper.Sqlite
             //
             query =
                 "SELECT SUM(" + SanitizeString(fieldName) + ") AS " + sumColumnName + " " +
-                "FROM " + SanitizeString(tableName) + " ";
+                "FROM '" + SanitizeString(tableName) + "' ";
 
             //
             // expressions
@@ -404,7 +404,7 @@ namespace DatabaseWrapper.Sqlite
 
         internal static string PreparedFieldName(string s)
         {
-            return "`" + s + "`";
+            return "'" + s + "'";
         }
 
         internal static string PreparedStringValue(string s)
