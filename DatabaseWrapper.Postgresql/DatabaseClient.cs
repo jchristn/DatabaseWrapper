@@ -399,78 +399,44 @@ namespace DatabaseWrapper.Postgresql
             string keys = "";
             string values = ""; 
             int added = 0;
+
             foreach (KeyValuePair<string, object> curr in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue; 
+                if (String.IsNullOrEmpty(curr.Key)) continue;
 
-                if (added == 0)
+                if (added > 0)
                 {
-                    #region First
+                    keys += ",";
+                    values += ",";
+                }
 
-                    keys += PostgresqlHelper.PreparedFieldName(curr.Key);
-                    if (curr.Value != null)
+                keys += PostgresqlHelper.PreparedFieldName(curr.Key);
+
+                if (curr.Value != null)
+                {
+                    if (curr.Value is DateTime || curr.Value is DateTime?)
                     {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            values += "'" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            values += curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                values += PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                values += PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
+                        values += "'" + DbTimestamp((DateTime)curr.Value) + "'";
+                    }
+                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    {
+                        values += curr.Value.ToString();
                     }
                     else
                     {
-                        values += "null";
+                        if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                        {
+                            values += PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                        }
+                        else
+                        {
+                            values += PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
+                        }
                     }
-
-                    #endregion
                 }
                 else
                 {
-                    #region Subsequent
-
-                    keys += "," + PostgresqlHelper.PreparedFieldName(curr.Key);
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            values += ",'" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            values += "," + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                values += "," + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                values += "," + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        values += ",null";
-                    }
-
-                    #endregion
+                    values += "null";
                 }
 
                 added++;
@@ -598,68 +564,40 @@ namespace DatabaseWrapper.Postgresql
 
             string keyValueClause = ""; 
             int added = 0;
+
             foreach (KeyValuePair<string, object> curr in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue; 
+                if (String.IsNullOrEmpty(curr.Key)) continue;
 
-                if (added == 0)
+                if (added > 0) keyValueClause += ",";
+                 
+                if (curr.Value != null)
                 {
-                    if (curr.Value != null)
+                    if (curr.Value is DateTime || curr.Value is DateTime?)
                     {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
+                        keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                    }
+                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    {
+                        keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
                     }
                     else
                     {
-                        keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "= null";
+                        if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                        {
+                            keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                        }
+                        else
+                        {
+                            keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
+                        }
                     }
                 }
                 else
                 {
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
-                    }
-                    else
-                    {
-                        keyValueClause += "," + PostgresqlHelper.PreparedFieldName(curr.Key) + "= null";
-                    }
-                }
+                    keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "= null";
+                } 
+
                 added++;
             }
 

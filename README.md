@@ -23,9 +23,10 @@ Core features:
 - Built-in sanitization
 - Support for .NET Standard, .NET Core, and .NET Framework
 
-## New in v3.2.2
+## New in v3.3.0
 
-- Breaking change: ```ResultOrder``` class for SELECT
+- Breaking change: update and insert will now correctly set values to ```null```
+- Minor refactor to SQL query builders
 
 ## A Note on Sanitization
 

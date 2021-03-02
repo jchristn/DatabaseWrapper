@@ -251,6 +251,7 @@ namespace Test.Sqlite
                 d.Add("firstName", "first" + i + "-updated");
                 d.Add("lastName", "last" + i + "-updated");
                 d.Add("age", i);
+                d.Add("birthday", null);
 
                 Expression e = new Expression("id", Operators.Equals, i);
                 _Database.Update("person", d, e);

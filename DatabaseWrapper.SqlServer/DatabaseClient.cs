@@ -403,78 +403,44 @@ namespace DatabaseWrapper.SqlServer
             string keys = "";
             string values = "";
             int added = 0;
+
             foreach (KeyValuePair<string, object> curr in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue; 
+                if (String.IsNullOrEmpty(curr.Key)) continue;
 
-                if (added == 0)
+                if (added > 0)
                 {
-                    #region First
+                    keys += ",";
+                    values += ",";
+                }
 
-                    keys += SqlServerHelper.PreparedFieldName(curr.Key);
-                    if (curr.Value != null)
+                keys += SqlServerHelper.PreparedFieldName(curr.Key);
+
+                if (curr.Value != null)
+                {
+                    if (curr.Value is DateTime || curr.Value is DateTime?)
                     {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            values += "'" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            values += curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                values += SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                values += SqlServerHelper.PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
+                        values += "'" + DbTimestamp((DateTime)curr.Value) + "'";
+                    }
+                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    {
+                        values += curr.Value.ToString();
                     }
                     else
                     {
-                        values += "null";
+                        if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                        {
+                            values += SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
+                        }
+                        else
+                        {
+                            values += SqlServerHelper.PreparedStringValue(curr.Value.ToString());
+                        }
                     }
-
-                    #endregion
                 }
                 else
                 {
-                    #region Subsequent
-
-                    keys += "," + SqlServerHelper.PreparedFieldName(curr.Key);
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            values += ",'" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            values += "," + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                values += "," + SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                values += "," + SqlServerHelper.PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        values += ",null";
-                    }
-
-                    #endregion
+                    values += "null";
                 }
 
                 added++;
@@ -602,68 +568,40 @@ namespace DatabaseWrapper.SqlServer
 
             string keyValueClause = "";
             int added = 0;
+
             foreach (KeyValuePair<string, object> curr in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue; 
+                if (String.IsNullOrEmpty(curr.Key)) continue;
 
-                if (added == 0)
+                if (added > 0) keyValueClause += ",";
+
+                if (curr.Value != null)
                 {
-                    if (curr.Value != null)
+                    if (curr.Value is DateTime || curr.Value is DateTime?)
                     {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
+                        keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                    }
+                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    {
+                        keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
                     }
                     else
                     {
-                        keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "= null";
+                        if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                        {
+                            keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
+                        }
+                        else
+                        {
+                            keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedStringValue(curr.Value.ToString());
+                        }
                     }
                 }
                 else
                 {
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            if (Helper.IsExtendedCharacters(curr.Value.ToString()))
-                            {
-                                keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
-                            }
-                            else
-                            {
-                                keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "=" + SqlServerHelper.PreparedStringValue(curr.Value.ToString());
-                            }
-                        }
-                    }
-                    else
-                    {
-                        keyValueClause += "," + SqlServerHelper.PreparedFieldName(curr.Key) + "= null";
-                    }
+                    keyValueClause += SqlServerHelper.PreparedFieldName(curr.Key) + "= null";
                 }
+
                 added++;
             }
 

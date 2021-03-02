@@ -397,76 +397,42 @@ namespace DatabaseWrapper.Sqlite
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (keyValuePairs == null || keyValuePairs.Count < 1) throw new ArgumentNullException(nameof(keyValuePairs));
 
-            #region Variables
-
-            string keys = "";
-            string values = ""; 
-            int insertedId = 0;
-            string retrievalQuery = "";
-            DataTable result;
-
-            #endregion
-
             #region Build-Key-Value-Pairs
 
+            string keys = "";
+            string values = "";
             int added = 0;
+             
             foreach (KeyValuePair<string, object> curr in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue; 
+                if (String.IsNullOrEmpty(curr.Key)) continue;
 
-                if (added == 0)
+                if (added > 0)
                 {
-                    #region First
+                    keys += ",";
+                    values += ",";
+                }
 
-                    keys += SqliteHelper.PreparedFieldName(curr.Key);
-                    if (curr.Value != null)
+                keys += SqliteHelper.PreparedFieldName(curr.Key);
+
+                if (curr.Value != null)
+                {
+                    if (curr.Value is DateTime || curr.Value is DateTime?)
                     {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            values += "'" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            values += curr.Value.ToString();
-                        }
-                        else
-                        {
-                            values += SqliteHelper.PreparedStringValue(curr.Value.ToString());  
-                        }
+                        values += "'" + DbTimestamp((DateTime)curr.Value) + "'";
+                    }
+                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    {
+                        values += curr.Value.ToString();
                     }
                     else
                     {
-                        values += "null";
+                        values += SqliteHelper.PreparedStringValue(curr.Value.ToString());  
                     }
-
-                    #endregion
                 }
                 else
                 {
-                    #region Subsequent
-
-                    keys += "," + SqliteHelper.PreparedFieldName(curr.Key);
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            values += ",'" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            values += "," + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            values += "," + SqliteHelper.PreparedStringValue(curr.Value.ToString());
-                        } 
-                    }
-                    else
-                    {
-                        values += ",null";
-                    }
-
-                    #endregion
+                    values += "null";
                 }
 
                 added++;
@@ -476,17 +442,18 @@ namespace DatabaseWrapper.Sqlite
 
             #region Build-INSERT-Query-and-Submit
              
-            result = Query(SqliteHelper.InsertQuery(tableName, keys, values));
+            DataTable result = Query(SqliteHelper.InsertQuery(tableName, keys, values));
 
             #endregion
 
             #region Post-Retrieval
-             
+
             if (!Helper.DataTableIsNullOrEmpty(result))
             {
                 bool idFound = false;
 
                 string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
+                int insertedId = 0;
 
                 foreach (DataRow curr in result.Rows)
                 {
@@ -503,7 +470,7 @@ namespace DatabaseWrapper.Sqlite
                 }
                 else
                 {
-                    retrievalQuery = "SELECT * FROM `" + tableName + "` WHERE " + primaryKeyColumn + "=" + insertedId;
+                    string retrievalQuery = "SELECT * FROM `" + tableName + "` WHERE `" + primaryKeyColumn + "`=" + insertedId;
                     result = Query(retrievalQuery);
                 }
             } 
@@ -613,63 +580,37 @@ namespace DatabaseWrapper.Sqlite
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (keyValuePairs == null || keyValuePairs.Count < 1) throw new ArgumentNullException(nameof(keyValuePairs));
 
-            #region Variables
-             
-            string keyValueClause = ""; 
-
-            #endregion
-
             #region Build-Key-Value-Clause
 
+            string keyValueClause = ""; 
             int added = 0;
+
             foreach (KeyValuePair<string, object> curr in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue; 
+                if (String.IsNullOrEmpty(curr.Key)) continue;
 
-                if (added == 0)
+                if (added > 0) keyValueClause += ",";
+
+                if (curr.Value != null)
                 {
-                    if (curr.Value != null)
+                    if (curr.Value is DateTime || curr.Value is DateTime?)
                     {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
-                        }
+                        keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                    }
+                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    {
+                        keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
                     }
                     else
                     {
-                        keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "= null";
+                        keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
                     }
                 }
                 else
                 {
-                    if (curr.Value != null)
-                    {
-                        if (curr.Value is DateTime || curr.Value is DateTime?)
-                        {
-                            keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
-                        }
-                        else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
-                        {
-                            keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
-                        }
-                        else
-                        {
-                            keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "=" + SqliteHelper.PreparedStringValue(curr.Value.ToString());
-                        }
-                    }
-                    else
-                    {
-                        keyValueClause += "," + SqliteHelper.PreparedFieldName(curr.Key) + "= null";
-                    }
+                    keyValueClause += SqliteHelper.PreparedFieldName(curr.Key) + "= null";
                 }
+
                 added++;
             }
 

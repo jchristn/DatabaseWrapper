@@ -263,6 +263,7 @@ namespace Test
                 d.Add("firstname", "first" + i + "-updated");
                 d.Add("lastname", "last" + i + "-updated");
                 d.Add("age", i);
+                d.Add("birthday", null);
 
                 Expression e = new Expression("id", Operators.Equals, i);
                 _Database.Update(_Table, d, e);
