@@ -35,6 +35,12 @@
             Default is MM/dd/yyyy hh:mm:ss.fffffff tt.
             </summary>
         </member>
+        <member name="P:DatabaseWrapper.Postgresql.DatabaseClient.TimestampOffsetFormat">
+            <summary>
+            Timestamp format with offset.
+            Default is MM/dd/yyyy hh:mm:ss.fffffff zzz.
+            </summary>
+        </member>
         <member name="P:DatabaseWrapper.Postgresql.DatabaseClient.MaxStatementLength">
             <summary>
             Maximum supported statement length.
@@ -239,6 +245,13 @@
         <member name="M:DatabaseWrapper.Postgresql.DatabaseClient.DbTimestamp(System.DateTime)">
             <summary>
             Convert a DateTime to a formatted string.
+            </summary> 
+            <param name="ts">The timestamp.</param>
+            <returns>A string formatted for use with the specified database.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Postgresql.DatabaseClient.DbTimestampOffset(System.DateTimeOffset)">
+            <summary>
+            Convert a DateTimeOffset to a formatted string.
             </summary> 
             <param name="ts">The timestamp.</param>
             <returns>A string formatted for use with the specified database.</returns>

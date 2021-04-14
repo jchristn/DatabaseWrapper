@@ -13,6 +13,8 @@ namespace DatabaseWrapper.Mysql
     {
         internal static string TimestampFormat = "yyyy-MM-dd HH:mm:ss.ffffff";
 
+        internal static string TimestampOffsetFormat = "yyyy-MM-dd HH:mm:ss.ffffffzzz";
+
         internal static string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
@@ -73,6 +75,7 @@ namespace DatabaseWrapper.Mysql
                     ret += "float(" + col.MaxLength + "," + col.Precision + ") ";
                     break;
                 case DataType.DateTime:
+                case DataType.DateTimeOffset:
                     if (col.Precision != null)
                     {
                         ret += "datetime(" + col.Precision + ") ";
@@ -829,6 +832,19 @@ namespace DatabaseWrapper.Mysql
         internal static string DbTimestamp(DateTime ts)
         {
             return ts.ToString(TimestampFormat);
+        }
+
+        internal static string DbTimestampOffset(DateTimeOffset ts)
+        {
+            string str = ts.ToString(TimestampOffsetFormat);
+            if (TimestampOffsetFormat.Contains("zzz"))
+            {
+                return str.Remove(str.LastIndexOf(":"), 1);
+            }
+            else
+            {
+                return str;
+            }
         }
 
         private static string BuildOrderByClause(ResultOrder[] resultOrder)

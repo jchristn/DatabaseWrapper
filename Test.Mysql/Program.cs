@@ -68,6 +68,7 @@ namespace Test
                 columns.Add(new Column("value", false, DataType.Long, 12, null, true));
                 columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
                 columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
+                columns.Add(new Column("localtime", false, DataType.DateTimeOffset, null, null, true));
 
                 _Database.CreateTable(_Table, columns);
                 Console.WriteLine("Press ENTER to continue...");
@@ -197,6 +198,7 @@ namespace Test
                 d.Add("value", i * 1000);
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
+                d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
 
                 _Database.Insert(_Table, d);
             }
@@ -215,6 +217,7 @@ namespace Test
                 d.Add("value", i * 1000);
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
+                d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 dicts.Add(d);
             }
 

@@ -52,6 +52,11 @@ namespace DatabaseWrapper.Core
         [EnumMember(Value = "DateTime")]
         DateTime,
         /// <summary>
+        /// Timestamp with offset.
+        /// </summary>
+        [EnumMember(Value = "DateTimeOffset")]
+        DateTimeOffset,
+        /// <summary>
         /// Blob
         /// </summary>
         [EnumMember(Value = "Blob")]

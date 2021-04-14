@@ -65,6 +65,23 @@ namespace DatabaseWrapper.Postgresql
         }
 
         /// <summary>
+        /// Timestamp format with offset.
+        /// Default is MM/dd/yyyy hh:mm:ss.fffffff zzz.
+        /// </summary>
+        public string TimestampOffsetFormat
+        {
+            get
+            {
+                return PostgresqlHelper.TimestampOffsetFormat;
+            }
+            set
+            {
+                if (String.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(TimestampOffsetFormat));
+                PostgresqlHelper.TimestampOffsetFormat = value;
+            }
+        }
+
+        /// <summary>
         /// Maximum supported statement length.
         /// </summary>
         public int MaxStatementLength
@@ -418,6 +435,10 @@ namespace DatabaseWrapper.Postgresql
                     {
                         values += "'" + DbTimestamp((DateTime)curr.Value) + "'";
                     }
+                    else if (curr.Value is DateTimeOffset || curr.Value is DateTimeOffset?)
+                    {
+                        values += "'" + DbTimestampOffset((DateTimeOffset)curr.Value) + "'";
+                    }
                     else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                     {
                         values += curr.Value.ToString();
@@ -510,6 +531,10 @@ namespace DatabaseWrapper.Postgresql
                         {
                             vals += "'" + DbTimestamp((DateTime)currKvp.Value) + "'";
                         }
+                        else if (currKvp.Value is DateTimeOffset || currKvp.Value is DateTimeOffset?)
+                        {
+                            vals += "'" + DbTimestampOffset((DateTimeOffset)currKvp.Value) + "'";
+                        }
                         else if (currKvp.Value is int || currKvp.Value is long || currKvp.Value is decimal)
                         {
                             vals += currKvp.Value.ToString();
@@ -576,6 +601,10 @@ namespace DatabaseWrapper.Postgresql
                     if (curr.Value is DateTime || curr.Value is DateTime?)
                     {
                         keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                    }
+                    else if (curr.Value is DateTimeOffset || curr.Value is DateTimeOffset?)
+                    {
+                        keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestampOffset((DateTime)curr.Value) + "'";
                     }
                     else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
                     {
@@ -801,7 +830,17 @@ namespace DatabaseWrapper.Postgresql
         {
             return PostgresqlHelper.DbTimestamp(ts);
         }
-         
+
+        /// <summary>
+        /// Convert a DateTimeOffset to a formatted string.
+        /// </summary> 
+        /// <param name="ts">The timestamp.</param>
+        /// <returns>A string formatted for use with the specified database.</returns>
+        public static string DbTimestampOffset(DateTimeOffset ts)
+        {
+            return PostgresqlHelper.DbTimestampOffset(ts);
+        }
+
         #endregion
     }
 }

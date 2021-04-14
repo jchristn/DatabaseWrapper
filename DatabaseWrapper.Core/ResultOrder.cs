@@ -9,23 +9,31 @@ namespace DatabaseWrapper.Core
     /// </summary>
     public class ResultOrder
     {
+        #region Public-Members
+
         /// <summary>
         /// Column name on which to order results.
         /// </summary>
-        public string ColumnName { get; set; }
+        public string ColumnName { get; set; } = null;
 
         /// <summary>
         /// Direction by which results should be returned.
         /// </summary>
-        public OrderDirection Direction { get; set; }
+        public OrderDirection Direction { get; set; } = OrderDirection.Ascending;
+
+        #endregion
+
+        #region Private-Members
+
+        #endregion
+
+        #region Constructors-and-Factories
 
         /// <summary>
         /// Instantiate the object.
         /// </summary>
         public ResultOrder()
         {
-            ColumnName = null;
-            Direction = OrderDirection.Ascending;
         }
 
         /// <summary>
@@ -39,5 +47,15 @@ namespace DatabaseWrapper.Core
             ColumnName = columnName;
             Direction = direction;
         }
+
+        #endregion
+
+        #region Public-Methods
+
+        #endregion
+
+        #region Private-Methods
+
+        #endregion
     }
 }

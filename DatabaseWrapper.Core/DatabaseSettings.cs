@@ -9,47 +9,60 @@ namespace DatabaseWrapper.Core
     /// </summary>
     public class DatabaseSettings
     {
+        #region Public-Members
+
         /// <summary>
         /// Filename, if using Sqlite.
         /// </summary>
-        public string Filename { get; set; }
+        public string Filename { get; set; } = null;
 
         /// <summary>
         /// The type of database.
         /// </summary>
-        public DbTypes Type { get; set; }
+        public DbTypes Type { get; set; } = DbTypes.Sqlite;
 
         /// <summary>
         /// The hostname of the database server.
         /// </summary>
-        public string Hostname { get; set; }
+        public string Hostname { get; set; } = null;
 
         /// <summary>
         /// The TCP port number on which the server is listening.
         /// </summary>
-        public int Port { get; set; }
+        public int Port { get; set; } = 0;
 
         /// <summary>
         /// The username to use when accessing the database.
         /// </summary>
-        public string Username { get; set; }
+        public string Username { get; set; } = null;
 
         /// <summary>
         /// The password to use when accessing the database.
         /// </summary>
-        public string Password { get; set; }
+        public string Password { get; set; } = null;
 
         /// <summary>
         /// For SQL Server Express, the instance name.
         /// </summary>
-        public string Instance { get; set; }
+        public string Instance { get; set; } = null;
 
         /// <summary>
         /// The name of the database.
         /// </summary>
-        public string DatabaseName { get; set; }
+        public string DatabaseName { get; set; } = null;
 
-        internal DatabaseSettings()
+        #endregion
+
+        #region Private-Members
+
+        #endregion
+
+        #region Constructors-and-Factories
+
+        /// <summary>
+        /// Instantiate the object.
+        /// </summary>
+        public DatabaseSettings()
         {
 
         }
@@ -109,9 +122,9 @@ namespace DatabaseWrapper.Core
             if (String.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
             if (String.IsNullOrEmpty(dbName)) throw new ArgumentNullException(nameof(dbName));
 
+            Type = dbType;
             if (Type == DbTypes.Sqlite) throw new ArgumentException("For Sqlite, use the filename constructor for DatabaseSettings.");
 
-            Type = dbType;
             Hostname = hostname;
             Port = port;
             Username = username;
@@ -144,5 +157,15 @@ namespace DatabaseWrapper.Core
             Instance = instance;
             DatabaseName = dbName;
         }
+
+        #endregion
+
+        #region Public-Methods
+
+        #endregion
+
+        #region Private-Methods
+
+        #endregion
     }
 }

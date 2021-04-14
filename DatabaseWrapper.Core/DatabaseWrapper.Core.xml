@@ -115,6 +115,11 @@
             The name of the database.
             </summary>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor(System.String)">
             <summary>
             Instantiate the object using Sqlite.
@@ -194,6 +199,11 @@
             Timestamp
             </summary>
         </member>
+        <member name="F:DatabaseWrapper.Core.DataType.DateTimeOffset">
+            <summary>
+            Timestamp with offset.
+            </summary>
+        </member>
         <member name="F:DatabaseWrapper.Core.DataType.Blob">
             <summary>
             Blob
@@ -229,6 +239,21 @@
             Boolean expression.
             </summary>
         </member>
+        <member name="P:DatabaseWrapper.Core.Expression.LeftTerm">
+            <summary>
+            The left term of the expression; can either be a string term or a nested Expression.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.Expression.Operator">
+            <summary>
+            The operator.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.Expression.RightTerm">
+            <summary>
+            The right term of the expression; can either be an object for comparison or a nested Expression.
+            </summary>
+        </member>
         <member name="M:DatabaseWrapper.Core.Expression.#ctor">
             <summary>
             A structure in the form of term-operator-term that defines a Boolean evaluation within a WHERE clause.
@@ -248,21 +273,6 @@
             </summary>
             <param name="left">The left term of the expression; can either be a string term or a nested Expression.</param> 
             <param name="right">List of two values where the first value is the lower value and the second value is the higher value.</param>
-        </member>
-        <member name="F:DatabaseWrapper.Core.Expression.LeftTerm">
-            <summary>
-            The left term of the expression; can either be a string term or a nested Expression.
-            </summary>
-        </member>
-        <member name="F:DatabaseWrapper.Core.Expression.Operator">
-            <summary>
-            The operator.
-            </summary>
-        </member>
-        <member name="F:DatabaseWrapper.Core.Expression.RightTerm">
-            <summary>
-            The right term of the expression; can either be an object for comparison or a nested Expression.
-            </summary>
         </member>
         <member name="M:DatabaseWrapper.Core.Expression.ToString">
             <summary>

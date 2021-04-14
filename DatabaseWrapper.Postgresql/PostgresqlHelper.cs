@@ -12,6 +12,8 @@ namespace DatabaseWrapper.Postgresql
     {
         internal static string TimestampFormat = "MM/dd/yyyy hh:mm:ss.fffffff tt";
 
+        internal static string TimestampOffsetFormat = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
+
         internal static string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
@@ -198,6 +200,9 @@ namespace DatabaseWrapper.Postgresql
                     ret += "float(" + col.MaxLength + ") ";
                     break;
                 case DataType.DateTime:
+                    ret += "timestamp without time zone ";
+                    break;
+                case DataType.DateTimeOffset:
                     ret += "timestamp with time zone ";
                     break;
                 default:
@@ -1024,6 +1029,11 @@ namespace DatabaseWrapper.Postgresql
         internal static string DbTimestamp(DateTime ts)
         {
             return ts.ToString(TimestampFormat);
+        }
+
+        internal static string DbTimestampOffset(DateTimeOffset ts)
+        {
+            return ts.ToString(TimestampOffsetFormat);
         }
 
         private static string BuildOrderByClause(ResultOrder[] resultOrder)

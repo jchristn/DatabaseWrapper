@@ -6,6 +6,7 @@ v3.3.0
 
 - Breaking change: update and insert will now correctly set values to ```null```
 - Minor refactor to SQL query builders
+- Better support for DateTimeOffset
 
 ## Previous Versions
 

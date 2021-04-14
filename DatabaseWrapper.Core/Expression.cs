@@ -14,7 +14,30 @@ namespace DatabaseWrapper.Core
     /// </summary>
     public class Expression
     {
-        #region Constructor
+        #region Public-Members
+
+        /// <summary>
+        /// The left term of the expression; can either be a string term or a nested Expression.
+        /// </summary>
+        public object LeftTerm { get; set; } = null;
+
+        /// <summary>
+        /// The operator.
+        /// </summary>
+        public Operators Operator { get; set; } = Operators.Equals;
+
+        /// <summary>
+        /// The right term of the expression; can either be an object for comparison or a nested Expression.
+        /// </summary>
+        public object RightTerm { get; set; } = null;
+
+        #endregion
+
+        #region Private-Members
+
+        #endregion
+
+        #region Constructors-and-Factories
 
         /// <summary>
         /// A structure in the form of term-operator-term that defines a Boolean evaluation within a WHERE clause.
@@ -44,34 +67,11 @@ namespace DatabaseWrapper.Core
         public static Expression Between(object left, List<object> right)
         {
             if (right == null) throw new ArgumentNullException(nameof(right));
-            if (right.Count != 2) throw new ArgumentException("Right term must contain exactly two members."); 
+            if (right.Count != 2) throw new ArgumentException("Right term must contain exactly two members.");
             Expression startOfBetween = new Expression(left, Operators.GreaterThanOrEqualTo, right.First());
             Expression endOfBetween = new Expression(left, Operators.LessThanOrEqualTo, right.Last());
-            return PrependAndClause(startOfBetween, endOfBetween); 
+            return PrependAndClause(startOfBetween, endOfBetween);
         }
-         
-        #endregion
-
-        #region Public-Members
-
-        /// <summary>
-        /// The left term of the expression; can either be a string term or a nested Expression.
-        /// </summary>
-        public object LeftTerm;
-
-        /// <summary>
-        /// The operator.
-        /// </summary>
-        public Operators Operator;
-
-        /// <summary>
-        /// The right term of the expression; can either be an object for comparison or a nested Expression.
-        /// </summary>
-        public object RightTerm;
-
-        #endregion
-
-        #region Private-Members
 
         #endregion
 
@@ -303,128 +303,7 @@ namespace DatabaseWrapper.Core
         #endregion
 
         #region Private-Methods
-
-        private string aSanitizeString(DbTypes dbType, string s)
-        {
-            if (String.IsNullOrEmpty(s)) return String.Empty;
-            string ret = "";
-
-            switch (dbType)
-            {
-                case DbTypes.SqlServer:
-                    ret = Sanitizer.SqlServerSanitizer(s);
-                    break;
-
-                case DbTypes.Mysql:
-                    ret = Sanitizer.MysqlSanitizer(s);
-                    break;
-
-                case DbTypes.Postgresql:
-                    ret = Sanitizer.PostgresqlSanitizer(s);
-                    break;
-
-                case DbTypes.Sqlite:
-                    ret = Sanitizer.SqliteSanitizer(s);
-                    break;
-            }
-
-            return ret;
-        }
-
-        private string PreparedFieldname(DbTypes dbType, string s)
-        {
-            switch (dbType)
-            {
-                case DbTypes.SqlServer:
-                    return "[" + s + "]";
-
-                case DbTypes.Mysql:
-                    return "`" + s + "`";
-
-                case DbTypes.Postgresql:
-                    return "\"" + s + "\"";
-
-                case DbTypes.Sqlite:
-                    return "`" + s + "`";
-            }
-
-            return null;
-        }
-
-        private string PreparedStringValue(DbTypes dbType, string s)
-        {
-            switch (dbType)
-            {
-                case DbTypes.SqlServer:
-                    return "'" + Sanitizer.SqlServerSanitizer(s) + "'";
-
-                case DbTypes.Mysql:
-                    return "'" + Sanitizer.MysqlSanitizer(s) + "'";
-
-                case DbTypes.Postgresql:
-                    // uses $xx$ escaping
-                    return Sanitizer.PostgresqlSanitizer(s);
-
-                case DbTypes.Sqlite:
-                    return "'" + Sanitizer.SqliteSanitizer(s) + "'";
-            }
-
-            return null;
-        }
-
-        private string PreparedUnicodeValue(DbTypes dbType, string s)
-        {
-            switch (dbType)
-            {
-                case DbTypes.SqlServer:
-                    return "N" + PreparedStringValue(dbType, s);
-
-                case DbTypes.Mysql:
-                    return "N" + PreparedStringValue(dbType, s);
-
-                case DbTypes.Postgresql:
-                    return "U&" + PreparedStringValue(dbType, s);
-
-                case DbTypes.Sqlite:
-                    return "N" + PreparedStringValue(dbType, s);
-            }
-
-            return null;
-        }
-
-        private string DbTimestamp(DbTypes dbType, object ts)
-        {
-            DateTime dt = DateTime.Now;
-            if (ts == null) return null;
-            if (ts is DateTime?) dt = Convert.ToDateTime(ts);
-            else if (ts is DateTime) dt = (DateTime)ts;
-
-            switch (dbType)
-            {
-                case DbTypes.SqlServer:
-                    return dt.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
-
-                case DbTypes.Mysql:
-                    return dt.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
-
-                case DbTypes.Postgresql:
-                    return dt.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt");
-
-                case DbTypes.Sqlite:
-                    return dt.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
-
-                default:
-                    return null;
-            }
-        }
-
-        private bool IsList(object obj)
-        {
-            return obj is IList &&
-                obj.GetType().IsGenericType &&
-                obj.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
-        }
-
+          
         #endregion
     }
 }

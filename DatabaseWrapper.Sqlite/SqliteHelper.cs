@@ -11,6 +11,8 @@ namespace DatabaseWrapper.Sqlite
     {
         internal static string TimestampFormat = "yyyy-MM-dd HH:mm:ss.ffffff";
 
+        internal static string TimestampOffsetFormat = "yyyy-MM-dd HH:mm:ss.fffffff zzz";
+
         internal static string ConnectionString(DatabaseSettings settings)
         {
             return "Data Source=" + settings.Filename;
@@ -153,6 +155,7 @@ namespace DatabaseWrapper.Sqlite
                     ret += "REAL ";
                     break;
                 case DataType.DateTime:
+                case DataType.DateTimeOffset:
                     ret += "TEXT ";
                     break;
                 case DataType.Blob:
@@ -407,6 +410,11 @@ namespace DatabaseWrapper.Sqlite
         internal static string DbTimestamp(DateTime ts)
         {
             return ts.ToString(TimestampFormat);
+        }
+
+        internal static string DbTimestampOffset(DateTimeOffset ts)
+        {
+            return ts.ToString(TimestampOffsetFormat);
         }
 
         internal static string PreparedFieldName(string s)
