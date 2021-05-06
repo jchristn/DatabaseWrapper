@@ -229,6 +229,13 @@
             <param name="ts">DateTime.</param>
             <returns>A string with formatted timestamp.</returns>
         </member>
+        <member name="M:DatabaseWrapper.Postgresql.DatabaseClient.TimestampOffset(System.DateTimeOffset)">
+            <summary>
+            Create a string timestamp with offset from the given DateTimeOffset.
+            </summary>
+            <param name="ts">DateTimeOffset.</param>
+            <returns>A string with formatted timestamp.</returns>
+        </member>
         <member name="M:DatabaseWrapper.Postgresql.DatabaseClient.SanitizeString(System.String)">
             <summary>
             Sanitize an input string.

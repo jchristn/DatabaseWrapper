@@ -42,7 +42,7 @@ namespace DatabaseWrapper.Core
         /// Whether or not the column can contain NULL.
         /// </summary>
         public bool Nullable = true;
-
+         
         #endregion
 
         #region Private-Members
@@ -152,7 +152,7 @@ namespace DatabaseWrapper.Core
                 " [Column " + Name + "] ";
 
             if (PrimaryKey) ret += "PK ";
-            ret += "Type: " + Type + " ";
+            ret += "Type: " + Type.ToString() + " ";
             if (MaxLength != null) ret += "MaxLen: " + MaxLength + " ";
             if (Precision != null) ret += "Precision: " + Precision + " ";
             ret += "Nullable: " + Nullable;

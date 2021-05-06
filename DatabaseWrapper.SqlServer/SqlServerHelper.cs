@@ -173,7 +173,21 @@ namespace DatabaseWrapper.SqlServer
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
             }
 
-            if (col.PrimaryKey) ret += "IDENTITY(1,1) ";
+            if (col.PrimaryKey)
+            {
+                if (col.Type == DataType.Varchar || col.Type == DataType.Nvarchar)
+                {
+                    ret += "UNIQUE ";
+                }
+                else if (col.Type == DataType.Int || col.Type == DataType.Long)
+                {
+                    ret += "IDENTITY(1,1) ";
+                }
+                else
+                {
+                    throw new ArgumentException("Primary key column '" + col.Name + "' is of an unsupported type: " + col.Type.ToString());
+                }
+            }
 
             if (col.Nullable) ret += "NULL ";
             else ret += "NOT NULL ";
@@ -451,21 +465,22 @@ namespace DatabaseWrapper.SqlServer
             if (s.Contains("."))
             {
                 string[] parts = s.Split('.');
-                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
-                return
-                    "[" +
-                    SanitizeString(parts[0]) +
-                    "].[" +
-                    SanitizeString(parts[1]) +
-                    "]";
+                if (parts.Length > 0)
+                {
+                    string ret = "";
+                    for (int i = 0; i < parts.Length; i++)
+                    {
+                        if (i > 0) ret += ".";
+                        ret += "[" + SanitizeString(parts[i]) + "]";
+                    }
+                    return ret;
+                }
             }
-            else
-            {
-                return
-                    "[" +
-                    SanitizeString(s) +
-                    "]";
-            }
+
+            return
+                "[" +
+                SanitizeString(s) +
+                "]";
         }
 
         internal static string PreparedTableNameUnenclosed(string s)

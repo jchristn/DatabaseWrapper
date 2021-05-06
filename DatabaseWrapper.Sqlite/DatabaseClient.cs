@@ -476,23 +476,26 @@ namespace DatabaseWrapper.Sqlite
                 string primaryKeyColumn = GetPrimaryKeyColumn(tableName);
                 int insertedId = 0;
 
-                foreach (DataRow curr in result.Rows)
+                if (!String.IsNullOrEmpty(primaryKeyColumn))
                 {
-                    if (Int32.TryParse(curr["id"].ToString(), out insertedId))
+                    foreach (DataRow curr in result.Rows)
                     {
-                        idFound = true;
-                        break;
+                        if (Int32.TryParse(curr["id"].ToString(), out insertedId))
+                        {
+                            idFound = true;
+                            break;
+                        }
                     }
-                }
 
-                if (!idFound)
-                {
-                    result = null;
-                }
-                else
-                {
-                    string retrievalQuery = "SELECT * FROM `" + tableName + "` WHERE `" + primaryKeyColumn + "`=" + insertedId;
-                    result = Query(retrievalQuery);
+                    if (!idFound)
+                    {
+                        result = null;
+                    }
+                    else
+                    {
+                        string retrievalQuery = "SELECT * FROM `" + tableName + "` WHERE `" + primaryKeyColumn + "`=" + insertedId;
+                        result = Query(retrievalQuery);
+                    }
                 }
             } 
 
@@ -794,6 +797,16 @@ namespace DatabaseWrapper.Sqlite
         public string Timestamp(DateTime ts)
         {
             return SqliteHelper.DbTimestamp(ts);
+        }
+
+        /// <summary>
+        /// Create a string timestamp with offset from the given DateTimeOffset.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>A string with formatted timestamp.</returns>
+        public string TimestampOffset(DateTimeOffset ts)
+        {
+            return SqliteHelper.DbTimestampOffset(ts);
         }
 
         /// <summary>

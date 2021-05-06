@@ -828,6 +828,16 @@ namespace DatabaseWrapper.Mysql
         }
 
         /// <summary>
+        /// Create a string timestamp with offset from the given DateTimeOffset.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>A string with formatted timestamp.</returns>
+        public string TimestampOffset(DateTimeOffset ts)
+        {
+            return MysqlHelper.DbTimestampOffset(ts);
+        }
+
+        /// <summary>
         /// Sanitize an input string.
         /// </summary>
         /// <param name="s">The value to sanitize.</param>

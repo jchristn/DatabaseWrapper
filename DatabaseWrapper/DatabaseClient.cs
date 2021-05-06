@@ -835,6 +835,28 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Create a string timestamp with offset from the given DateTimeOffset for the database of the instance type.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>A string with timestamp and offset formatted for the database of the instance type.</returns>
+        public string TimestampOffset(DateTimeOffset ts)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypes.Mysql:
+                    return _Mysql.TimestampOffset(ts);
+                case DbTypes.Postgresql:
+                    return _Postgresql.TimestampOffset(ts);
+                case DbTypes.Sqlite:
+                    return _Sqlite.TimestampOffset(ts);
+                case DbTypes.SqlServer:
+                    return _SqlServer.TimestampOffset(ts);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Sanitize an input string.
         /// </summary>
         /// <param name="s">The value to sanitize.</param>
@@ -888,7 +910,7 @@ namespace DatabaseWrapper
 
             _Disposed = true;
         }
-          
+
         #endregion
 
         #region Public-Static-Methods
@@ -915,7 +937,30 @@ namespace DatabaseWrapper
                     return null;
             }
         }
-         
+
+        /// <summary>
+        /// Convert a DateTimeOffset to a string formatted for the specified database type.
+        /// </summary>
+        /// <param name="dbType">The type of database.</param>
+        /// <param name="ts">The timestamp with offset.</param>
+        /// <returns>A string formatted for use with the specified database.</returns>
+        public static string DbTimestampOffset(DbTypes dbType, DateTimeOffset ts)
+        {
+            switch (dbType)
+            {
+                case DbTypes.Mysql:
+                    return Mysql.DatabaseClient.DbTimestampOffset(ts);
+                case DbTypes.Postgresql:
+                    return Postgresql.DatabaseClient.DbTimestampOffset(ts);
+                case DbTypes.Sqlite:
+                    return Sqlite.DatabaseClient.DbTimestampOffset(ts);
+                case DbTypes.SqlServer:
+                    return SqlServer.DatabaseClient.DbTimestampOffset(ts);
+                default:
+                    return null;
+            }
+        }
+
         #endregion
     }
 }

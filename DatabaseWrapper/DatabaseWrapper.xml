@@ -230,6 +230,13 @@
             <param name="ts">DateTime.</param>
             <returns>A string with timestamp formatted for the database of the instance type.</returns>
         </member>
+        <member name="M:DatabaseWrapper.DatabaseClient.TimestampOffset(System.DateTimeOffset)">
+            <summary>
+            Create a string timestamp with offset from the given DateTimeOffset for the database of the instance type.
+            </summary>
+            <param name="ts">DateTimeOffset.</param>
+            <returns>A string with timestamp and offset formatted for the database of the instance type.</returns>
+        </member>
         <member name="M:DatabaseWrapper.DatabaseClient.SanitizeString(System.String)">
             <summary>
             Sanitize an input string.
@@ -249,6 +256,14 @@
             </summary>
             <param name="dbType">The type of database.</param>
             <param name="ts">The timestamp.</param>
+            <returns>A string formatted for use with the specified database.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.DatabaseClient.DbTimestampOffset(DatabaseWrapper.Core.DbTypes,System.DateTimeOffset)">
+            <summary>
+            Convert a DateTimeOffset to a string formatted for the specified database type.
+            </summary>
+            <param name="dbType">The type of database.</param>
+            <param name="ts">The timestamp with offset.</param>
             <returns>A string formatted for use with the specified database.</returns>
         </member>
     </members>

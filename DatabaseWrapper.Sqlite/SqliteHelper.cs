@@ -165,7 +165,22 @@ namespace DatabaseWrapper.Sqlite
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
             }
 
-            if (col.PrimaryKey) ret += "PRIMARY KEY AUTOINCREMENT "; 
+            if (col.PrimaryKey)
+            {
+                if (col.Type == DataType.Varchar || col.Type == DataType.Nvarchar)
+                {
+                    ret += "UNIQUE ";
+                }
+                else if (col.Type == DataType.Int || col.Type == DataType.Long)
+                {
+                    ret += "PRIMARY KEY AUTOINCREMENT ";
+                }
+                else
+                {
+                    throw new ArgumentException("Primary key column '" + col.Name + "' is of an unsupported type: " + col.Type.ToString());
+                }
+            }
+
             if (!col.Nullable) ret += "NOT NULL ";
 
             return ret;
