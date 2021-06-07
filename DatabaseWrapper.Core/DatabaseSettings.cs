@@ -91,8 +91,6 @@ namespace DatabaseWrapper.Core
         {
             if (String.IsNullOrEmpty(dbType)) throw new ArgumentNullException(nameof(dbType));
             if (String.IsNullOrEmpty(hostname)) throw new ArgumentNullException(nameof(hostname));
-            if (String.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
-            if (String.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
             if (String.IsNullOrEmpty(dbName)) throw new ArgumentNullException(nameof(dbName));
 
             Type = (DbTypes)(Enum.Parse(typeof(DbTypes), dbType));
@@ -118,8 +116,6 @@ namespace DatabaseWrapper.Core
         public DatabaseSettings(DbTypes dbType, string hostname, int port, string username, string password, string dbName)
         {
             if (String.IsNullOrEmpty(hostname)) throw new ArgumentNullException(nameof(hostname));
-            if (String.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
-            if (String.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
             if (String.IsNullOrEmpty(dbName)) throw new ArgumentNullException(nameof(dbName));
 
             Type = dbType;
@@ -145,8 +141,6 @@ namespace DatabaseWrapper.Core
         public DatabaseSettings(string hostname, int port, string username, string password, string instance, string dbName)
         {
             if (String.IsNullOrEmpty(hostname)) throw new ArgumentNullException(nameof(hostname));
-            if (String.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
-            if (String.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
             if (String.IsNullOrEmpty(dbName)) throw new ArgumentNullException(nameof(dbName));
 
             Type = DbTypes.SqlServer;
