@@ -2,13 +2,21 @@
 
 ## Current Version
 
+v3.3.2
+
+- Support for BLOB data types using ```byte[]```
+  - SQL Server: ```varbinary(max)```
+  - Sqlite: ```blob```
+  - Postgresql: ```bytea```
+  - Mysql: ```longblob```
+
+## Previous Versions
+
 v3.3.0
 
 - Breaking change: update and insert will now correctly set values to ```null```
 - Minor refactor to SQL query builders
 - Better support for DateTimeOffset
-
-## Previous Versions
 
 v3.2.0
 

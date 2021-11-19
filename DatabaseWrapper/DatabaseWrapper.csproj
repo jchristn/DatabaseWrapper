@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.3.1.5</Version>
+    <Version>3.3.2</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite. written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages if you only need support for one database type.</Description>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageReleaseNotes>.NET 6 support</PackageReleaseNotes>
+    <PackageReleaseNotes>BLOB data type support</PackageReleaseNotes>
     <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
     <PackageIconUrl></PackageIconUrl>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
@@ -20,10 +20,6 @@
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 	
-  <PropertyGroup>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
-
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
@@ -73,10 +69,10 @@
 
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Mysql" Version="3.3.1.5" />
-    <PackageReference Include="DatabaseWrapper.Postgresql" Version="3.3.1.5" />
-    <PackageReference Include="DatabaseWrapper.Sqlite" Version="3.3.1.5" />
-    <PackageReference Include="DatabaseWrapper.SqlServer" Version="3.3.1.5" />
+    <PackageReference Include="DatabaseWrapper.Mysql" Version="3.3.2" />
+    <PackageReference Include="DatabaseWrapper.Postgresql" Version="3.3.2" />
+    <PackageReference Include="DatabaseWrapper.Sqlite" Version="3.3.2" />
+    <PackageReference Include="DatabaseWrapper.SqlServer" Version="3.3.2" />
   </ItemGroup>
  
   <ItemGroup>

@@ -85,6 +85,9 @@ namespace DatabaseWrapper.Mysql
                         ret += "datetime ";
                     }
                     break;
+                case DataType.Blob:
+                    ret += "longblob ";
+                    break;
                 default:
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
             }

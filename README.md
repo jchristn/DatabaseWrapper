@@ -23,11 +23,13 @@ Core features:
 - Built-in sanitization
 - Support for .NET Standard, .NET Core, and .NET Framework
 
-## New in v3.3.0
+## New in v3.3.2
 
-- Breaking change: update and insert will now correctly set values to ```null```
-- Minor refactor to SQL query builders
-- Better support for DateTimeOffset
+- Support for BLOB data types using ```byte[]```
+  - SQL Server: ```varbinary(max)```
+  - Sqlite: ```blob```
+  - Postgresql: ```bytea```
+  - Mysql: ```longblob```
 
 ## A Note on Sanitization
 
