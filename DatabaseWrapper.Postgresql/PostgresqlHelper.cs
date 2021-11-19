@@ -205,6 +205,9 @@ namespace DatabaseWrapper.Postgresql
                 case DataType.DateTimeOffset:
                     ret += "timestamp with time zone ";
                     break;
+                case DataType.Blob:
+                    ret += "bytea ";
+                    break;
                 default:
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
             }

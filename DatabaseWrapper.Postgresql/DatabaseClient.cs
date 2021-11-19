@@ -414,50 +414,56 @@ namespace DatabaseWrapper.Postgresql
             #region Build-Key-Value-Pairs
 
             string keys = "";
-            string values = ""; 
+            string vals = ""; 
             int added = 0;
 
-            foreach (KeyValuePair<string, object> curr in keyValuePairs)
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue;
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
 
                 if (added > 0)
                 {
                     keys += ",";
-                    values += ",";
+                    vals += ",";
                 }
 
-                keys += PostgresqlHelper.PreparedFieldName(curr.Key);
+                keys += PostgresqlHelper.PreparedFieldName(currKvp.Key);
 
-                if (curr.Value != null)
+                if (currKvp.Value != null)
                 {
-                    if (curr.Value is DateTime || curr.Value is DateTime?)
+                    if (currKvp.Value is DateTime || currKvp.Value is DateTime?)
                     {
-                        values += "'" + DbTimestamp((DateTime)curr.Value) + "'";
+                        vals += "'" + DbTimestamp((DateTime)currKvp.Value) + "'";
                     }
-                    else if (curr.Value is DateTimeOffset || curr.Value is DateTimeOffset?)
+                    else if (currKvp.Value is DateTimeOffset || currKvp.Value is DateTimeOffset?)
                     {
-                        values += "'" + DbTimestampOffset((DateTimeOffset)curr.Value) + "'";
+                        vals += "'" + DbTimestampOffset((DateTimeOffset)currKvp.Value) + "'";
                     }
-                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    else if (currKvp.Value is int || currKvp.Value is long || currKvp.Value is decimal)
                     {
-                        values += curr.Value.ToString();
+                        vals += currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is byte[])
+                    {
+                        vals += "decode('" + Helper.ByteArrayToString((byte[])currKvp.Value) + "', 'hex')";
+                        // vals += "E'\\x" + Helper.ByteArrayToString((byte[])currKvp.Value) + "'";
+                        // vals += "E'\\x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
                     }
                     else
                     {
-                        if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
                         {
-                            values += PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                            vals += PostgresqlHelper.PreparedUnicodeValue(currKvp.Value.ToString());
                         }
                         else
                         {
-                            values += PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
+                            vals += PostgresqlHelper.PreparedStringValue(currKvp.Value.ToString());
                         }
                     }
                 }
                 else
                 {
-                    values += "null";
+                    vals += "null";
                 }
 
                 added++;
@@ -467,7 +473,7 @@ namespace DatabaseWrapper.Postgresql
 
             #region Build-INSERT-Query-and-Submit
 
-            return Query(PostgresqlHelper.InsertQuery(tableName, keys, values)); 
+            return Query(PostgresqlHelper.InsertQuery(tableName, keys, vals)); 
 
             #endregion 
         }
@@ -538,6 +544,12 @@ namespace DatabaseWrapper.Postgresql
                         else if (currKvp.Value is int || currKvp.Value is long || currKvp.Value is decimal)
                         {
                             vals += currKvp.Value.ToString();
+                        }
+                        else if (currKvp.Value is byte[])
+                        {
+                            vals += "decode('" + Helper.ByteArrayToString((byte[])currKvp.Value) + "', 'hex')";
+                            // vals += "E'\\x" + Helper.ByteArrayToString((byte[])currKvp.Value) + "'";
+                            // vals += "E'\\x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
                         }
                         else
                         {
