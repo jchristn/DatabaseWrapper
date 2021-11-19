@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace Test.Sqlite
         static DatabaseSettings _Settings;
         static DatabaseClient _Database;
         static string _Table = "person";
+        static byte[] _FileBytes = File.ReadAllBytes("./headshot.png");
 
         static void Main(string[] args)
         {
@@ -26,7 +28,7 @@ namespace Test.Sqlite
                 string filename = Console.ReadLine();
                 if (String.IsNullOrEmpty(filename)) return;
                 _Settings = new DatabaseSettings(filename);
-                _Database = new DatabaseClient(_Settings); 
+                _Database = new DatabaseClient(_Settings);
 
                 _Database.Logger = Logger;
                 _Database.LogQueries = true;
@@ -57,6 +59,7 @@ namespace Test.Sqlite
                 columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
                 columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
                 columns.Add(new Column("localtime", false, DataType.DateTimeOffset, null, null, true));
+                columns.Add(new Column("picture", false, DataType.Blob, true));
 
                 _Database.CreateTable("person", columns);
                 Console.WriteLine("Press ENTER to continue...");
@@ -187,7 +190,7 @@ namespace Test.Sqlite
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
-
+                d.Add("picture", _FileBytes);
                 _Database.Insert("person", d);
             }
         }
@@ -206,6 +209,7 @@ namespace Test.Sqlite
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
+                d.Add("picture", _FileBytes);
                 dicts.Add(d);
             }
 
@@ -263,7 +267,7 @@ namespace Test.Sqlite
 
         static void RetrieveRows()
         {
-            List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
+            List<string> returnFields = new List<string> { "firstName", "lastName", "age", "picture" };
 
             for (int i = 30; i < 40; i++)
             {
@@ -279,7 +283,15 @@ namespace Test.Sqlite
                 // is here to show how to build a nested expression
                 //
 
-                _Database.Select("person", null, 3, returnFields, e);
+                DataTable result = _Database.Select("person", null, 3, returnFields, e);
+                if (result != null && result.Rows != null && result.Rows.Count > 0)
+                {
+                    foreach (DataRow row in result.Rows)
+                    {
+                        byte[] data = (byte[])(row["picture"]);
+                        Console.WriteLine("Picture data length " + data.Length + " vs original length " + _FileBytes.Length);
+                    }
+                }
             }
         }
 

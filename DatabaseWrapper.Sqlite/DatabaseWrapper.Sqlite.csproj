@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
-    <Version>3.3.1.5</Version>
+    <Version>3.3.2</Version>
     <Authors>Joel Christner</Authors>
     <Description>Simple database wrapper for Sqlite written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, MySQL, and PostgreSQL.</Description>
     <Copyright>(c)2021 Joel Christner</Copyright>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
-    <PackageReleaseNotes>.NET 6 support</PackageReleaseNotes>
+    <PackageReleaseNotes>BLOB data type support</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
@@ -66,7 +66,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Core" Version="3.3.1.5" />
+    <PackageReference Include="DatabaseWrapper.Core" Version="3.3.1.7" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
