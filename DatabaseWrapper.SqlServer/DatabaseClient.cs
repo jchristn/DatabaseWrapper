@@ -418,55 +418,54 @@ namespace DatabaseWrapper.SqlServer
             #region Build-Key-Value-Pairs
 
             string keys = "";
-            string values = "";
+            string vals = "";
             int added = 0;
 
-            foreach (KeyValuePair<string, object> curr in keyValuePairs)
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue;
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
 
                 if (added > 0)
                 {
                     keys += ",";
-                    values += ",";
+                    vals += ",";
                 }
 
-                keys += SqlServerHelper.PreparedFieldName(curr.Key);
+                keys += SqlServerHelper.PreparedFieldName(currKvp.Key);
 
-                if (curr.Value != null)
+                if (currKvp.Value != null)
                 {
-                    if (curr.Value is DateTime || curr.Value is DateTime?)
+                    if (currKvp.Value is DateTime || currKvp.Value is DateTime?)
                     {
-                        values += "'" + DbTimestamp((DateTime)curr.Value) + "'";
+                        vals += "'" + DbTimestamp((DateTime)currKvp.Value) + "'";
                     }
-                    else if (curr.Value is DateTimeOffset || curr.Value is DateTimeOffset?)
+                    else if (currKvp.Value is DateTimeOffset || currKvp.Value is DateTimeOffset?)
                     {
-                        values += "'" + DbTimestampOffset((DateTimeOffset)curr.Value) + "'";
+                        vals += "'" + DbTimestampOffset((DateTimeOffset)currKvp.Value) + "'";
                     }
-                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    else if (currKvp.Value is int || currKvp.Value is long || currKvp.Value is decimal)
                     {
-                        values += curr.Value.ToString();
+                        vals += currKvp.Value.ToString();
                     }
-                    else if (curr.Value is byte[])
+                    else if (currKvp.Value is byte[])
                     {
-                        // CAST('"+hexStr + "' as varBinary(MAX)
-                        values += "'" + Convert.ToBase64String((byte[])curr.Value) + "'";
+                        vals += "0x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "");
                     }
                     else
                     {
-                        if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
                         {
-                            values += SqlServerHelper.PreparedUnicodeValue(curr.Value.ToString());
+                            vals += SqlServerHelper.PreparedUnicodeValue(currKvp.Value.ToString());
                         }
                         else
                         {
-                            values += SqlServerHelper.PreparedStringValue(curr.Value.ToString());
+                            vals += SqlServerHelper.PreparedStringValue(currKvp.Value.ToString());
                         }
                     }
                 }
                 else
                 {
-                    values += "null";
+                    vals += "null";
                 }
 
                 added++;
@@ -476,7 +475,7 @@ namespace DatabaseWrapper.SqlServer
 
             #region Build-INSERT-Query-and-Submit
              
-            return Query(SqlServerHelper.InsertQuery(tableName, keys, values));
+            return Query(SqlServerHelper.InsertQuery(tableName, keys, vals));
 
             #endregion
         }
@@ -548,6 +547,10 @@ namespace DatabaseWrapper.SqlServer
                         {
                             vals += currKvp.Value.ToString();
                         }
+                        else if (currKvp.Value is byte[])
+                        {
+                            vals += "0x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "");
+                        }
                         else
                         {
                             if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
@@ -559,7 +562,6 @@ namespace DatabaseWrapper.SqlServer
                                 vals += SqlServerHelper.PreparedStringValue(currKvp.Value.ToString());
                             }
                         }
-
                     }
                     else
                     {

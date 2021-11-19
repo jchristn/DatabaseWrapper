@@ -17,6 +17,9 @@
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
+  <PropertyGroup>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
     <DocumentationFile>DatabaseWrapper.Sqlite.xml</DocumentationFile>

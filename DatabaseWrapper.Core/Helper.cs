@@ -355,7 +355,7 @@ namespace DatabaseWrapper.Core
         /// </summary>
         /// <param name="bytes">Byte array.</param>
         /// <returns>Hex string.</returns>
-        public static string ByteArrayToString(byte[] bytes)
+        public static string ByteArrayToHexString(byte[] bytes)
         {
             if (bytes == null) return null;
             if (bytes.Length < 1) return "";

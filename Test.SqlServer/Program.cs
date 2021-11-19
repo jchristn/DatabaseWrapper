@@ -282,7 +282,7 @@ namespace Test
 
         static void RetrieveRows()
         {
-            List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
+            List<string> returnFields = new List<string> { "firstname", "lastname", "age", "picture" };
 
             for (int i = 30; i < 40; i++)
             {
@@ -301,7 +301,15 @@ namespace Test
                 ResultOrder[] resultOrder = new ResultOrder[1];
                 resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
 
-                _Database.Select(_Table, 0, 3, returnFields, e, resultOrder);
+                DataTable result = _Database.Select(_Table, 0, 3, returnFields, e, resultOrder);
+                if (result != null && result.Rows != null && result.Rows.Count > 0)
+                {
+                    foreach (DataRow row in result.Rows)
+                    {
+                        byte[] data = (byte[])(row["picture"]);
+                        Console.WriteLine("Picture data length " + data.Length + " vs original length " + _FileBytes.Length);
+                    }
+                }
             }
         }
 

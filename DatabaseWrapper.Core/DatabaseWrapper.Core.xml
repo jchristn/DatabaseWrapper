@@ -446,7 +446,7 @@
             <param name="s">String containing column type.</param>
             <returns>DataType.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Core.Helper.ByteArrayToString(System.Byte[])">
+        <member name="M:DatabaseWrapper.Core.Helper.ByteArrayToHexString(System.Byte[])">
             <summary>
             Convert byte array to hex string.
             </summary>
