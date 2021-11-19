@@ -9,4 +9,10 @@
     <ProjectReference Include="..\DatabaseWrapper.Mysql\DatabaseWrapper.Mysql.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="headshot.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -169,6 +169,9 @@ namespace DatabaseWrapper.SqlServer
                 case DataType.DateTimeOffset:
                     ret += "[datetimeoffset] ";
                     break;
+                case DataType.Blob:
+                    ret += "[varbinary](max) ";
+                    break;
                 default:
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
             }

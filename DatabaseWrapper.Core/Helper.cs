@@ -337,8 +337,13 @@ namespace DatabaseWrapper.Core
                 case "nvarchar":
                     return DataType.Nvarchar;   // mssql
 
-                case "blob":
-                    return DataType.Blob;       // sqlite
+                case "blob":                    // sqlite, mysql
+                case "tinyblob":                // mysql
+                case "mediumblob":              // mysql
+                case "longblob":                // mysql
+                case "bytea":                   // pgsql
+                case "varbinary":               // mssql
+                    return DataType.Blob;
 
                 default:
                     throw new ArgumentException("Unknown DataType: " + s);

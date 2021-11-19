@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,10 +16,11 @@ namespace Test
         static Random _Random = new Random(DateTime.Now.Millisecond);
         static DatabaseSettings _Settings;
         static DatabaseClient _Database;
+        static byte[] _FileBytes = File.ReadAllBytes("./headshot.png");
 
         // To use dbo.person, change _Table to either 'dbo.person' or just 'person'
         // To use with a specific schema, use 'schema.table', i.e. 'foo.person'
-        static string _Table = "foo.person";
+        static string _Table = "dbo.person";
 
         static void Main(string[] args)
         {
@@ -72,6 +74,7 @@ namespace Test
                 columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
                 columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
                 columns.Add(new Column("localtime", false, DataType.DateTimeOffset, null, null, true));
+                columns.Add(new Column("picture", false, DataType.Blob, true));
 
                 _Database.CreateTable(_Table, columns);
                 Console.WriteLine("Press ENTER to continue...");
@@ -202,7 +205,7 @@ namespace Test
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
-
+                d.Add("picture", _FileBytes);
                 _Database.Insert(_Table, d);
             }
         }
@@ -221,6 +224,7 @@ namespace Test
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
+                d.Add("picture", _FileBytes);
                 dicts.Add(d);
             }
 
