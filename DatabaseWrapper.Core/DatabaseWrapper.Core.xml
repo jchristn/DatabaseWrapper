@@ -446,6 +446,20 @@
             <param name="s">String containing column type.</param>
             <returns>DataType.</returns>
         </member>
+        <member name="M:DatabaseWrapper.Core.Helper.ByteArrayToString(System.Byte[])">
+            <summary>
+            Convert byte array to hex string.
+            </summary>
+            <param name="bytes">Byte array.</param>
+            <returns>Hex string.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.Helper.HexStringToBytes(System.String)">
+            <summary>
+            Convert hex string to byte array.
+            </summary>
+            <param name="hex">Hex string.</param>
+            <returns>Byte array.</returns>
+        </member>
         <member name="T:DatabaseWrapper.Core.Operators">
             <summary>
             Enumeration containing the supported WHERE clause operators.

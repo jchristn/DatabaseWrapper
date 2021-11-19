@@ -349,5 +349,51 @@ namespace DatabaseWrapper.Core
                     throw new ArgumentException("Unknown DataType: " + s);
             }
         }
+
+        /// <summary>
+        /// Convert byte array to hex string.
+        /// </summary>
+        /// <param name="bytes">Byte array.</param>
+        /// <returns>Hex string.</returns>
+        public static string ByteArrayToString(byte[] bytes)
+        {
+            if (bytes == null) return null;
+            if (bytes.Length < 1) return "";
+            StringBuilder hex = new StringBuilder(bytes.Length * 2);
+            foreach (byte b in bytes) hex.AppendFormat("{0:x2}", b);
+            return hex.ToString();
+        }
+
+        /// <summary>
+        /// Convert hex string to byte array.
+        /// </summary>
+        /// <param name="hex">Hex string.</param>
+        /// <returns>Byte array.</returns>
+        public static byte[] HexStringToBytes(string hex)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+        {
+            if (String.IsNullOrEmpty(hex)) throw new ArgumentNullException(nameof(hex));
+            if (hex.Length % 2 == 1) throw new ArgumentException("The supplied hex cannot have an odd number of digits.");
+
+            byte[] arr = new byte[hex.Length >> 1];
+
+            for (int i = 0; i < hex.Length >> 1; ++i)
+            {
+                arr[i] = (byte)((GetHexValue(hex[i << 1]) << 4) + (GetHexValue(hex[(i << 1) + 1])));
+            }
+
+            return arr;
+        }
+
+        private static int GetHexValue(char hex)
+        {
+            int val = (int)hex;
+            // For uppercase A-F letters:
+            // return val - (val < 58 ? 48 : 55);
+            // For lowercase a-f letters:
+            // return val - (val < 58 ? 48 : 87);
+            // Or the two combined, but a bit slower:
+            return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
+        }
     }
 }

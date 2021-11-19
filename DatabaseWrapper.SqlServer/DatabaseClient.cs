@@ -447,6 +447,11 @@ namespace DatabaseWrapper.SqlServer
                     {
                         values += curr.Value.ToString();
                     }
+                    else if (curr.Value is byte[])
+                    {
+                        // CAST('"+hexStr + "' as varBinary(MAX)
+                        values += "'" + Convert.ToBase64String((byte[])curr.Value) + "'";
+                    }
                     else
                     {
                         if (Helper.IsExtendedCharacters(curr.Value.ToString()))
