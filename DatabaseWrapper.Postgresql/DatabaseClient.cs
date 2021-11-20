@@ -446,8 +446,6 @@ namespace DatabaseWrapper.Postgresql
                     else if (currKvp.Value is byte[])
                     {
                         vals += "decode('" + Helper.ByteArrayToString((byte[])currKvp.Value) + "', 'hex')";
-                        // vals += "E'\\x" + Helper.ByteArrayToString((byte[])currKvp.Value) + "'";
-                        // vals += "E'\\x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
                     }
                     else
                     {
@@ -548,8 +546,6 @@ namespace DatabaseWrapper.Postgresql
                         else if (currKvp.Value is byte[])
                         {
                             vals += "decode('" + Helper.ByteArrayToString((byte[])currKvp.Value) + "', 'hex')";
-                            // vals += "E'\\x" + Helper.ByteArrayToString((byte[])currKvp.Value) + "'";
-                            // vals += "E'\\x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
                         }
                         else
                         {
@@ -602,41 +598,45 @@ namespace DatabaseWrapper.Postgresql
             string keyValueClause = ""; 
             int added = 0;
 
-            foreach (KeyValuePair<string, object> curr in keyValuePairs)
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue;
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
 
                 if (added > 0) keyValueClause += ",";
                  
-                if (curr.Value != null)
+                if (currKvp.Value != null)
                 {
-                    if (curr.Value is DateTime || curr.Value is DateTime?)
+                    if (currKvp.Value is DateTime || currKvp.Value is DateTime?)
                     {
-                        keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                        keyValueClause += PostgresqlHelper.PreparedFieldName(currKvp.Key) + "='" + DbTimestamp((DateTime)currKvp.Value) + "'";
                     }
-                    else if (curr.Value is DateTimeOffset || curr.Value is DateTimeOffset?)
+                    else if (currKvp.Value is DateTimeOffset || currKvp.Value is DateTimeOffset?)
                     {
-                        keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestampOffset((DateTime)curr.Value) + "'";
+                        keyValueClause += PostgresqlHelper.PreparedFieldName(currKvp.Key) + "='" + DbTimestampOffset((DateTime)currKvp.Value) + "'";
                     }
-                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    else if (currKvp.Value is int || currKvp.Value is long || currKvp.Value is decimal)
                     {
-                        keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
+                        keyValueClause += PostgresqlHelper.PreparedFieldName(currKvp.Key) + "=" + currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is byte[])
+                    {
+                        keyValueClause += PostgresqlHelper.PreparedFieldName(currKvp.Key) + "=" + "decode('" + Helper.ByteArrayToString((byte[])currKvp.Value) + "', 'hex')";
                     }
                     else
                     {
-                        if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
                         {
-                            keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                            keyValueClause += PostgresqlHelper.PreparedFieldName(currKvp.Key) + "=" + PostgresqlHelper.PreparedUnicodeValue(currKvp.Value.ToString());
                         }
                         else
                         {
-                            keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "=" + PostgresqlHelper.PreparedStringValue(curr.Value.ToString());
+                            keyValueClause += PostgresqlHelper.PreparedFieldName(currKvp.Key) + "=" + PostgresqlHelper.PreparedStringValue(currKvp.Value.ToString());
                         }
                     }
                 }
                 else
                 {
-                    keyValueClause += PostgresqlHelper.PreparedFieldName(curr.Key) + "= null";
+                    keyValueClause += PostgresqlHelper.PreparedFieldName(currKvp.Key) + "= null";
                 } 
 
                 added++;

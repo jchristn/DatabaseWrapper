@@ -634,41 +634,45 @@ namespace DatabaseWrapper.Mysql
             string keyValueClause = "";
             int added = 0;
 
-            foreach (KeyValuePair<string, object> curr in keyValuePairs)
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
             {
-                if (String.IsNullOrEmpty(curr.Key)) continue;
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
 
                 if (added > 0) keyValueClause += ",";
 
-                if (curr.Value != null)
+                if (currKvp.Value != null)
                 {
-                    if (curr.Value is DateTime || curr.Value is DateTime?)
+                    if (currKvp.Value is DateTime || currKvp.Value is DateTime?)
                     {
-                        keyValueClause += MysqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestamp((DateTime)curr.Value) + "'";
+                        keyValueClause += MysqlHelper.PreparedFieldName(currKvp.Key) + "='" + DbTimestamp((DateTime)currKvp.Value) + "'";
                     }
-                    else if (curr.Value is DateTimeOffset || curr.Value is DateTimeOffset?)
+                    else if (currKvp.Value is DateTimeOffset || currKvp.Value is DateTimeOffset?)
                     {
-                        keyValueClause += MysqlHelper.PreparedFieldName(curr.Key) + "='" + DbTimestampOffset((DateTime)curr.Value) + "'";
+                        keyValueClause += MysqlHelper.PreparedFieldName(currKvp.Key) + "='" + DbTimestampOffset((DateTime)currKvp.Value) + "'";
                     }
-                    else if (curr.Value is int || curr.Value is long || curr.Value is decimal)
+                    else if (currKvp.Value is int || currKvp.Value is long || currKvp.Value is decimal)
                     {
-                        keyValueClause += MysqlHelper.PreparedFieldName(curr.Key) + "=" + curr.Value.ToString();
+                        keyValueClause += MysqlHelper.PreparedFieldName(currKvp.Key) + "=" + currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is byte[])
+                    {
+                        keyValueClause += MysqlHelper.PreparedFieldName(currKvp.Key) + "=" + "x'" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
                     }
                     else
                     {
-                        if (Helper.IsExtendedCharacters(curr.Value.ToString()))
+                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
                         {
-                            keyValueClause += MysqlHelper.PreparedFieldName(curr.Key) + "=" + MysqlHelper.PreparedUnicodeValue(curr.Value.ToString());
+                            keyValueClause += MysqlHelper.PreparedFieldName(currKvp.Key) + "=" + MysqlHelper.PreparedUnicodeValue(currKvp.Value.ToString());
                         }
                         else
                         {
-                            keyValueClause += MysqlHelper.PreparedFieldName(curr.Key) + "=" + MysqlHelper.PreparedStringValue(curr.Value.ToString());
+                            keyValueClause += MysqlHelper.PreparedFieldName(currKvp.Key) + "=" + MysqlHelper.PreparedStringValue(currKvp.Value.ToString());
                         }
                     }
                 }
                 else
                 {
-                    keyValueClause += MysqlHelper.PreparedFieldName(curr.Key) + "= null";
+                    keyValueClause += MysqlHelper.PreparedFieldName(currKvp.Key) + "= null";
                 }
 
                 added++;
