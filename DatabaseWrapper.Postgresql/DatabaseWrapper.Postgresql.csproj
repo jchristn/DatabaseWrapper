@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
-    <Version>3.3.2.1</Version>
+    <Version>3.3.2.3</Version>
     <Authors>Joel Christner</Authors>
     <Description>Simple database wrapper for Postgresql written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, Sqlite, and MySQL.</Description>
     <Copyright>(c)2021 Joel Christner</Copyright>
@@ -13,12 +13,9 @@
     <RepositoryType>Github</RepositoryType>
     <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
     <PackageReleaseNotes>BLOB data type support</PackageReleaseNotes>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-  </PropertyGroup>
-
-  <PropertyGroup>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
@@ -38,6 +35,10 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
+    <DocumentationFile>DatabaseWrapper.Postgresql.xml</DocumentationFile>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
     <DocumentationFile>DatabaseWrapper.Postgresql.xml</DocumentationFile>
   </PropertyGroup>
 
@@ -63,13 +64,17 @@
     <DocumentationFile>DatabaseWrapper.Postgresql.xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
+    <DocumentationFile>DatabaseWrapper.Postgresql.xml</DocumentationFile>
+  </PropertyGroup>
+
 
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Core" Version="3.3.1.7" />
+    <PackageReference Include="DatabaseWrapper.Core" Version="3.3.1.8" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Npgsql" Version="6.0.0" />
+    <PackageReference Include="Npgsql" Version="6.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -77,6 +82,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="assets\icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseWrapper.Postgresql.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="LICENSE.md">

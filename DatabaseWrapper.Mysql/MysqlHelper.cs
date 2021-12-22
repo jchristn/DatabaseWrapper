@@ -839,15 +839,7 @@ namespace DatabaseWrapper.Mysql
 
         internal static string DbTimestampOffset(DateTimeOffset ts)
         {
-            string str = ts.ToString(TimestampOffsetFormat);
-            if (TimestampOffsetFormat.Contains("zzz"))
-            {
-                return str.Remove(str.LastIndexOf(":"), 1);
-            }
-            else
-            {
-                return str;
-            }
+            return ts.DateTime.ToString(TimestampFormat);
         }
 
         private static string BuildOrderByClause(ResultOrder[] resultOrder)

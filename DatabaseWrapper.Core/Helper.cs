@@ -261,7 +261,7 @@ namespace DatabaseWrapper.Core
             if (String.IsNullOrEmpty(data)) return false;
             foreach (char c in data)
             {
-                if ((int)c > 128) return true;
+                if ((int)c > 255) return true;
             }
             return false;
         }

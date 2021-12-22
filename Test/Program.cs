@@ -16,6 +16,10 @@ namespace Test
         static DatabaseSettings _Settings;
         static DatabaseClient _Database;
 
+        // To use dbo.person, change _Table to either 'dbo.person' or just '" + _Table + "'
+        // To use with a specific schema, use 'schema.table', i.e. 'foo.person'
+        static string _Table = "person";
+
         static void Main(string[] args)
         {
             try
@@ -85,8 +89,8 @@ namespace Test
                 #region Drop-Table
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
-                Console.WriteLine("Dropping table 'person'...");
-                _Database.DropTable("person");
+                Console.WriteLine("Dropping table '" + _Table + "'...");
+                _Database.DropTable(_Table);
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -95,7 +99,7 @@ namespace Test
                 #region Create-Table
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
-                Console.WriteLine("Creating table 'person'...");
+                Console.WriteLine("Creating table '" + _Table + "'...");
                 List<Column> columns = new List<Column>();
                 columns.Add(new Column("id", true, DataType.Int, 11, null, false));
                 columns.Add(new Column("firstname", false, DataType.Nvarchar, 30, null, false));
@@ -106,7 +110,7 @@ namespace Test
                 columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
                 columns.Add(new Column("localtime", false, DataType.DateTimeOffset, null, null, true));
 
-                _Database.CreateTable("person", columns);
+                _Database.CreateTable(_Table, columns);
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -115,9 +119,9 @@ namespace Test
                 #region Check-Existence-and-Describe
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
-                Console.WriteLine("Table 'person' exists: " + _Database.TableExists("person"));
-                Console.WriteLine("Table 'person' configuration:");
-                columns = _Database.DescribeTable("person");
+                Console.WriteLine("Table '" + _Table + "' exists: " + _Database.TableExists(_Table));
+                Console.WriteLine("Table '" + _Table + "' configuration:");
+                columns = _Database.DescribeTable(_Table);
                 foreach (Column col in columns) Console.WriteLine(col.ToString());
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
@@ -156,6 +160,12 @@ namespace Test
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Retrieving rows...");
                 RetrieveRows();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
+                Console.WriteLine("Retrieving rows with special character...");
+                RetrieveRowsWithSpecialCharacter();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -206,7 +216,7 @@ namespace Test
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Dropping table...");
-                _Database.DropTable("person");
+                _Database.DropTable(_Table);
                 Console.ReadLine();
 
                 #endregion
@@ -230,26 +240,40 @@ namespace Test
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
 
-                _Database.Insert("person", d);
+                _Database.Insert(_Table, d);
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                Dictionary<string, object> d = new Dictionary<string, object>();
+                d.Add("firstname", "firsté" + i);
+                d.Add("lastname", "lasté" + i);
+                d.Add("age", i);
+                d.Add("value", i * 1000);
+                d.Add("birthday", DateTime.Now);
+                d.Add("hourly", 123.456);
+                d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
+
+                _Database.Insert(_Table, d);
             }
         }
 
         static void ExistsRows()
         {
             Expression e = new Expression("firstname", Operators.IsNotNull, null);
-            Console.WriteLine("Exists: " + _Database.Exists("person", e));
+            Console.WriteLine("Exists: " + _Database.Exists(_Table, e));
         }
 
         static void CountAge()
         {
             Expression e = new Expression("age", Operators.GreaterThan, 25);
-            Console.WriteLine("Age count: " + _Database.Count("person", e));
+            Console.WriteLine("Age count: " + _Database.Count(_Table, e));
         }
 
         static void SumAge()
         {
             Expression e = new Expression("age", Operators.GreaterThan, 0);
-            Console.WriteLine("Age sum: " + _Database.Sum("person", "age", e));
+            Console.WriteLine("Age sum: " + _Database.Sum(_Table, "age", e));
         }
 
         static void UpdateRows()
@@ -262,7 +286,7 @@ namespace Test
                 d.Add("age", i);
 
                 Expression e = new Expression("id", Operators.Equals, i);
-                _Database.Update("person", d, e);
+                _Database.Update(_Table, d, e);
             }
         }
 
@@ -287,7 +311,23 @@ namespace Test
                 ResultOrder[] resultOrder = new ResultOrder[1];
                 resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
 
-                _Database.Select("person", 0, 3, returnFields, e, resultOrder);
+                _Database.Select(_Table, 0, 3, returnFields, e, resultOrder);
+            }
+        }
+
+        static void RetrieveRowsWithSpecialCharacter()
+        {
+            List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
+
+            Expression e = new Expression("lastname", Operators.StartsWith, "lasté");
+
+            DataTable result = _Database.Select(_Table, 0, 5, returnFields, e);
+            if (result != null && result.Rows != null && result.Rows.Count > 0)
+            {
+                foreach (DataRow row in result.Rows)
+                {
+                    Console.WriteLine("Person: " + row["firstname"] + " " + row["lastname"] + " age: " + row["age"]);
+                }
             }
         }
 
@@ -312,7 +352,7 @@ namespace Test
                 ResultOrder[] resultOrder = new ResultOrder[1];
                 resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
 
-                _Database.Select("person", (i - 10), 5, returnFields, e, resultOrder);
+                _Database.Select(_Table, (i - 10), 5, returnFields, e, resultOrder);
             }
         }
 
@@ -321,7 +361,7 @@ namespace Test
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
             Expression e = Expression.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
-            _Database.Select("person", null, null, returnFields, e);
+            _Database.Select(_Table, null, null, returnFields, e);
         }
 
         static void RetrieveRowsSorted()
@@ -331,7 +371,7 @@ namespace Test
             Console.WriteLine("Expression: " + e.ToString());
             ResultOrder[] resultOrder = new ResultOrder[1];
             resultOrder[0] = new ResultOrder("firstname", OrderDirection.Ascending);
-            _Database.Select("person", null, null, returnFields, e, resultOrder);
+            _Database.Select(_Table, null, null, returnFields, e, resultOrder);
         }
 
         private static void DeleteRows()
@@ -339,7 +379,7 @@ namespace Test
             for (int i = 20; i < 30; i++)
             {
                 Expression e = new Expression("id", Operators.Equals, i);
-                _Database.Delete("person", e);
+                _Database.Delete(_Table, e);
             }
         }
 

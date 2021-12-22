@@ -445,7 +445,7 @@ namespace DatabaseWrapper.Postgresql
                     }
                     else if (currKvp.Value is byte[])
                     {
-                        vals += "decode('" + Helper.ByteArrayToString((byte[])currKvp.Value) + "', 'hex')";
+                        vals += "decode('" + Helper.ByteArrayToHexString((byte[])currKvp.Value) + "', 'hex')";
                     }
                     else
                     {
@@ -545,7 +545,7 @@ namespace DatabaseWrapper.Postgresql
                         }
                         else if (currKvp.Value is byte[])
                         {
-                            vals += "decode('" + Helper.ByteArrayToString((byte[])currKvp.Value) + "', 'hex')";
+                            vals += "decode('" + Helper.ByteArrayToHexString((byte[])currKvp.Value) + "', 'hex')";
                         }
                         else
                         {
@@ -620,7 +620,7 @@ namespace DatabaseWrapper.Postgresql
                     }
                     else if (currKvp.Value is byte[])
                     {
-                        keyValueClause += PostgresqlHelper.PreparedFieldName(currKvp.Key) + "=" + "decode('" + Helper.ByteArrayToString((byte[])currKvp.Value) + "', 'hex')";
+                        keyValueClause += PostgresqlHelper.PreparedFieldName(currKvp.Key) + "=" + "decode('" + Helper.ByteArrayToHexString((byte[])currKvp.Value) + "', 'hex')";
                     }
                     else
                     {

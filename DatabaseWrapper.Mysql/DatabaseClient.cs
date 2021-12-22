@@ -454,7 +454,7 @@ namespace DatabaseWrapper.Mysql
                     }
                     else
                     {
-                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                        if (IsExtendedCharacters(currKvp.Value.ToString()))
                         {
                             vals += MysqlHelper.PreparedUnicodeValue(currKvp.Value.ToString());
                         }
@@ -587,7 +587,7 @@ namespace DatabaseWrapper.Mysql
                         }
                         else
                         {
-                            if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                            if (IsExtendedCharacters(currKvp.Value.ToString()))
                             {
                                 vals += MysqlHelper.PreparedUnicodeValue(currKvp.Value.ToString());
                             }
@@ -616,6 +616,16 @@ namespace DatabaseWrapper.Mysql
             Query(MysqlHelper.InsertMultipleQuery(tableName, keys, values));
 
             #endregion
+        }
+
+        private bool IsExtendedCharacters(string data)
+        {
+            if (String.IsNullOrEmpty(data)) return false;
+            foreach (char c in data)
+            {
+                if ((int)c > 255) return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -660,7 +670,7 @@ namespace DatabaseWrapper.Mysql
                     }
                     else
                     {
-                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                        if (IsExtendedCharacters(currKvp.Value.ToString()))
                         {
                             keyValueClause += MysqlHelper.PreparedFieldName(currKvp.Key) + "=" + MysqlHelper.PreparedUnicodeValue(currKvp.Value.ToString());
                         }

@@ -20,7 +20,7 @@ namespace Test
 
         // To use dbo.person, change _Table to either 'dbo.person' or just 'person'
         // To use with a specific schema, use 'schema.table', i.e. 'foo.person'
-        static string _Table = "foo.person";
+        static string _Table = "person";
 
         static void Main(string[] args)
         {
@@ -136,6 +136,12 @@ namespace Test
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
+                Console.WriteLine("Retrieving rows with special character...");
+                RetrieveRowsWithSpecialCharacter();
+                Console.WriteLine("Press ENTER to continue...");
+                Console.ReadLine();
+
+                for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Retrieving rows by index...");
                 RetrieveRowsByIndex();
                 Console.WriteLine("Press ENTER to continue...");
@@ -206,6 +212,20 @@ namespace Test
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 d.Add("picture", _FileBytes);
+                _Database.Insert(_Table, d);
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                Dictionary<string, object> d = new Dictionary<string, object>();
+                d.Add("firstname", "firsté" + i);
+                d.Add("lastname", "lasté" + i);
+                d.Add("age", i);
+                d.Add("value", i * 1000);
+                d.Add("birthday", DateTime.Now);
+                d.Add("hourly", 123.456);
+                d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
+
                 _Database.Insert(_Table, d);
             }
         }
@@ -309,6 +329,22 @@ namespace Test
                         byte[] data = (byte[])(row["picture"]);
                         Console.WriteLine("Picture data length " + data.Length + " vs original length " + _FileBytes.Length);
                     }
+                }
+            }
+        }
+
+        static void RetrieveRowsWithSpecialCharacter()
+        {
+            List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
+
+            Expression e = new Expression("lastname", Operators.StartsWith, "lasté");
+
+            DataTable result = _Database.Select(_Table, 0, 5, returnFields, e);
+            if (result != null && result.Rows != null && result.Rows.Count > 0)
+            {
+                foreach (DataRow row in result.Rows)
+                {
+                    Console.WriteLine("Person: " + row["firstname"] + " " + row["lastname"] + " age: " + row["age"]);
                 }
             }
         }
