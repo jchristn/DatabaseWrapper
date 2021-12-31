@@ -129,7 +129,7 @@
             <param name="value">The value to match in the key or unique field column.  This should be an object that can be cast to a string value.</param>
             <returns>A DataTable containing at most one row.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},DatabaseWrapper.Core.Expression)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},ExpressionTree.Expr)">
             <summary>
             Execute a SELECT query.
             </summary>
@@ -140,7 +140,7 @@
             <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
             <returns>A DataTable containing the results.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},DatabaseWrapper.Core.Expression,DatabaseWrapper.Core.ResultOrder[])">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},ExpressionTree.Expr,DatabaseWrapper.Core.ResultOrder[])">
             <summary>
             Execute a SELECT query.
             </summary>
@@ -167,7 +167,7 @@
             <param name="tableName">The table in which you wish to INSERT.</param>
             <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
         </member>
-        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Update(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},DatabaseWrapper.Core.Expression)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Update(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},ExpressionTree.Expr)">
             <summary>
             Execute an UPDATE query. 
             </summary>
@@ -175,7 +175,7 @@
             <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
             <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param> 
         </member>
-        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Delete(System.String,DatabaseWrapper.Core.Expression)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Delete(System.String,ExpressionTree.Expr)">
             <summary>
             Execute a DELETE query.
             </summary>
@@ -195,7 +195,7 @@
             <param name="query">Database query defined outside of the database client.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Exists(System.String,DatabaseWrapper.Core.Expression)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Exists(System.String,ExpressionTree.Expr)">
             <summary>
             Determine if records exist by filter.
             </summary>
@@ -203,7 +203,7 @@
             <param name="filter">Expression.</param>
             <returns>True if records exist.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Count(System.String,DatabaseWrapper.Core.Expression)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Count(System.String,ExpressionTree.Expr)">
             <summary>
             Determine the number of records that exist by filter.
             </summary>
@@ -211,7 +211,7 @@
             <param name="filter">Expression.</param>
             <returns>The number of records.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Sum(System.String,System.String,DatabaseWrapper.Core.Expression)">
+        <member name="M:DatabaseWrapper.Mysql.DatabaseClient.Sum(System.String,System.String,ExpressionTree.Expr)">
             <summary>
             Determine the sum of a column for records that match the supplied filter.
             </summary>

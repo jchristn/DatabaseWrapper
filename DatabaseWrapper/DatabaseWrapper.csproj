@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.3.2.3</Version>
+    <Version>4.0.0.1</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite. written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages if you only need support for one database type.</Description>
@@ -19,10 +19,6 @@
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     <PackageIcon>icon.png</PackageIcon>
-  </PropertyGroup>
-	
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
@@ -47,10 +43,6 @@
 
 
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
     <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
   </PropertyGroup>
@@ -70,15 +62,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
     <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
   </PropertyGroup>
-
-
-
-  <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Mysql" Version="3.3.2.3" />
-    <PackageReference Include="DatabaseWrapper.Postgresql" Version="3.3.2.3" />
-    <PackageReference Include="DatabaseWrapper.Sqlite" Version="3.3.2.3" />
-    <PackageReference Include="DatabaseWrapper.SqlServer" Version="3.3.2.3" />
-  </ItemGroup>
  
   <ItemGroup>
     <None Include="assets\icon.png">
@@ -96,6 +79,13 @@
       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
     </ItemGroup>
   </Target>
+
+  <ItemGroup>
+    <PackageReference Include="DatabaseWrapper.Mysql" Version="4.0.0.1" />
+    <PackageReference Include="DatabaseWrapper.Postgresql" Version="4.0.0.1" />
+    <PackageReference Include="DatabaseWrapper.Sqlite" Version="4.0.0.1" />
+    <PackageReference Include="DatabaseWrapper.SqlServer" Version="4.0.0.1" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="assets\icon.ico">

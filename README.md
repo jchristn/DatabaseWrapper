@@ -8,10 +8,11 @@
 | DatabaseWrapper.Sqlite | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.Sqlite.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.Sqlite/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.Sqlite.svg)](https://www.nuget.org/packages/DatabaseWrapper.Sqlite) |
 | DatabaseWrapper.SqlServer | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.SqlServer.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.SqlServer/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.SqlServer.svg)](https://www.nuget.org/packages/DatabaseWrapper.SqlServer) |
 | DatabaseWrapper.Core | [![NuGet Version](https://img.shields.io/nuget/v/DatabaseWrapper.Core.svg?style=flat)](https://www.nuget.org/packages/DatabaseWrapper.Core/)  | [![NuGet](https://img.shields.io/nuget/dt/DatabaseWrapper.Core.svg)](https://www.nuget.org/packages/DatabaseWrapper.Core) |
+| ExpressionTree | [![NuGet Version](https://img.shields.io/nuget/v/ExpressionTree.svg?style=flat)](https://www.nuget.org/packages/ExpressionTree/)  | [![NuGet](https://img.shields.io/nuget/dt/ExpressionTree.svg)](https://www.nuget.org/packages/ExpressionTree) |
 
 DatabaseWrapper is the EASIEST and FASTEST way to get a data-driven application up and running using SQL Server, MySQL, PostgreSQL, or Sqlite.
 
-For a sample app exercising this library, refer to the ```Test``` project contained within the solution.
+For a sample app exercising this library, refer to the numerous ```Test``` projects contained within the solution.
 
 Core features:
 
@@ -23,13 +24,15 @@ Core features:
 - Built-in sanitization
 - Support for .NET Standard, .NET Core, and .NET Framework
 
-## New in v3.3.2
+## New in v4.0.0
 
-- Support for BLOB data types using ```byte[]```
-  - SQL Server: ```varbinary(max)```
-  - Sqlite: ```blob```
-  - Postgresql: ```bytea```
-  - Mysql: ```longblob```
+- Breaking changes
+- Internal refactor
+- Use of external library ```ExpressionTree``` for ```Expr``` class, replaces ```Expression``` class
+- Use of external library ```ExpressionTree``` for ```OperatorEnum``` class, replaces ```Operator``` enum
+- ```Expression.LeftTerm``` is now ```Expr.Left```
+- ```Expression.RightTerm``` is now ```Expr.Right```
+- Reduced dependency clutter
 
 ## A Note on Sanitization
 
@@ -43,8 +46,9 @@ Refer to the test project for a more complete example with sample table setup sc
 ```csharp
 using DatabaseWrapper;
 using DatabaseWrapper.Core;
+using ExpressionTree;
 
-DatabaseClient = null;
+DatabaseClient client = null;
 
 // Sqlite
 client = new DatabaseClient("[databasefilename]");
@@ -59,7 +63,7 @@ client = new DatabaseClient(DbTypes.SqlServer,  "[hostname]", [port], "[user]", 
 
 // some variables we'll be using
 Dictionary<string, object> d;
-Expression e;
+Expr e;
 List<string> fields;
 DataTable result;
 
@@ -73,18 +77,18 @@ result = client.Insert("person", d);
 // update a record
 d = new Dictionary<string, object>();
 d.Add("notes", "The author :)");
-e = new Expression("firstName", Operators.Equals, "Joel"); 
+e = new Expr("firstName", OperatorEnum.Equals, "Joel"); 
 result = client.Update("person", d, e);
 
 // retrieve 10 records
 fields = new List<string> { "firstName", "lastName" }; // leave null for *
-e = new Expression("lastName", Operators.Equals, "Christner"); 
+e = new Expr("lastName", OperatorEnum.Equals, "Christner"); 
 ResultOrder[] order = new ResultOrder[1];
 order = new ResultOrder("firstName", OrderDirection.Ascending)
 result = client.Select("person", 0, 10, fields, e, order);
 
 // delete a record
-e = new Expression("firstName", Operators.Equals, "Joel"); 
+e = new Expr("firstName", Operators.Equals, "Joel"); 
 result = client.Delete("person", e);
 
 // execute a raw query
@@ -93,12 +97,13 @@ result = client.RawQuery("SELECT customer_id FROM customer WHERE customer_id > 1
 
 ## Sample Compound Expression
 
-Expressions can be nested in either the LeftTerm or RightTerm.  Conversion from Expression to a WHERE clause uses recursion, so you should have a good degree of flexibility in building your expressions in terms of depth.
+Expressions, i.e. the ```Expr``` class from ```ExpressionTree```, can be nested in either the ```Left``` or ```Right``` properties.  Conversion from ```Expr``` to a WHERE clause uses recursion, so you have a good degree of flexibility in building your expressions in terms of depth.
+
 ```csharp
-Expression e = new Expression {
-	LeftTerm = new Expression("age", Operators.GreaterThan, 30),
+Expr e = new Expr {
+	Left = new Expr("age", OperatorEnum.GreaterThan, 30),
 	Operator = Operators.And,
-	RightTerm = new Expression("height", Operators.LessThan, 74)
+	Right = new Expr("height", OperatorEnum.LessThan, 74)
 };
 ```
 
@@ -117,6 +122,7 @@ DataTable result = client.Select("person", 5, 10, null, e, order);
 ## Need a Timestamp?
 
 We added a simple static method for this which you can use when building expressions (or elsewhere).  An object method exists as well.
+
 ```csharp
 string SqlServer1 = DatabaseClient.DbTimestamp(DbTypes.SqlServer, DateTime.Now));
 string SqlServer2 = client.Timestamp(DateTime.Now);
@@ -134,11 +140,13 @@ string mysql2 = client.Timestamp(DateTime.Now);
 When using database-specific classes ```DatabaseWrapper.Mysql```, ```DatabaseWrapper.Postgresql```, ```DatabaseWrapper.SqlServer```, or ```DatabaseWrapper.Sqlite```, the constructor is simplified from what is shown above.
 
 For Sqlite:
+
 ```csharp
 DatabaseClient client = new DatabaseClient("[databasefilename]");
 ```
 
 For SQL Server, MySQL, or PostgreSQL:
+
 ```csharp
 DatabaseClient client = new DatabaseClient(DbTypes.SqlServer,  "[hostname]", [port], "[user]", "[password]", "[databasename]");
 DatabaseClient client = new DatabaseClient(DbTypes.Mysql,      "[hostname]", [port], "[user]", "[password]", "[databasename]");
@@ -146,6 +154,7 @@ DatabaseClient client = new DatabaseClient(DbTypes.Postgresql, "[hostname]", [po
 ```
 
 For SQL Server Express:
+
 ```csharp
 DatabaseClient client = new DatabaseClient(DbTypes.SqlServer, "[hostname]", [port], "[user]", "[password]", "[instance]", "[databasename]");
 ```

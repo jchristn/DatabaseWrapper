@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using MySql;
 using MySql.Data.MySqlClient; 
 using DatabaseWrapper.Core;
+using ExpressionTree;
 
 namespace DatabaseWrapper.Mysql
 {
@@ -364,11 +365,11 @@ namespace DatabaseWrapper.Mysql
             if (String.IsNullOrEmpty(columnName)) throw new ArgumentNullException(nameof(columnName));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            Expression e = new Expression
+            Expr e = new Expr
             {
-                LeftTerm = columnName,
-                Operator = Operators.Equals,
-                RightTerm = value.ToString()
+                Left = columnName,
+                Operator = OperatorEnum.Equals,
+                Right = value.ToString()
             };
 
             return Select(tableName, null, 1, null, e, null);
@@ -383,7 +384,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
         /// <returns>A DataTable containing the results.</returns>
-        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter)
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             return Query(MysqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, null));
@@ -399,7 +400,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
         /// <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             return Query(MysqlHelper.SelectQuery(tableName, indexStart, maxResults, returnFields, filter, resultOrder));
@@ -634,7 +635,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="tableName">The table in which you wish to UPDATE.</param>
         /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
         /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param> 
-        public void Update(string tableName, Dictionary<string, object> keyValuePairs, Expression filter)
+        public void Update(string tableName, Dictionary<string, object> keyValuePairs, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (keyValuePairs == null || keyValuePairs.Count < 1) throw new ArgumentNullException(nameof(keyValuePairs));
@@ -702,7 +703,7 @@ namespace DatabaseWrapper.Mysql
         /// </summary>
         /// <param name="tableName">The table in which you wish to DELETE.</param>
         /// <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param> 
-        public void Delete(string tableName, Expression filter)
+        public void Delete(string tableName, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (filter == null) throw new ArgumentNullException(nameof(filter));
@@ -787,7 +788,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="tableName">The name of the table.</param>
         /// <param name="filter">Expression.</param>
         /// <returns>True if records exist.</returns>
-        public bool Exists(string tableName, Expression filter)
+        public bool Exists(string tableName, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             DataTable result = Query(MysqlHelper.ExistsQuery(tableName, filter));
@@ -801,7 +802,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="tableName">The name of the table.</param>
         /// <param name="filter">Expression.</param>
         /// <returns>The number of records.</returns>
-        public long Count(string tableName, Expression filter)
+        public long Count(string tableName, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             DataTable result = Query(MysqlHelper.CountQuery(tableName, _CountColumnName, filter));
@@ -823,7 +824,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="fieldName">The name of the field.</param>
         /// <param name="filter">Expression.</param>
         /// <returns>The sum of the specified column from the matching rows.</returns>
-        public decimal Sum(string tableName, string fieldName, Expression filter)
+        public decimal Sum(string tableName, string fieldName, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (String.IsNullOrEmpty(fieldName)) throw new ArgumentNullException(nameof(fieldName));

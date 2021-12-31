@@ -2,6 +2,18 @@
 
 ## Current Version
 
+v4.0.0
+
+- Breaking changes
+- Internal refactor
+- Use of external library ```ExpressionTree``` for ```Expr``` class, replaces ```Expression``` class
+- Use of external library ```ExpressionTree``` for ```OperatorEnum``` class, replaces ```Operator``` enum
+- ```Expression.LeftTerm``` is now ```Expr.Left```
+- ```Expression.RightTerm``` is now ```Expr.Right```
+- Reduced dependency clutter
+
+## Previous Versions
+
 v3.3.2
 
 - Support for BLOB data types using ```byte[]```
@@ -9,8 +21,6 @@ v3.3.2
   - Sqlite: ```blob```
   - Postgresql: ```bytea```
   - Mysql: ```longblob```
-
-## Previous Versions
 
 v3.3.0
 

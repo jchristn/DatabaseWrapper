@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DatabaseWrapper.Mysql;
 using DatabaseWrapper.Core;
+using ExpressionTree;
 
 namespace Test
 {
@@ -18,6 +19,9 @@ namespace Test
         static DatabaseClient _Database;
         static byte[] _FileBytes = File.ReadAllBytes("./headshot.png");
         static string _Table = "person";
+
+        static string _Host = "localhost";
+        static int _Port = 3306;
 
         static void Main(string[] args)
         {
@@ -39,7 +43,7 @@ namespace Test
                 Console.Write("Password: ");
                 string pass = Console.ReadLine();
 
-                _Settings = new DatabaseSettings(DbTypes.Mysql, "localhost", 3306, user, pass, "test");
+                _Settings = new DatabaseSettings(DbTypes.Mysql, _Host, _Port, user, pass, "test");
                 _Database = new DatabaseClient(_Settings);
 
                 _Database.Logger = Logger;
@@ -266,19 +270,19 @@ namespace Test
 
         static void ExistsRows()
         {
-            Expression e = new Expression("firstname", Operators.IsNotNull, null);
+            Expr e = new Expr("firstname", OperatorEnum.IsNotNull, null);
             Console.WriteLine("Exists: " + _Database.Exists(_Table, e));
         }
 
         static void CountAge()
         {
-            Expression e = new Expression("age", Operators.GreaterThan, 25);
+            Expr e = new Expr("age", OperatorEnum.GreaterThan, 25);
             Console.WriteLine("Age count: " + _Database.Count(_Table, e));
         }
 
         static void SumAge()
         {
-            Expression e = new Expression("age", Operators.GreaterThan, 0);
+            Expr e = new Expr("age", OperatorEnum.GreaterThan, 0);
             Console.WriteLine("Age sum: " + _Database.Sum(_Table, "age", e));
         }
 
@@ -292,7 +296,7 @@ namespace Test
                 d.Add("age", i);
                 d.Add("birthday", null);
 
-                Expression e = new Expression("id", Operators.Equals, i);
+                Expr e = new Expr("id", OperatorEnum.Equals, i);
                 _Database.Update(_Table, d, e);
             }
         }
@@ -303,11 +307,11 @@ namespace Test
 
             for (int i = 30; i < 40; i++)
             {
-                Expression e = new Expression
+                Expr e = new Expr
                 {
-                    LeftTerm = new Expression("id", Operators.LessThan, i),
-                    Operator = Operators.And,
-                    RightTerm = new Expression("age", Operators.LessThan, i)
+                    Left = new Expr("id", OperatorEnum.LessThan, i),
+                    Operator = OperatorEnum.And,
+                    Right = new Expr("age", OperatorEnum.LessThan, i)
                 };
 
                 // 
@@ -334,7 +338,7 @@ namespace Test
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
 
-            Expression e = new Expression("lastname", Operators.StartsWith, "lasté");
+            Expr e = new Expr("lastname", OperatorEnum.StartsWith, "lasté");
 
             DataTable result = _Database.Select(_Table, 0, 5, returnFields, e);
             if (result != null && result.Rows != null && result.Rows.Count > 0)
@@ -352,11 +356,11 @@ namespace Test
 
             for (int i = 10; i < 20; i++)
             {
-                Expression e = new Expression
+                Expr e = new Expr
                 {
-                    LeftTerm = new Expression("id", Operators.GreaterThan, 1),
-                    Operator = Operators.And,
-                    RightTerm = new Expression("age", Operators.LessThan, 50)
+                    Left = new Expr("id", OperatorEnum.GreaterThan, 1),
+                    Operator = OperatorEnum.And,
+                    Right = new Expr("age", OperatorEnum.LessThan, 50)
                 };
 
                 // 
@@ -374,7 +378,7 @@ namespace Test
         static void RetrieveRowsByBetween()
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
-            Expression e = Expression.Between("id", new List<object> { 10, 20 });
+            Expr e = Expr.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
             _Database.Select(_Table, null, null, returnFields, e);
         }
@@ -382,7 +386,7 @@ namespace Test
         static void RetrieveRowsSorted()
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
-            Expression e = Expression.Between("id", new List<object> { 10, 20 });
+            Expr e = Expr.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
             ResultOrder[] resultOrder = new ResultOrder[1];
             resultOrder[0] = new ResultOrder("firstname", OrderDirection.Ascending);
@@ -393,7 +397,7 @@ namespace Test
         {
             for (int i = 20; i < 30; i++)
             {
-                Expression e = new Expression("id", Operators.Equals, i);
+                Expr e = new Expr("id", OperatorEnum.Equals, i);
                 _Database.Delete(_Table, e);
             }
         }

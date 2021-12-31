@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper" Version="3.2.2.11" />
+    <PackageReference Include="DatabaseWrapper" Version="4.0.0.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DatabaseWrapper.Sqlite;
 using DatabaseWrapper.Core;
+using ExpressionTree;
 
 namespace Test.Sqlite
 {
@@ -254,19 +255,19 @@ namespace Test.Sqlite
 
         static void ExistsRows()
         {
-            Expression e = new Expression("firstName", Operators.IsNotNull, null);
+            Expr e = new Expr("firstName", OperatorEnum.IsNotNull, null);
             Console.WriteLine("Exists: " + _Database.Exists(_Table, e));
         }
 
         static void CountAge()
         {
-            Expression e = new Expression("age", Operators.GreaterThan, 25);
+            Expr e = new Expr("age", OperatorEnum.GreaterThan, 25);
             Console.WriteLine("Age count: " + _Database.Count(_Table, e));
         }
 
         static void SumAge()
         {
-            Expression e = new Expression("age", Operators.GreaterThan, 0);
+            Expr e = new Expr("age", OperatorEnum.GreaterThan, 0);
             Console.WriteLine("Age sum: " + _Database.Sum(_Table, "age", e));
         }
 
@@ -280,7 +281,7 @@ namespace Test.Sqlite
                 d.Add("age", i);
                 d.Add("birthday", null);
 
-                Expression e = new Expression("id", Operators.Equals, i);
+                Expr e = new Expr("id", OperatorEnum.Equals, i);
                 _Database.Update(_Table, d, e);
             }
         }
@@ -291,11 +292,11 @@ namespace Test.Sqlite
 
             for (int i = 30; i < 40; i++)
             {
-                Expression e = new Expression
+                Expr e = new Expr
                 {
-                    LeftTerm = new Expression("id", Operators.LessThan, i),
-                    Operator = Operators.And,
-                    RightTerm = new Expression("age", Operators.LessThan, i)
+                    Left = new Expr("id", OperatorEnum.LessThan, i),
+                    Operator = OperatorEnum.And,
+                    Right = new Expr("age", OperatorEnum.LessThan, i)
                 };
 
                 // 
@@ -319,7 +320,7 @@ namespace Test.Sqlite
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
 
-            Expression e = new Expression("lastname", Operators.StartsWith, "lasté");
+            Expr e = new Expr("lastname", OperatorEnum.StartsWith, "lasté");
 
             DataTable result = _Database.Select(_Table, 0, 5, returnFields, e);
             if (result != null && result.Rows != null && result.Rows.Count > 0)
@@ -337,11 +338,11 @@ namespace Test.Sqlite
 
             for (int i = 10; i < 20; i++)
             {
-                Expression e = new Expression
+                Expr e = new Expr
                 {
-                    LeftTerm = new Expression("id", Operators.GreaterThan, 1),
-                    Operator = Operators.And,
-                    RightTerm = new Expression("age", Operators.LessThan, 50)
+                    Left = new Expr("id", OperatorEnum.GreaterThan, 1),
+                    Operator = OperatorEnum.And,
+                    Right = new Expr("age", OperatorEnum.LessThan, 50)
                 };
 
                 // 
@@ -359,7 +360,7 @@ namespace Test.Sqlite
         static void RetrieveRowsByBetween()
         {
             List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
-            Expression e = Expression.Between("id", new List<object> { 10, 20 });
+            Expr e = Expr.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
             _Database.Select(_Table, null, null, returnFields, e);
         }
@@ -367,7 +368,7 @@ namespace Test.Sqlite
         static void RetrieveRowsSorted()
         {
             List<string> returnFields = new List<string> { "firstName", "lastName", "age" };
-            Expression e = Expression.Between("id", new List<object> { 10, 20 });
+            Expr e = Expr.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
             ResultOrder[] resultOrder = new ResultOrder[2];
             resultOrder[0] = new ResultOrder("id", OrderDirection.Descending);
@@ -379,7 +380,7 @@ namespace Test.Sqlite
         {
             for (int i = 20; i < 30; i++)
             {
-                Expression e = new Expression("id", Operators.Equals, i);
+                Expr e = new Expr("id", OperatorEnum.Equals, i);
                 _Database.Delete(_Table, e);
             }
         }

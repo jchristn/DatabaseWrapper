@@ -10,6 +10,7 @@ using DatabaseWrapper.Mysql;
 using DatabaseWrapper.Postgresql;
 using DatabaseWrapper.Sqlite;
 using DatabaseWrapper.SqlServer;
+using ExpressionTree;
 
 namespace DatabaseWrapper
 {
@@ -574,7 +575,7 @@ namespace DatabaseWrapper
         /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
         /// <returns>A DataTable containing the results.</returns>
-        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter)
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter)
         {
             switch (_Settings.Type)
             {
@@ -601,7 +602,7 @@ namespace DatabaseWrapper
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
         /// <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
         {
             switch (_Settings.Type)
             {
@@ -642,6 +643,32 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Execute an INSERT query with multiple values within a transaction.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
+        public void InsertMultiple(string tableName, List<Dictionary<string, object>> keyValuePairList)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypes.Mysql:
+                    _Mysql.InsertMultiple(tableName, keyValuePairList);
+                    return;
+                case DbTypes.Postgresql:
+                    _Postgresql.InsertMultiple(tableName, keyValuePairList);
+                    return;
+                case DbTypes.Sqlite:
+                    _Sqlite.InsertMultiple(tableName, keyValuePairList);
+                    return;
+                case DbTypes.SqlServer:
+                    _SqlServer.InsertMultiple(tableName, keyValuePairList);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Execute an UPDATE query.
         /// For Microsoft SQL Server and PostgreSQL, the updated rows are returned.
         /// For MySQL and Sqlite, nothing is returned.
@@ -650,7 +677,7 @@ namespace DatabaseWrapper
         /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
         /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
         /// <returns>For Microsoft SQL Server and PostgreSQL, a DataTable containing the results.  For MySQL and Sqlite, null.</returns>
-        public DataTable Update(string tableName, Dictionary<string, object> keyValuePairs, Expression filter)
+        public DataTable Update(string tableName, Dictionary<string, object> keyValuePairs, Expr filter)
         {
             switch (_Settings.Type)
             {
@@ -674,7 +701,7 @@ namespace DatabaseWrapper
         /// </summary>
         /// <param name="tableName">The table in which you wish to DELETE.</param>
         /// <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param> 
-        public void Delete(string tableName, Expression filter)
+        public void Delete(string tableName, Expr filter)
         {
             switch (_Settings.Type)
             {
@@ -748,7 +775,7 @@ namespace DatabaseWrapper
         /// <param name="tableName">The name of the table.</param>
         /// <param name="filter">Expression.</param>
         /// <returns>True if records exist.</returns>
-        public bool Exists(string tableName, Expression filter)
+        public bool Exists(string tableName, Expr filter)
         {
             switch (_Settings.Type)
             {
@@ -771,7 +798,7 @@ namespace DatabaseWrapper
         /// <param name="tableName">The name of the table.</param>
         /// <param name="filter">Expression.</param>
         /// <returns>The number of records.</returns>
-        public long Count(string tableName, Expression filter)
+        public long Count(string tableName, Expr filter)
         {
             switch (_Settings.Type)
             {
@@ -795,7 +822,7 @@ namespace DatabaseWrapper
         /// <param name="fieldName">The name of the field.</param>
         /// <param name="filter">Expression.</param>
         /// <returns>The sum of the specified column from the matching rows.</returns>
-        public decimal Sum(string tableName, string fieldName, Expression filter)
+        public decimal Sum(string tableName, string fieldName, Expr filter)
         {
             switch (_Settings.Type)
             {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DatabaseWrapper.Core;
+using ExpressionTree;
 
 namespace DatabaseWrapper.SqlServer
 {
@@ -252,7 +253,7 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
+        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
         {
             string query = "";
             string whereClause = "";
@@ -354,7 +355,7 @@ namespace DatabaseWrapper.SqlServer
             return ret;
         }
 
-        internal static string UpdateQuery(string tableName, string keyValueClause, Expression filter)
+        internal static string UpdateQuery(string tableName, string keyValueClause, Expr filter)
         {
             string ret =
                 "UPDATE " + PreparedTableName(tableName) + " WITH (ROWLOCK) SET " +
@@ -366,7 +367,7 @@ namespace DatabaseWrapper.SqlServer
             return ret;
         }
 
-        internal static string DeleteQuery(string tableName, Expression filter)
+        internal static string DeleteQuery(string tableName, Expr filter)
         {
             string ret =
                 "DELETE FROM " + PreparedTableName(tableName) + " WITH (ROWLOCK) ";
@@ -381,7 +382,7 @@ namespace DatabaseWrapper.SqlServer
             return "TRUNCATE TABLE " + PreparedTableName(tableName);
         }
 
-        internal static string ExistsQuery(string tableName, Expression filter)
+        internal static string ExistsQuery(string tableName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -401,7 +402,7 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string CountQuery(string tableName, string countColumnName, Expression filter)
+        internal static string CountQuery(string tableName, string countColumnName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -421,7 +422,7 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string SumQuery(string tableName, string fieldName, string sumColumnName, Expression filter)
+        internal static string SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -527,38 +528,38 @@ namespace DatabaseWrapper.SqlServer
             return "N" + PreparedStringValue(s);
         }
 
-        internal static string ExpressionToWhereClause(Expression expr)
+        internal static string ExpressionToWhereClause(Expr expr)
         {
             if (expr == null) return null;
 
             string clause = "";
 
-            if (expr.LeftTerm == null) return null;
+            if (expr.Left == null) return null;
 
             clause += "(";
 
-            if (expr.LeftTerm is Expression)
+            if (expr.Left is Expr)
             {
-                clause += ExpressionToWhereClause((Expression)expr.LeftTerm) + " ";
+                clause += ExpressionToWhereClause((Expr)expr.Left) + " ";
             }
             else
             {
-                if (!(expr.LeftTerm is string))
+                if (!(expr.Left is string))
                 {
                     throw new ArgumentException("Left term must be of type Expression or String");
                 }
 
-                if (expr.Operator != Operators.Contains
-                    && expr.Operator != Operators.ContainsNot
-                    && expr.Operator != Operators.StartsWith
-                    && expr.Operator != Operators.StartsWithNot
-                    && expr.Operator != Operators.EndsWith
-                    && expr.Operator != Operators.EndsWithNot)
+                if (expr.Operator != OperatorEnum.Contains
+                    && expr.Operator != OperatorEnum.ContainsNot
+                    && expr.Operator != OperatorEnum.StartsWith
+                    && expr.Operator != OperatorEnum.StartsWithNot
+                    && expr.Operator != OperatorEnum.EndsWith
+                    && expr.Operator != OperatorEnum.EndsWithNot)
                 {
                     //
                     // These operators will add the left term
                     //
-                    clause += PreparedFieldName(expr.LeftTerm.ToString()) + " ";
+                    clause += PreparedFieldName(expr.Left.ToString()) + " ";
                 }
             }
 
@@ -566,126 +567,126 @@ namespace DatabaseWrapper.SqlServer
             {
                 #region Process-By-Operators
 
-                case Operators.And:
+                case OperatorEnum.And:
                     #region And
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     clause += "AND ";
 
-                    if (expr.RightTerm is Expression)
+                    if (expr.Right is Expr)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
+                        clause += ExpressionToWhereClause((Expr)expr.Right);
                     }
                     else
                     {
-                        if (expr.RightTerm is DateTime || expr.RightTerm is DateTime?)
+                        if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.RightTerm)) + "'";
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
-                        else if (expr.RightTerm is int || expr.RightTerm is long || expr.RightTerm is decimal)
+                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
-                            clause += expr.RightTerm.ToString();
+                            clause += expr.Right.ToString();
                         }
                         else
                         {
-                            clause += PreparedStringValue(expr.RightTerm.ToString());
+                            clause += PreparedStringValue(expr.Right.ToString());
                         }
                     }
                     break;
 
                 #endregion
 
-                case Operators.Or:
+                case OperatorEnum.Or:
                     #region Or
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     clause += "OR ";
-                    if (expr.RightTerm is Expression)
+                    if (expr.Right is Expr)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
+                        clause += ExpressionToWhereClause((Expr)expr.Right);
                     }
                     else
                     {
-                        if (expr.RightTerm is DateTime || expr.RightTerm is DateTime?)
+                        if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.RightTerm)) + "'";
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
-                        else if (expr.RightTerm is int || expr.RightTerm is long || expr.RightTerm is decimal)
+                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
-                            clause += expr.RightTerm.ToString();
+                            clause += expr.Right.ToString();
                         }
                         else
                         {
-                            clause += PreparedStringValue(expr.RightTerm.ToString());
+                            clause += PreparedStringValue(expr.Right.ToString());
                         }
                     }
                     break;
 
                 #endregion
 
-                case Operators.Equals:
+                case OperatorEnum.Equals:
                     #region Equals
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     clause += "= ";
-                    if (expr.RightTerm is Expression)
+                    if (expr.Right is Expr)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
+                        clause += ExpressionToWhereClause((Expr)expr.Right);
                     }
                     else
                     {
-                        if (expr.RightTerm is DateTime || expr.RightTerm is DateTime?)
+                        if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.RightTerm)) + "'";
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
-                        else if (expr.RightTerm is int || expr.RightTerm is long || expr.RightTerm is decimal)
+                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
-                            clause += expr.RightTerm.ToString();
+                            clause += expr.Right.ToString();
                         }
                         else
                         {
-                            clause += PreparedStringValue(expr.RightTerm.ToString());
+                            clause += PreparedStringValue(expr.Right.ToString());
                         }
                     }
                     break;
 
                 #endregion
 
-                case Operators.NotEquals:
+                case OperatorEnum.NotEquals:
                     #region NotEquals
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     clause += "<> ";
-                    if (expr.RightTerm is Expression)
+                    if (expr.Right is Expr)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
+                        clause += ExpressionToWhereClause((Expr)expr.Right);
                     }
                     else
                     {
-                        if (expr.RightTerm is DateTime || expr.RightTerm is DateTime?)
+                        if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.RightTerm)) + "'";
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
-                        else if (expr.RightTerm is int || expr.RightTerm is long || expr.RightTerm is decimal)
+                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
-                            clause += expr.RightTerm.ToString();
+                            clause += expr.Right.ToString();
                         }
                         else
                         {
-                            clause += PreparedStringValue(expr.RightTerm.ToString());
+                            clause += PreparedStringValue(expr.Right.ToString());
                         }
                     }
                     break;
 
                 #endregion
 
-                case Operators.In:
+                case OperatorEnum.In:
                     #region In
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     int inAdded = 0;
-                    if (!Helper.IsList(expr.RightTerm)) return null;
-                    List<object> inTempList = Helper.ObjectToList(expr.RightTerm);
+                    if (!Helper.IsList(expr.Right)) return null;
+                    List<object> inTempList = Helper.ObjectToList(expr.Right);
                     clause += " IN (";
                     foreach (object currObj in inTempList)
                     {
@@ -710,13 +711,13 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
-                case Operators.NotIn:
+                case OperatorEnum.NotIn:
                     #region NotIn
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     int notInAdded = 0;
-                    if (!Helper.IsList(expr.RightTerm)) return null;
-                    List<object> notInTempList = Helper.ObjectToList(expr.RightTerm);
+                    if (!Helper.IsList(expr.Right)) return null;
+                    List<object> notInTempList = Helper.ObjectToList(expr.Right);
                     clause += " NOT IN (";
                     foreach (object currObj in notInTempList)
                     {
@@ -741,17 +742,17 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
-                case Operators.Contains:
+                case OperatorEnum.Contains:
                     #region Contains
 
-                    if (expr.RightTerm == null) return null;
-                    if (expr.RightTerm is string)
+                    if (expr.Right == null) return null;
+                    if (expr.Right is string)
                     {
                         clause +=
                             "(" +
-                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.Left.ToString()) + " LIKE " + PreparedStringValue("%" + expr.Right.ToString()) +
+                            "OR " + PreparedFieldName(expr.Left.ToString()) + " LIKE " + PreparedStringValue("%" + expr.Right.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.Left.ToString()) + " LIKE " + PreparedStringValue(expr.Right.ToString() + "%") +
                             ")";
                     }
                     else
@@ -762,17 +763,17 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
-                case Operators.ContainsNot:
+                case OperatorEnum.ContainsNot:
                     #region ContainsNot
 
-                    if (expr.RightTerm == null) return null;
-                    if (expr.RightTerm is string)
+                    if (expr.Right == null) return null;
+                    if (expr.Right is string)
                     {
                         clause +=
                             "(" +
-                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
-                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString() + "%") +
-                            "OR " + PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue(expr.RightTerm.ToString() + "%") +
+                            PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.Right.ToString()) +
+                            "OR " + PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.Right.ToString() + "%") +
+                            "OR " + PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + PreparedStringValue(expr.Right.ToString() + "%") +
                             ")";
                     }
                     else
@@ -783,15 +784,15 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
-                case Operators.StartsWith:
+                case OperatorEnum.StartsWith:
                     #region StartsWith
 
-                    if (expr.RightTerm == null) return null;
-                    if (expr.RightTerm is string)
+                    if (expr.Right == null) return null;
+                    if (expr.Right is string)
                     {
                         clause +=
                             "(" +
-                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + (PreparedStringValue(expr.RightTerm.ToString() + "%")) +
+                            PreparedFieldName(expr.Left.ToString()) + " LIKE " + (PreparedStringValue(expr.Right.ToString() + "%")) +
                             ")";
                     }
                     else
@@ -802,15 +803,15 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
-                case Operators.StartsWithNot:
+                case OperatorEnum.StartsWithNot:
                     #region StartsWithNot
 
-                    if (expr.RightTerm == null) return null;
-                    if (expr.RightTerm is string)
+                    if (expr.Right == null) return null;
+                    if (expr.Right is string)
                     {
                         clause +=
                             "(" +
-                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + (PreparedStringValue(expr.RightTerm.ToString() + "%")) +
+                            PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + (PreparedStringValue(expr.Right.ToString() + "%")) +
                             ")";
                     }
                     else
@@ -821,15 +822,15 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
-                case Operators.EndsWith:
+                case OperatorEnum.EndsWith:
                     #region EndsWith
 
-                    if (expr.RightTerm == null) return null;
-                    if (expr.RightTerm is string)
+                    if (expr.Right == null) return null;
+                    if (expr.Right is string)
                     {
                         clause +=
                             "(" +
-                            PreparedFieldName(expr.LeftTerm.ToString()) + " LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.Left.ToString()) + " LIKE " + PreparedStringValue("%" + expr.Right.ToString()) +
                             ")";
                     }
                     else
@@ -840,15 +841,15 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
-                case Operators.EndsWithNot:
+                case OperatorEnum.EndsWithNot:
                     #region EndsWithNot
 
-                    if (expr.RightTerm == null) return null;
-                    if (expr.RightTerm is string)
+                    if (expr.Right == null) return null;
+                    if (expr.Right is string)
                     {
                         clause +=
                             "(" +
-                            PreparedFieldName(expr.LeftTerm.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.RightTerm.ToString()) +
+                            PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.Right.ToString()) +
                             ")";
                     }
                     else
@@ -859,119 +860,119 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
-                case Operators.GreaterThan:
+                case OperatorEnum.GreaterThan:
                     #region GreaterThan
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     clause += "> ";
-                    if (expr.RightTerm is Expression)
+                    if (expr.Right is Expr)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
+                        clause += ExpressionToWhereClause((Expr)expr.Right);
                     }
                     else
                     {
-                        if (expr.RightTerm is DateTime || expr.RightTerm is DateTime?)
+                        if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.RightTerm)) + "'";
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
-                        else if (expr.RightTerm is int || expr.RightTerm is long || expr.RightTerm is decimal)
+                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
-                            clause += expr.RightTerm.ToString();
+                            clause += expr.Right.ToString();
                         }
                         else
                         {
-                            clause += PreparedStringValue(expr.RightTerm.ToString());
+                            clause += PreparedStringValue(expr.Right.ToString());
                         }
                     }
                     break;
 
                 #endregion
 
-                case Operators.GreaterThanOrEqualTo:
+                case OperatorEnum.GreaterThanOrEqualTo:
                     #region GreaterThanOrEqualTo
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     clause += ">= ";
-                    if (expr.RightTerm is Expression)
+                    if (expr.Right is Expr)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
+                        clause += ExpressionToWhereClause((Expr)expr.Right);
                     }
                     else
                     {
-                        if (expr.RightTerm is DateTime || expr.RightTerm is DateTime?)
+                        if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.RightTerm)) + "'";
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
-                        else if (expr.RightTerm is int || expr.RightTerm is long || expr.RightTerm is decimal)
+                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
-                            clause += expr.RightTerm.ToString();
+                            clause += expr.Right.ToString();
                         }
                         else
                         {
-                            clause += PreparedStringValue(expr.RightTerm.ToString());
+                            clause += PreparedStringValue(expr.Right.ToString());
                         }
                     }
                     break;
 
                 #endregion
 
-                case Operators.LessThan:
+                case OperatorEnum.LessThan:
                     #region LessThan
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     clause += "< ";
-                    if (expr.RightTerm is Expression)
+                    if (expr.Right is Expr)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
+                        clause += ExpressionToWhereClause((Expr)expr.Right);
                     }
                     else
                     {
-                        if (expr.RightTerm is DateTime || expr.RightTerm is DateTime?)
+                        if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.RightTerm)) + "'";
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
-                        else if (expr.RightTerm is int || expr.RightTerm is long || expr.RightTerm is decimal)
+                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
-                            clause += expr.RightTerm.ToString();
+                            clause += expr.Right.ToString();
                         }
                         else
                         {
-                            clause += PreparedStringValue(expr.RightTerm.ToString());
+                            clause += PreparedStringValue(expr.Right.ToString());
                         }
                     }
                     break;
 
                 #endregion
 
-                case Operators.LessThanOrEqualTo:
+                case OperatorEnum.LessThanOrEqualTo:
                     #region LessThanOrEqualTo
 
-                    if (expr.RightTerm == null) return null;
+                    if (expr.Right == null) return null;
                     clause += "<= ";
-                    if (expr.RightTerm is Expression)
+                    if (expr.Right is Expr)
                     {
-                        clause += ExpressionToWhereClause((Expression)expr.RightTerm);
+                        clause += ExpressionToWhereClause((Expr)expr.Right);
                     }
                     else
                     {
-                        if (expr.RightTerm is DateTime || expr.RightTerm is DateTime?)
+                        if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.RightTerm)) + "'";
+                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
-                        else if (expr.RightTerm is int || expr.RightTerm is long || expr.RightTerm is decimal)
+                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
-                            clause += expr.RightTerm.ToString();
+                            clause += expr.Right.ToString();
                         }
                         else
                         {
-                            clause += PreparedStringValue(expr.RightTerm.ToString());
+                            clause += PreparedStringValue(expr.Right.ToString());
                         }
                     }
                     break;
 
                 #endregion
 
-                case Operators.IsNull:
+                case OperatorEnum.IsNull:
                     #region IsNull
 
                     clause += " IS NULL";
@@ -979,7 +980,7 @@ namespace DatabaseWrapper.SqlServer
 
                 #endregion
 
-                case Operators.IsNotNull:
+                case OperatorEnum.IsNotNull:
                     #region IsNotNull
 
                     clause += " IS NOT NULL";

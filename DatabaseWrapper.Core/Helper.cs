@@ -7,8 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace DatabaseWrapper.Core
 {
@@ -190,65 +188,6 @@ namespace DatabaseWrapper.Core
             }
 
             return ret;
-        }
-
-        /// <summary>
-        /// Deserialize JSON to an object.
-        /// </summary>
-        /// <typeparam name="T">Type of object.</typeparam>
-        /// <param name="json">JSON string.</param>
-        /// <returns>Object of specified type.</returns>
-        public static T DeserializeJson<T>(string json)
-        {
-            if (String.IsNullOrEmpty(json)) throw new ArgumentNullException(nameof(json));
-            return JsonConvert.DeserializeObject<T>(json);
-        }
-
-        /// <summary>
-        /// Deserialize JSON to an object.
-        /// </summary>
-        /// <typeparam name="T">Type of object.</typeparam>
-        /// <param name="bytes">JSON bytes.</param>
-        /// <returns>Object of specified type.</returns>
-        public static T DeserializeJson<T>(byte[] bytes)
-        {
-            if (bytes == null || bytes.Length < 1) throw new ArgumentNullException(nameof(bytes));
-            return DeserializeJson<T>(Encoding.UTF8.GetString(bytes));
-        }
-
-        /// <summary>
-        /// Serialize an object to JSON.
-        /// </summary>
-        /// <param name="obj">Object.</param>
-        /// <param name="pretty">Enable or disable pretty printing.</param>
-        /// <returns>JSON string.</returns>
-        public static string SerializeJson(object obj, bool pretty)
-        {
-            if (obj == null) return null;
-            string json;
-
-            if (pretty)
-            {
-                json = JsonConvert.SerializeObject(
-                  obj,
-                  Newtonsoft.Json.Formatting.Indented,
-                  new JsonSerializerSettings
-                  {
-                      NullValueHandling = NullValueHandling.Ignore,
-                      DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-                  });
-            }
-            else
-            {
-                json = JsonConvert.SerializeObject(obj,
-                  new JsonSerializerSettings
-                  {
-                      NullValueHandling = NullValueHandling.Ignore,
-                      DateTimeZoneHandling = DateTimeZoneHandling.Utc
-                  });
-            }
-
-            return json;
         }
 
         /// <summary>

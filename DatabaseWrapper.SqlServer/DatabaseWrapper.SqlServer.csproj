@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
-    <Version>3.3.2.3</Version>
+    <TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
+    <Version>4.0.0.1</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for SQL Server written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for MySQL, Sqlite, and PostgreSQL.</Description>
@@ -72,9 +72,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Core" Version="3.3.1.8" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="DatabaseWrapper.Core" Version="4.0.0.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 

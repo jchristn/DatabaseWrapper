@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks; 
 using DatabaseWrapper.Core;
+using ExpressionTree;
 
 namespace DatabaseWrapper.SqlServer
 {
@@ -361,11 +362,11 @@ namespace DatabaseWrapper.SqlServer
             if (String.IsNullOrEmpty(columnName)) throw new ArgumentNullException(nameof(columnName));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            Expression e = new Expression
+            Expr e = new Expr
             {
-                LeftTerm = columnName,
-                Operator = Operators.Equals,
-                RightTerm = value.ToString()
+                Left = columnName,
+                Operator = OperatorEnum.Equals,
+                Right = value.ToString()
             };
 
             return Select(tableName, null, 1, null, e, null);
@@ -380,7 +381,7 @@ namespace DatabaseWrapper.SqlServer
         /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param> 
         /// <returns>A DataTable containing the results.</returns>
-        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter)
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (indexStart != null) throw new ArgumentException("For SQL Server, use the Select API including result order when using a starting index.");
@@ -397,7 +398,7 @@ namespace DatabaseWrapper.SqlServer
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param> 
         /// <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expression filter, ResultOrder[] resultOrder)
+        public DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (indexStart != null && (resultOrder == null || resultOrder.Length < 1)) throw new ArgumentException("For SQL Server, result order must be populated when using a starting index.");
@@ -591,7 +592,7 @@ namespace DatabaseWrapper.SqlServer
         /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
         /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
         /// <returns>DataTable containing the updated rows.</returns>
-        public DataTable Update(string tableName, Dictionary<string, object> keyValuePairs, Expression filter)
+        public DataTable Update(string tableName, Dictionary<string, object> keyValuePairs, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (keyValuePairs == null || keyValuePairs.Count < 1) throw new ArgumentNullException(nameof(keyValuePairs));
@@ -659,7 +660,7 @@ namespace DatabaseWrapper.SqlServer
         /// </summary>
         /// <param name="tableName">The table in which you wish to DELETE.</param>
         /// <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param> 
-        public void Delete(string tableName, Expression filter)
+        public void Delete(string tableName, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (filter == null) throw new ArgumentNullException(nameof(filter));
@@ -730,7 +731,7 @@ namespace DatabaseWrapper.SqlServer
         /// <param name="tableName">The name of the table.</param>
         /// <param name="filter">Expression.</param>
         /// <returns>True if records exist.</returns>
-        public bool Exists(string tableName, Expression filter)
+        public bool Exists(string tableName, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             DataTable result = Query(SqlServerHelper.ExistsQuery(tableName, filter));
@@ -744,7 +745,7 @@ namespace DatabaseWrapper.SqlServer
         /// <param name="tableName">The name of the table.</param>
         /// <param name="filter">Expression.</param>
         /// <returns>The number of records.</returns>
-        public long Count(string tableName, Expression filter)
+        public long Count(string tableName, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             DataTable result = Query(SqlServerHelper.CountQuery(tableName, _CountColumnName, filter));
@@ -766,7 +767,7 @@ namespace DatabaseWrapper.SqlServer
         /// <param name="fieldName">The name of the field.</param>
         /// <param name="filter">Expression.</param>
         /// <returns>The sum of the specified column from the matching rows.</returns>
-        public decimal Sum(string tableName, string fieldName, Expression filter)
+        public decimal Sum(string tableName, string fieldName, Expr filter)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (String.IsNullOrEmpty(fieldName)) throw new ArgumentNullException(nameof(fieldName));
