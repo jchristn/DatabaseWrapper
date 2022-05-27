@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Inputty" Version="1.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DatabaseWrapper.SqlServer\DatabaseWrapper.SqlServer.csproj" />
   </ItemGroup>
 

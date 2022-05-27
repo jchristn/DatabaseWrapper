@@ -115,6 +115,11 @@
             The name of the database.
             </summary>
         </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.Debug">
+            <summary>
+            Debug settings.
+            </summary>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseSettings.#ctor">
             <summary>
             Instantiate the object.
@@ -158,6 +163,31 @@
             <param name="password">The password to use when accessing the database.</param>
             <param name="instance">For SQL Server Express, the instance name.</param>
             <param name="dbName">The name of the database.</param>
+        </member>
+        <member name="T:DatabaseWrapper.Core.DatabaseSettings.DebugSettings">
+            <summary>
+            Debug settings.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.DebugSettings.EnableForQueries">
+            <summary>
+            Enable debugging for queries.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.DebugSettings.EnableForResults">
+            <summary>
+            Enable debugging for results.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.DebugSettings.Logger">
+            <summary>
+            Action to invoke when sending a debug message.
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseSettings.DebugSettings.#ctor">
+            <summary>
+            Instantiate.
+            </summary>
         </member>
         <member name="T:DatabaseWrapper.Core.DataType">
             <summary>

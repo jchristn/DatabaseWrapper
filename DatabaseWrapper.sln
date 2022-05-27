@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29411.108
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseWrapper", "DatabaseWrapper\DatabaseWrapper.csproj", "{95C16D74-8F0A-421C-8F30-5DBDADD8A364}"
 EndProject
@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.NuGet", "Test.NuGet\Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Postgresql", "Test.Postgresql\Test.Postgresql.csproj", "{F3654C22-82BB-4A84-B378-265103D44900}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Mysql", "Test.Mysql\Test.Mysql.csproj", "{D90D908B-BB94-45B2-B801-82F95C60337C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Mysql", "Test.Mysql\Test.Mysql.csproj", "{D90D908B-BB94-45B2-B801-82F95C60337C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.DatabaseConsole", "Test.DatabaseConsole\Test.DatabaseConsole.csproj", "{E7595B6D-37F5-4B1F-B2B0-2CBF12EB872D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{D90D908B-BB94-45B2-B801-82F95C60337C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D90D908B-BB94-45B2-B801-82F95C60337C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D90D908B-BB94-45B2-B801-82F95C60337C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7595B6D-37F5-4B1F-B2B0-2CBF12EB872D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7595B6D-37F5-4B1F-B2B0-2CBF12EB872D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7595B6D-37F5-4B1F-B2B0-2CBF12EB872D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7595B6D-37F5-4B1F-B2B0-2CBF12EB872D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

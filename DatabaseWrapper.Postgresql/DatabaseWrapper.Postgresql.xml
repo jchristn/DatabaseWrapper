@@ -14,21 +14,6 @@
             The connection string used to connect to the database.
             </summary>
         </member>
-        <member name="F:DatabaseWrapper.Postgresql.DatabaseClient.LogQueries">
-            <summary>
-            Enable or disable logging of queries using the Logger(string msg) method (default: false).
-            </summary>
-        </member>
-        <member name="F:DatabaseWrapper.Postgresql.DatabaseClient.LogResults">
-            <summary>
-            Enable or disable logging of query results using the Logger(string msg) method (default: false).
-            </summary>
-        </member>
-        <member name="F:DatabaseWrapper.Postgresql.DatabaseClient.Logger">
-            <summary>
-            Method to invoke when sending a log message.
-            </summary>
-        </member>
         <member name="P:DatabaseWrapper.Postgresql.DatabaseClient.TimestampFormat">
             <summary>
             Timestamp format.
@@ -44,6 +29,11 @@
         <member name="P:DatabaseWrapper.Postgresql.DatabaseClient.MaxStatementLength">
             <summary>
             Maximum supported statement length.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Postgresql.DatabaseClient.Settings">
+            <summary>
+            Database settings.
             </summary>
         </member>
         <member name="M:DatabaseWrapper.Postgresql.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">

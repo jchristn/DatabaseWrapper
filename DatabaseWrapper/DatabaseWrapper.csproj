@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>4.0.0.1</Version>
+    <Version>4.1.2</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite. written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages if you only need support for one database type.</Description>
@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageReleaseNotes>BLOB data type support</PackageReleaseNotes>
+	<PackageReleaseNotes>Minor breaking changes, moved debug into settings</PackageReleaseNotes>
     <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
     <PackageIconUrl></PackageIconUrl>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
@@ -81,10 +81,10 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Mysql" Version="4.0.0.1" />
-    <PackageReference Include="DatabaseWrapper.Postgresql" Version="4.0.0.1" />
-    <PackageReference Include="DatabaseWrapper.Sqlite" Version="4.0.0.1" />
-    <PackageReference Include="DatabaseWrapper.SqlServer" Version="4.0.0.1" />
+    <PackageReference Include="DatabaseWrapper.Mysql" Version="4.1.2" />
+    <PackageReference Include="DatabaseWrapper.Postgresql" Version="4.1.2" />
+    <PackageReference Include="DatabaseWrapper.Sqlite" Version="4.1.2" />
+    <PackageReference Include="DatabaseWrapper.SqlServer" Version="4.1.2" />
   </ItemGroup>
 
   <ItemGroup>

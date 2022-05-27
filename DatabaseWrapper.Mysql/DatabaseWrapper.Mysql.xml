@@ -14,21 +14,6 @@
             The connection string used to connect to the database.
             </summary>
         </member>
-        <member name="F:DatabaseWrapper.Mysql.DatabaseClient.LogQueries">
-            <summary>
-            Enable or disable logging of queries using the Logger(string msg) method (default: false).
-            </summary>
-        </member>
-        <member name="F:DatabaseWrapper.Mysql.DatabaseClient.LogResults">
-            <summary>
-            Enable or disable logging of query results using the Logger(string msg) method (default: false).
-            </summary>
-        </member>
-        <member name="F:DatabaseWrapper.Mysql.DatabaseClient.Logger">
-            <summary>
-            Method to invoke when sending a log message.
-            </summary>
-        </member>
         <member name="P:DatabaseWrapper.Mysql.DatabaseClient.TimestampFormat">
             <summary>
             Timestamp format.
@@ -44,6 +29,11 @@
         <member name="P:DatabaseWrapper.Mysql.DatabaseClient.MaxStatementLength">
             <summary>
             Maximum supported statement length.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.Mysql.DatabaseClient.Settings">
+            <summary>
+            Database settings.
             </summary>
         </member>
         <member name="M:DatabaseWrapper.Mysql.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">

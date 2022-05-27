@@ -44,11 +44,11 @@ namespace Test
                 string pass = Console.ReadLine();
 
                 _Settings = new DatabaseSettings(DbTypes.Mysql, _Host, _Port, user, pass, "test");
-                _Database = new DatabaseClient(_Settings);
+                _Settings.Debug.Logger = Logger;
+                _Settings.Debug.EnableForQueries = true;
+                _Settings.Debug.EnableForResults = true;
 
-                _Database.Logger = Logger;
-                _Database.LogQueries = true;
-                _Database.LogResults = true;
+                _Database = new DatabaseClient(_Settings);
 
                 #endregion
 

@@ -34,21 +34,6 @@ namespace DatabaseWrapper.Sqlite
         }
 
         /// <summary>
-        /// Enable or disable logging of queries using the Logger(string msg) method (default: false).
-        /// </summary>
-        public bool LogQueries = false;
-
-        /// <summary>
-        /// Enable or disable logging of query results using the Logger(string msg) method (default: false).
-        /// </summary>
-        public bool LogResults = false;
-
-        /// <summary>
-        /// Method to invoke when sending a log message.
-        /// </summary>
-        public Action<string> Logger = null;
-
-        /// <summary>
         /// Timestamp format.
         /// Default is yyyy-MM-dd HH:mm:ss.ffffff.
         /// </summary>
@@ -91,6 +76,22 @@ namespace DatabaseWrapper.Sqlite
             {
                 // https://www.sqlite.org/limits.html
                 return 1000000000;
+            }
+        }
+
+        /// <summary>
+        /// Database settings.
+        /// </summary>
+        public DatabaseSettings Settings
+        {
+            get
+            {
+                return _Settings;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(Settings));
+                _Settings = value;
             }
         }
 
@@ -701,7 +702,8 @@ namespace DatabaseWrapper.Sqlite
 
             DataTable result = new DataTable();
 
-            if (LogQueries && Logger != null) Logger(_Header + "query: " + query);
+            if (_Settings.Debug.EnableForQueries && _Settings.Debug.Logger != null)
+                _Settings.Debug.Logger(_Header + "query: " + query);
 
             try
             {
@@ -722,15 +724,15 @@ namespace DatabaseWrapper.Sqlite
                     conn.Close();
                 }
 
-                if (LogResults && Logger != null)
+                if (_Settings.Debug.EnableForResults && _Settings.Debug.Logger != null)
                 {
                     if (result != null)
                     {
-                        Logger(_Header + "result: " + result.Rows.Count + " rows");
+                        _Settings.Debug.Logger(_Header + "result: " + result.Rows.Count + " rows");
                     }
                     else
                     {
-                        Logger(_Header + "result: null");
+                        _Settings.Debug.Logger(_Header + "result: null");
                     }
                 }
 

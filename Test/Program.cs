@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DatabaseWrapper;
 using DatabaseWrapper.Core;
 using ExpressionTree;
+using GetSomeInput;
 
 namespace Test
 {
@@ -35,31 +36,35 @@ namespace Test
                  * 
                  */
 
-                Console.Write("DB type [sqlserver|mysql|postgresql|sqlite]: ");
-                string dbType = Console.ReadLine();
-                if (String.IsNullOrEmpty(dbType)) return;
+                string dbType = Inputty.GetString("DB type [sqlserver|mysql|postgresql|sqlite]:", "mysql", false);
                 dbType = dbType.ToLower();
 
                 if (dbType.Equals("sqlserver") || dbType.Equals("mysql") || dbType.Equals("postgresql"))
                 {
-                    Console.Write("User: ");
-                    string user = Console.ReadLine();
-
-                    Console.Write("Password: ");
-                    string pass = Console.ReadLine();
+                    string user = Inputty.GetString("User:", "root", false);
+                    string pass = Inputty.GetString("Pass:", null, true);
 
                     switch (dbType)
                     {
                         case "sqlserver":
                             _Settings = new DatabaseSettings("localhost", 1433, user, pass, null, "test");
+                            _Settings.Debug.Logger = Logger;
+                            _Settings.Debug.EnableForQueries = true;
+                            _Settings.Debug.EnableForResults = true;
                             _Database = new DatabaseClient(_Settings);
                             break;
                         case "mysql":
                             _Settings = new DatabaseSettings(DbTypes.Mysql, "localhost", 3306, user, pass, "test");
+                            _Settings.Debug.Logger = Logger;
+                            _Settings.Debug.EnableForQueries = true;
+                            _Settings.Debug.EnableForResults = true;
                             _Database = new DatabaseClient(_Settings);
                             break;
                         case "postgresql":
                             _Settings = new DatabaseSettings(DbTypes.Postgresql, "localhost", 5432, user, pass, "test");
+                            _Settings.Debug.Logger = Logger;
+                            _Settings.Debug.EnableForQueries = true;
+                            _Settings.Debug.EnableForResults = true;
                             _Database = new DatabaseClient(_Settings);
                             break;
                         default:
@@ -68,11 +73,11 @@ namespace Test
                 }
                 else if (dbType.Equals("sqlite"))
                 {
-                    Console.Write("Filename: ");
-                    string filename = Console.ReadLine();
-                    if (String.IsNullOrEmpty(filename)) return;
-
+                    string filename = Inputty.GetString("Filename:", "sqlite.db", false);
                     _Settings = new DatabaseSettings(filename);
+                    _Settings.Debug.Logger = Logger;
+                    _Settings.Debug.EnableForQueries = true;
+                    _Settings.Debug.EnableForResults = true;
                     _Database = new DatabaseClient(_Settings);
                 }
                 else
@@ -81,10 +86,6 @@ namespace Test
                     return;
                 }
 
-                _Database.Logger = Logger;
-                _Database.LogQueries = true;
-                _Database.LogResults = true;
-                 
                 #endregion
 
                 #region Drop-Table

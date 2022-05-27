@@ -2,6 +2,15 @@
 
 ## Current Version
 
+v4.1
+
+- Minor breaking changes
+- Moved debug settings and logger into ```DatabaseSettings```
+- Dependency updates
+- Validated support for MariaDB
+
+## Previous Versions
+
 v4.0.0
 
 - Breaking changes
@@ -11,8 +20,6 @@ v4.0.0
 - ```Expression.LeftTerm``` is now ```Expr.Left```
 - ```Expression.RightTerm``` is now ```Expr.Right```
 - Reduced dependency clutter
-
-## Previous Versions
 
 v3.3.2
 

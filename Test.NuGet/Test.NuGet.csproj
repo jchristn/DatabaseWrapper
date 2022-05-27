@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="DatabaseWrapper" Version="4.0.0.1" />
+    <PackageReference Include="Inputty" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>

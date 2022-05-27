@@ -23,16 +23,14 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 - Support for .NET Standard, .NET Core, and .NET Framework
+- Support for SQL Server, Sqlite, PostgreSQL, MySQL, MariaDB, both on-premises and in the cloud
 
-## New in v4.0.0
+## New in v4.1
 
-- Breaking changes
-- Internal refactor
-- Use of external library ```ExpressionTree``` for ```Expr``` class, replaces ```Expression``` class
-- Use of external library ```ExpressionTree``` for ```OperatorEnum``` class, replaces ```Operator``` enum
-- ```Expression.LeftTerm``` is now ```Expr.Left```
-- ```Expression.RightTerm``` is now ```Expr.Right```
-- Reduced dependency clutter
+- Minor breaking changes
+- Moved debug settings and logger into ```DatabaseSettings```
+- Dependency updates
+- Validated support for MariaDB
 
 ## A Note on Sanitization
 
@@ -162,6 +160,10 @@ DatabaseClient client = new DatabaseClient(DbTypes.SqlServer, "[hostname]", [por
 ### MySQL
 
 - MySQL does not like to return updated rows.  I thought about making the UPDATE clause require that you supply the ID field and the ID value so that I could retrieve it after the fact, but that approach is just too limiting.
+
+### MariaDB
+
+- Use the MySQL constructor.  MySQL constraints remain.
 
 ### PostgreSQL
 

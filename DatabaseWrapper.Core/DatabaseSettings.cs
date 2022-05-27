@@ -29,7 +29,18 @@ namespace DatabaseWrapper.Core
         /// <summary>
         /// The TCP port number on which the server is listening.
         /// </summary>
-        public int Port { get; set; } = 0;
+        public int Port
+        {
+            get
+            {
+                return _Port;
+            }
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(Port));
+                _Port = value;
+            }
+        }
 
         /// <summary>
         /// The username to use when accessing the database.
@@ -51,9 +62,28 @@ namespace DatabaseWrapper.Core
         /// </summary>
         public string DatabaseName { get; set; } = null;
 
+        /// <summary>
+        /// Debug settings.
+        /// </summary>
+        public DebugSettings Debug
+        {
+            get
+            {
+                return _Debug;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(Debug));
+                _Debug = value;
+            }
+        }
+
         #endregion
 
         #region Private-Members
+
+        private int _Port = 0;
+        private DebugSettings _Debug = new DebugSettings();
 
         #endregion
 
@@ -159,6 +189,39 @@ namespace DatabaseWrapper.Core
         #endregion
 
         #region Private-Methods
+
+        #endregion
+
+        #region Public-Embedded-Classes
+
+        /// <summary>
+        /// Debug settings.
+        /// </summary>
+        public class DebugSettings
+        {
+            /// <summary>
+            /// Enable debugging for queries.
+            /// </summary>
+            public bool EnableForQueries { get; set; } = false;
+
+            /// <summary>
+            /// Enable debugging for results.
+            /// </summary>
+            public bool EnableForResults { get; set; } = false;
+
+            /// <summary>
+            /// Action to invoke when sending a debug message.
+            /// </summary>
+            public Action<string> Logger { get; set; } = null;
+
+            /// <summary>
+            /// Instantiate.
+            /// </summary>
+            public DebugSettings()
+            {
+
+            }
+        }
 
         #endregion
     }

@@ -56,127 +56,33 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
-        /// Enable or disable logging of queries using the Logger(string msg) method (default: false).
+        /// Settings.
         /// </summary>
-        public bool LogQueries
+        public DatabaseSettings Settings
         {
             get
             {
-                switch (_Settings.Type)
-                {
-                    case DbTypes.SqlServer:
-                        return _SqlServer.LogQueries;
-                    case DbTypes.Mysql:
-                        return _Mysql.LogQueries;
-                    case DbTypes.Postgresql:
-                        return _Postgresql.LogQueries;
-                    case DbTypes.Sqlite:
-                        return _Sqlite.LogQueries;
-                    default:
-                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
-                }
+                return _Settings;
             }
             set
             {
-                switch (_Settings.Type)
-                {
-                    case DbTypes.SqlServer:
-                        _SqlServer.LogQueries = value;
-                        break;
-                    case DbTypes.Mysql:
-                        _Mysql.LogQueries = value;
-                        break;
-                    case DbTypes.Postgresql:
-                        _Postgresql.LogQueries = value;
-                        break;
-                    case DbTypes.Sqlite:
-                        _Sqlite.LogQueries = value;
-                        break;
-                    default:
-                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
-                }
-            }
-        }
+                if (value == null) throw new ArgumentNullException(nameof(Settings));
 
-        /// <summary>
-        /// Enable or disable logging of query results using the Logger(string msg) method (default: false).
-        /// </summary>
-        public bool LogResults
-        {
-            get
-            {
-                switch (_Settings.Type)
-                {
-                    case DbTypes.SqlServer:
-                        return _SqlServer.LogResults;
-                    case DbTypes.Mysql:
-                        return _Mysql.LogResults;
-                    case DbTypes.Postgresql:
-                        return _Postgresql.LogResults;
-                    case DbTypes.Sqlite:
-                        return _Sqlite.LogResults;
-                    default:
-                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
-                }
-            }
-            set
-            {
-                switch (_Settings.Type)
-                {
-                    case DbTypes.SqlServer:
-                        _SqlServer.LogResults = value;
-                        break;
-                    case DbTypes.Mysql:
-                        _Mysql.LogResults = value;
-                        break;
-                    case DbTypes.Postgresql:
-                        _Postgresql.LogResults = value;
-                        break;
-                    case DbTypes.Sqlite:
-                        _Sqlite.LogResults = value;
-                        break;
-                    default:
-                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
-                }
-            }
-        }
+                _Settings = value;
 
-        /// <summary>
-        /// Method to invoke when sending a log message.
-        /// </summary>
-        public Action<string> Logger
-        {
-            get
-            {
-                switch (_Settings.Type)
+                switch (Type)
                 {
-                    case DbTypes.SqlServer:
-                        return _SqlServer.Logger;
                     case DbTypes.Mysql:
-                        return _Mysql.Logger;
-                    case DbTypes.Postgresql:
-                        return _Postgresql.Logger;
-                    case DbTypes.Sqlite:
-                        return _Sqlite.Logger;
-                    default:
-                        throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
-                }
-            }
-            set
-            {
-                switch (_Settings.Type)
-                {
-                    case DbTypes.SqlServer:
-                        _SqlServer.Logger = value;
-                        break;
-                    case DbTypes.Mysql:
-                        _Mysql.Logger = value;
+                        _Mysql.Settings = value;
                         break;
                     case DbTypes.Postgresql:
-                        _Postgresql.Logger = value;
+                        _Postgresql.Settings = value;
                         break;
                     case DbTypes.Sqlite:
-                        _Sqlite.Logger = value;
+                        _Sqlite.Settings = value;
+                        break;
+                    case DbTypes.SqlServer:
+                        _SqlServer.Settings = value;
                         break;
                     default:
                         throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");

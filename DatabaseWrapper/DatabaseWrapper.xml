@@ -19,19 +19,9 @@
             The connection string used to connect to the database server.
             </summary>
         </member>
-        <member name="P:DatabaseWrapper.DatabaseClient.LogQueries">
+        <member name="P:DatabaseWrapper.DatabaseClient.Settings">
             <summary>
-            Enable or disable logging of queries using the Logger(string msg) method (default: false).
-            </summary>
-        </member>
-        <member name="P:DatabaseWrapper.DatabaseClient.LogResults">
-            <summary>
-            Enable or disable logging of query results using the Logger(string msg) method (default: false).
-            </summary>
-        </member>
-        <member name="P:DatabaseWrapper.DatabaseClient.Logger">
-            <summary>
-            Method to invoke when sending a log message.
+            Settings.
             </summary>
         </member>
         <member name="M:DatabaseWrapper.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">
