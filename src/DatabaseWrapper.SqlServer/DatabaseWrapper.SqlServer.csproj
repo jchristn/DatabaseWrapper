@@ -2,89 +2,78 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>4.1.2</Version>
+    <Version>4.1.3</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
-    <Description>Simple database wrapper for Microsoft SQL Server, MySQL, PostgreSQL, and Sqlite. written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages if you only need support for one database type.</Description>
+    <Description>Simple database wrapper for SQL Server written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for MySQL, Sqlite, and PostgreSQL.</Description>
     <Copyright>(c)2021 Joel Christner</Copyright>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/jchristn/DatabaseWrapper</PackageProjectUrl>
+    <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
-    <PackageLicenseUrl></PackageLicenseUrl>
-	<PackageReleaseNotes>Minor breaking changes, moved debug into settings</PackageReleaseNotes>
     <PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
-    <PackageIconUrl></PackageIconUrl>
-    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+    <PackageReleaseNotes>Minor breaking changes, moved debug into settings</PackageReleaseNotes>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp3.1|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net461|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
 
 
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netcoreapp3.1|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net461|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
-    <DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
+    <DocumentationFile>DatabaseWrapper.SqlServer.xml</DocumentationFile>
   </PropertyGroup>
- 
-  <ItemGroup>
-    <None Include="assets\icon.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="LICENSE.md">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
 
-  <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
-    <ItemGroup>
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
-    </ItemGroup>
-  </Target>
+
 
   <ItemGroup>
-    <PackageReference Include="DatabaseWrapper.Mysql" Version="4.1.2" />
-    <PackageReference Include="DatabaseWrapper.Postgresql" Version="4.1.2" />
-    <PackageReference Include="DatabaseWrapper.Sqlite" Version="4.1.2" />
-    <PackageReference Include="DatabaseWrapper.SqlServer" Version="4.1.2" />
+    <PackageReference Include="DatabaseWrapper.Core" Version="4.1.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -94,11 +83,19 @@
     <None Update="assets\icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DatabaseWrapper.xml">
+    <None Update="DatabaseWrapper.SqlServer.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="LICENSE.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
 

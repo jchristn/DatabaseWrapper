@@ -267,6 +267,9 @@ namespace DatabaseWrapper.Core
                 case "character":               // pgsql
                 case "char":                    // mssql, mysql, pgsql
                 case "text":                    // mssql, mysql, pgsql, sqlite
+                case "tinytext":                // mysql
+                case "mediumtext":              // mysql
+                case "longtext":                // mysql
                 case "varchar":                 // mssql, mysql, pgsql
                     return DataType.Varchar;
 
