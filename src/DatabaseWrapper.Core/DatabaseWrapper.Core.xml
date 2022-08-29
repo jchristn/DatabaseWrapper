@@ -239,6 +239,11 @@
             Blob
             </summary>
         </member>
+        <member name="F:DatabaseWrapper.Core.DataType.Unknown">
+            <summary>
+            Unknown
+            </summary>
+        </member>
         <member name="T:DatabaseWrapper.Core.DbTypes">
             <summary>
             Enumeration containing the supported database types.

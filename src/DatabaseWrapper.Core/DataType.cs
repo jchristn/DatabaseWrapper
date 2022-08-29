@@ -56,6 +56,11 @@ namespace DatabaseWrapper.Core
         /// Blob
         /// </summary>
         [EnumMember(Value = "Blob")]
-        Blob
+        Blob,
+        /// <summary>
+        /// Unknown
+        /// </summary>
+        [EnumMember(Value = "Unknown")]
+        Unknown
     }
 }

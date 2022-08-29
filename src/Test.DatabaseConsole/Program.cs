@@ -23,11 +23,11 @@ namespace Test.DatabaseConsole
 
         // To use dbo.person, change _Table to either 'dbo.person' or just '" + _Table + "'
         // To use with a specific schema, use 'schema.table', i.e. 'foo.person'
-        static string _DbType = "mysql";
+        static string _DbType = "sqlserver";
         static string _User = "root";
         static string _Password = "password";
         static string _Hostname = "localhost";
-        static int _Port = 3306;
+        static int _Port = 1433;
         static string _DbName = "test";
         static bool _Debug = true;
         static bool _RunForever = true;
@@ -125,12 +125,63 @@ namespace Test.DatabaseConsole
                     {
                         Console.WriteLine("");
                         Console.WriteLine("Available commands:");
-                        Console.WriteLine("  q         quit");
-                        Console.WriteLine("  ?         help, this menu");
-                        Console.WriteLine("  cls       clear the screen");
-                        Console.WriteLine("  debug     enable/disable debug, currently " + _Debug);
-                        Console.WriteLine("  [query]   execute a query");
+                        Console.WriteLine("  q                   quit");
+                        Console.WriteLine("  ?                   help, this menu");
+                        Console.WriteLine("  cls                 clear the screen");
+                        Console.WriteLine("  debug               enable/disable debug, currently " + _Debug);
+                        Console.WriteLine("  tables              show list of tables");
+                        Console.WriteLine("  describe [table]    describe a table");
+                        Console.WriteLine("  [query]             execute a query");
                         Console.WriteLine("");
+                    }
+                    else if (userInput.Equals("tables"))
+                    {
+                        Dictionary<string, List<Column>> db = _Database.DescribeDatabase();
+
+                        if (db != null && db.Count > 0)
+                        {
+                            Console.WriteLine("");
+                            Console.WriteLine(db.Count + " tables");
+                            Console.WriteLine("");
+
+                            foreach (KeyValuePair<string, List<Column>> kvp in db)
+                            {
+                                Console.WriteLine("Table " + kvp.Key);
+                                foreach (Column col in kvp.Value)
+                                {
+                                    Console.WriteLine(
+                                        "| " + col.Name +
+                                        " " + col.Type.ToString() +
+                                        (col.Nullable ? " nullable" : "") +
+                                        (col.PrimaryKey ? " pri" : "") +
+                                        (col.Precision != null ? " precision " + col.Precision : "") +
+                                        (col.MaxLength != null ? " maxlen " + col.MaxLength : ""));
+                                }
+                            }
+                        }
+                    }
+                    else if (userInput.StartsWith("describe "))
+                    {
+                        string[] parts = userInput.Split(' ', 2);
+                        if (parts != null && parts.Length == 2)
+                        {
+                            List<Column> cols = _Database.DescribeTable(parts[1]);
+                            if (cols != null && cols.Count > 0)
+                            {
+                                Console.WriteLine("");
+                                Console.WriteLine("Table " + parts[1]);
+                                foreach (Column col in cols)
+                                {
+                                    Console.WriteLine(
+                                        "| " + col.Name +
+                                        " " + col.Type.ToString() +
+                                        (col.Nullable ? " nullable" : "") +
+                                        (col.PrimaryKey ? " pri" : "") +
+                                        (col.Precision != null ? " precision " + col.Precision : "") +
+                                        (col.MaxLength != null ? " maxlen " + col.MaxLength : ""));
+                                }
+                            }
+                        }
                     }
                     else
                     {

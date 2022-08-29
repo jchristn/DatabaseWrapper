@@ -249,18 +249,18 @@ namespace DatabaseWrapper.Core
                 case "timestamp without time zone":     // pgsql
                 case "time without timezone":           // pgsql
                 case "time without time zone":          // pgsql
-                case "time":                    // mssql, mysql
-                case "date":                    // mssql, mysql
-                case "datetime":                // mssql, mysql
-                case "datetime2":               // mssql
-                case "timestamp":               // mysql
+                case "time":                            // mssql, mysql
+                case "date":                            // mssql, mysql
+                case "datetime":                        // mssql, mysql
+                case "datetime2":                       // mssql
+                case "timestamp":                       // mysql
                     return DataType.DateTime;
 
                 case "time with timezone":              // pgsql
                 case "time with time zone":             // pgsql
                 case "timestamp with timezone":         // pgsql
                 case "timestamp with time zone":        // pgsql
-                case "datetimeoffset":          // mssql
+                case "datetimeoffset":                  // mssql
                     return DataType.DateTimeOffset;
 
                 case "enum":                    // mysql
@@ -288,7 +288,7 @@ namespace DatabaseWrapper.Core
                     return DataType.Blob;
 
                 default:
-                    throw new ArgumentException("Unknown DataType: " + s);
+                    return DataType.Unknown;
             }
         }
 

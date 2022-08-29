@@ -32,6 +32,12 @@ Core features:
 - Dependency updates
 - Validated support for MariaDB
 
+## Special Thanks
+
+Special thanks to those who have helped contribute or otherwise improve the library!  
+
+@shawty @constantinje @thedarklort @l-404-l @igrgurina @Vaelek @treyhay31 @daoye @twobytescy
+
 ## A Note on Sanitization
 
 Use of parameterized queries vs building queries dynamically is a sensitive subject.  Proponents of parameterized queries have data on their side - that parameterization does the right thing to prevent SQL injection and other issues.  *I do not disagree with them*.  However, it is worth noting that with proper care, you CAN build systems that allow you to dynamically build queries, and you SHOULD do so as long as you build in the appropriate safeguards.
