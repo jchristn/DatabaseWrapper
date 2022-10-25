@@ -19,7 +19,7 @@ namespace DatabaseWrapper.Core
         /// <summary>
         /// The type of database.
         /// </summary>
-        public DbTypes Type { get; set; } = DbTypes.Sqlite;
+        public DbTypeEnum Type { get; set; } = DbTypeEnum.Sqlite;
 
         /// <summary>
         /// The hostname of the database server.
@@ -104,7 +104,7 @@ namespace DatabaseWrapper.Core
         public DatabaseSettings(string filename)
         {
             if (String.IsNullOrEmpty(filename)) throw new ArgumentNullException(nameof(filename));
-            Type = DbTypes.Sqlite;
+            Type = DbTypeEnum.Sqlite;
             Filename = filename;
         }
 
@@ -123,8 +123,8 @@ namespace DatabaseWrapper.Core
             if (String.IsNullOrEmpty(hostname)) throw new ArgumentNullException(nameof(hostname));
             if (String.IsNullOrEmpty(dbName)) throw new ArgumentNullException(nameof(dbName));
 
-            Type = (DbTypes)(Enum.Parse(typeof(DbTypes), dbType));
-            if (Type == DbTypes.Sqlite) throw new ArgumentException("For Sqlite, use the filename constructor.");
+            Type = (DbTypeEnum)(Enum.Parse(typeof(DbTypeEnum), dbType));
+            if (Type == DbTypeEnum.Sqlite) throw new ArgumentException("For Sqlite, use the filename constructor.");
 
             Hostname = hostname;
             Port = port;
@@ -143,13 +143,13 @@ namespace DatabaseWrapper.Core
         /// <param name="username">The username to use when accessing the database.</param>
         /// <param name="password">The password to use when accessing the database.</param> 
         /// <param name="dbName">The name of the database.</param>
-        public DatabaseSettings(DbTypes dbType, string hostname, int port, string username, string password, string dbName)
+        public DatabaseSettings(DbTypeEnum dbType, string hostname, int port, string username, string password, string dbName)
         {
             if (String.IsNullOrEmpty(hostname)) throw new ArgumentNullException(nameof(hostname));
             if (String.IsNullOrEmpty(dbName)) throw new ArgumentNullException(nameof(dbName));
 
             Type = dbType;
-            if (Type == DbTypes.Sqlite) throw new ArgumentException("For Sqlite, use the filename constructor for DatabaseSettings.");
+            if (Type == DbTypeEnum.Sqlite) throw new ArgumentException("For Sqlite, use the filename constructor for DatabaseSettings.");
 
             Hostname = hostname;
             Port = port;
@@ -173,7 +173,7 @@ namespace DatabaseWrapper.Core
             if (String.IsNullOrEmpty(hostname)) throw new ArgumentNullException(nameof(hostname));
             if (String.IsNullOrEmpty(dbName)) throw new ArgumentNullException(nameof(dbName));
 
-            Type = DbTypes.SqlServer;
+            Type = DbTypeEnum.SqlServer;
             Hostname = hostname;
             Port = port;
             Username = username;

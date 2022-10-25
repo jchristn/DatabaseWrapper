@@ -10,13 +10,41 @@ using ExpressionTree;
 
 namespace DatabaseWrapper.Mysql
 {
-    internal static class MysqlHelper
+    /// <summary>
+    /// MySQL implementation of helper properties and methods.
+    /// </summary>
+    public class MysqlHelper : DatabaseHelperBase
     {
-        internal static string TimestampFormat = "yyyy-MM-dd HH:mm:ss.ffffff";
+        #region Public-Members
 
-        internal static string TimestampOffsetFormat = "yyyy-MM-dd HH:mm:ss.ffffffzzz";
+        /// <summary>
+        /// Timestamp format for use in DateTime.ToString([format]).
+        /// </summary>
+        public new string TimestampFormat = "yyyy-MM-dd HH:mm:ss.ffffff";
 
-        internal static string ConnectionString(DatabaseSettings settings)
+        /// <summary>
+        /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
+        /// </summary>
+        public new string TimestampOffsetFormat = "yyyy-MM-dd HH:mm:ss.ffffffzzz";
+
+        #endregion
+
+        #region Private-Members
+
+        #endregion
+
+        #region Constructors-and-Factories
+
+        #endregion
+
+        #region Public-Methods
+
+        /// <summary>
+        /// Build a connection string from DatabaseSettings.
+        /// </summary>
+        /// <param name="settings">Settings.</param>
+        /// <returns>String.</returns>
+        public override string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
 
@@ -33,12 +61,23 @@ namespace DatabaseWrapper.Mysql
             return ret;
         }
 
-        internal static string LoadTableNamesQuery()
+        /// <summary>
+        /// Query to retrieve the names of tables from a database.
+        /// </summary>
+        /// <param name="database">Database name.</param>
+        /// <returns>String.</returns>
+        public override string LoadTableNamesQuery(string database)
         {
             return "SHOW TABLES";
         }
 
-        internal static string LoadTableColumnsQuery(string database, string table)
+        /// <summary>
+        /// Query to retrieve the list of columns for a table.
+        /// </summary>
+        /// <param name="database">Database name.</param>
+        /// <param name="table">Table name.</param>
+        /// <returns></returns>
+        public override string LoadTableColumnsQuery(string database, string table)
         {
             return
                 "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE " +
@@ -46,37 +85,50 @@ namespace DatabaseWrapper.Mysql
                 "AND TABLE_SCHEMA='" + database + "'";
         }
 
-        internal static string SanitizeString(string val)
+        /// <summary>
+        /// Method to sanitize a string.
+        /// </summary>
+        /// <param name="val">String.</param>
+        /// <returns>String.</returns>
+        public override string SanitizeString(string val)
         {
             string ret = "";
             ret = MySqlHelper.EscapeString(val);
             return ret;
         }
 
-        internal static string ColumnToCreateString(Column col)
+        /// <summary>
+        /// Method to convert a Column object to the values used in a table create statement.
+        /// </summary>
+        /// <param name="col">Column.</param>
+        /// <returns>String.</returns>
+        public override string ColumnToCreateString(Column col)
         { 
             string ret =
                 "`" + SanitizeString(col.Name) + "` ";
 
             switch (col.Type)
             {
-                case DataType.Varchar:
-                case DataType.Nvarchar:
+                case DataTypeEnum.Varchar:
+                case DataTypeEnum.Nvarchar:
                     ret += "varchar(" + col.MaxLength + ") ";
                     break;
-                case DataType.Int:
-                case DataType.Long:
+                case DataTypeEnum.Guid:
+                    ret += "varchar(36) ";
+                    break;
+                case DataTypeEnum.Int:
+                case DataTypeEnum.Long:
                     if (col.MaxLength != null) ret += "int(" + col.MaxLength + ") ";
                     else ret += "int ";
                     break;
-                case DataType.Decimal:
+                case DataTypeEnum.Decimal:
                     ret += "decimal(" + col.MaxLength + "," + col.Precision + ") ";
                     break;
-                case DataType.Double:
+                case DataTypeEnum.Double:
                     ret += "float(" + col.MaxLength + "," + col.Precision + ") ";
                     break;
-                case DataType.DateTime:
-                case DataType.DateTimeOffset:
+                case DataTypeEnum.DateTime:
+                case DataTypeEnum.DateTimeOffset:
                     if (col.Precision != null)
                     {
                         ret += "datetime(" + col.Precision + ") ";
@@ -86,7 +138,7 @@ namespace DatabaseWrapper.Mysql
                         ret += "datetime ";
                     }
                     break;
-                case DataType.Blob:
+                case DataTypeEnum.Blob:
                     ret += "longblob ";
                     break;
                 default:
@@ -101,14 +153,25 @@ namespace DatabaseWrapper.Mysql
             return ret;
         }
 
-        internal static Column GetPrimaryKeyColumn(List<Column> columns)
+        /// <summary>
+        /// Retrieve the primary key column from a list of columns.
+        /// </summary>
+        /// <param name="columns">List of Column.</param>
+        /// <returns>Column.</returns>
+        public override Column GetPrimaryKeyColumn(List<Column> columns)
         {
             Column c = columns.FirstOrDefault(d => d.PrimaryKey);
             if (c == null || c == default(Column)) return null;
             return c;
         }
 
-        internal static string CreateTableQuery(string tableName, List<Column> columns)
+        /// <summary>
+        /// Retrieve a query used for table creation.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="columns">List of columns.</param>
+        /// <returns>String.</returns>
+        public override string CreateTableQuery(string tableName, List<Column> columns)
         {
             string query =
                 "CREATE TABLE `" + SanitizeString(tableName) + "` " +
@@ -139,13 +202,28 @@ namespace DatabaseWrapper.Mysql
             return query;
         }
 
-        internal static string DropTableQuery(string tableName)
+        /// <summary>
+        /// Retrieve a query used for dropping a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <returns>String.</returns>
+        public override string DropTableQuery(string tableName)
         {
             string query = "DROP TABLE IF EXISTS `" + SanitizeString(tableName) + "`";
             return query;
         }
 
-        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
+        /// <summary>
+        /// Retrieve a query used for selecting data from a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="indexStart">Index start.</param>
+        /// <param name="maxResults">Maximum number of results to retrieve.</param>
+        /// <param name="returnFields">List of field names to return.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <param name="resultOrder">Result order.</param>
+        /// <returns>String.</returns>
+        public override string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
         { 
             string query = "";
             string whereClause = "";
@@ -215,22 +293,44 @@ namespace DatabaseWrapper.Mysql
             return query;
         }
 
-        internal static string InsertQuery(string tableName, string keys, string values)
+        /// <summary>
+        /// Retrieve a query used for inserting data into a table.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
+        /// <returns>String.</returns>
+        public override string InsertQuery(string tableName, Dictionary<string, object> keyValuePairs)
         {
             string ret =
                 "START TRANSACTION; " +
                 "INSERT INTO `" + SanitizeString(tableName) + "` " +
-                "(" + keys + ") " + 
-                "VALUES " + 
-                "(" + values + "); " + 
+                "(";
+
+            string keys = "";
+            string vals = "";
+            BuildKeysValuesFromDictionary(keyValuePairs, out keys, out vals);
+
+            ret += keys + ") " +
+                "VALUES " +
+                "(" + vals + "); " + 
                 "SELECT LAST_INSERT_ID() AS id; " + 
                 "COMMIT; ";
 
             return ret;
         }
 
-        internal static string InsertMultipleQuery(string tableName, string keys, List<string> values)
+        /// <summary>
+        /// Retrieve a query for inserting multiple rows into a table.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
+        /// <returns>String.</returns>
+        public override string InsertMultipleQuery(string tableName, List<Dictionary<string, object>> keyValuePairList)
         {
+            ValidateInputDictionaries(keyValuePairList);
+            string keys = BuildKeysFromDictionary(keyValuePairList[0]);
+            List<string> values = BuildValuesFromDictionaries(keyValuePairList);
+
             string ret =
                 "START TRANSACTION;" +
                 "  INSERT INTO `" + SanitizeString(tableName) + "` " +
@@ -251,8 +351,17 @@ namespace DatabaseWrapper.Mysql
             return ret;
         }
 
-        internal static string UpdateQuery(string tableName, string keyValueClause, Expr filter)
+        /// <summary>
+        /// Retrieve a query for updating data in a table.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to UPDATE.</param>
+        /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
+        /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
+        /// <returns>String.</returns>
+        public override string UpdateQuery(string tableName, Dictionary<string, object> keyValuePairs, Expr filter)
         {
+            string keyValueClause = BuildKeyValueClauseFromDictionary(keyValuePairs);
+
             string ret =
                 "UPDATE `" + SanitizeString(tableName) + "` SET " +
                 keyValueClause + " ";
@@ -262,7 +371,13 @@ namespace DatabaseWrapper.Mysql
             return ret;
         }
 
-        internal static string DeleteQuery(string tableName, Expr filter)
+        /// <summary>
+        /// Retrieve a query for deleting data from a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string DeleteQuery(string tableName, Expr filter)
         {
             string ret =
                 "DELETE FROM `" + SanitizeString(tableName) + "` ";
@@ -272,12 +387,23 @@ namespace DatabaseWrapper.Mysql
             return ret;
         }
 
-        internal static string TruncateQuery(string tableName)
+        /// <summary>
+        /// Retrieve a query for truncating a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <returns>String.</returns>
+        public override string TruncateQuery(string tableName)
         {
             return "TRUNCATE TABLE `" + SanitizeString(tableName) + "`";
         }
 
-        internal static string ExistsQuery(string tableName, Expr filter)
+        /// <summary>
+        /// Retrieve a query for determing whether data matching specified conditions exists.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string ExistsQuery(string tableName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -302,7 +428,14 @@ namespace DatabaseWrapper.Mysql
             return query;
         }
 
-        internal static string CountQuery(string tableName, string countColumnName, Expr filter)
+        /// <summary>
+        /// Retrieve a query that returns a count of the number of rows matching the supplied conditions.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="countColumnName">Column name to use to temporarily store the result.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string CountQuery(string tableName, string countColumnName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -326,7 +459,15 @@ namespace DatabaseWrapper.Mysql
             return query;
         }
 
-        internal static string SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter)
+        /// <summary>
+        /// Retrieve a query that sums the values found in the specified field.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="fieldName">Column containing values to sum.</param>
+        /// <param name="sumColumnName">Column name to temporarily store the result.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -350,22 +491,41 @@ namespace DatabaseWrapper.Mysql
             return query;
         }
 
-        internal static string PreparedFieldName(string s)
+        /// <summary>
+        /// Retrieve a timestamp in the database format.
+        /// </summary>
+        /// <param name="ts">DateTime.</param>
+        /// <returns>String.</returns>
+        public override string DbTimestamp(DateTime ts)
         {
-            return "`" + s + "`";
+            return ts.ToString(TimestampFormat);
         }
 
-        internal static string PreparedStringValue(string s)
+        /// <summary>
+        /// Retrieve a timestamp offset in the database format.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>String.</returns>
+        public override string DbTimestampOffset(DateTimeOffset ts)
         {
-            return "'" + MysqlHelper.SanitizeString(s) + "'";
+            return ts.DateTime.ToString(TimestampFormat);
         }
 
-        internal static string PreparedUnicodeValue(string s)
+        #endregion
+
+        #region Private-Methods
+
+        private string PreparedFieldName(string fieldName)
         {
-            return "N" + PreparedStringValue(s);
+            return "`" + fieldName + "`";
         }
 
-        internal static string ExpressionToWhereClause(Expr expr)
+        private string PreparedStringValue(string str)
+        {
+            return "'" + SanitizeString(str) + "'";
+        }
+
+        private string ExpressionToWhereClause(Expr expr)
         {
             if (expr == null) return null;
 
@@ -543,7 +703,7 @@ namespace DatabaseWrapper.Mysql
                         }
                         inAdded++;
                     }
-                    clause += ")"; 
+                    clause += ")";
                     break;
 
                 #endregion
@@ -574,7 +734,7 @@ namespace DatabaseWrapper.Mysql
                         }
                         notInAdded++;
                     }
-                    clause += ")"; 
+                    clause += ")";
                     break;
 
                 #endregion
@@ -833,17 +993,12 @@ namespace DatabaseWrapper.Mysql
             return clause;
         }
 
-        internal static string DbTimestamp(DateTime ts)
+        private string PreparedUnicodeValue(string s)
         {
-            return ts.ToString(TimestampFormat);
+            return "N" + PreparedStringValue(s);
         }
 
-        internal static string DbTimestampOffset(DateTimeOffset ts)
-        {
-            return ts.DateTime.ToString(TimestampFormat);
-        }
-
-        private static string BuildOrderByClause(ResultOrder[] resultOrder)
+        private string BuildOrderByClause(ResultOrder[] resultOrder)
         {
             if (resultOrder == null || resultOrder.Length < 0) return null;
 
@@ -853,12 +1008,233 @@ namespace DatabaseWrapper.Mysql
             {
                 if (i > 0) ret += ", ";
                 ret += SanitizeString(resultOrder[i].ColumnName) + " ";
-                if (resultOrder[i].Direction == OrderDirection.Ascending) ret += "ASC";
-                else if (resultOrder[i].Direction == OrderDirection.Descending) ret += "DESC";
+                if (resultOrder[i].Direction == OrderDirectionEnum.Ascending) ret += "ASC";
+                else if (resultOrder[i].Direction == OrderDirectionEnum.Descending) ret += "DESC";
             }
 
             ret += " ";
             return ret;
         }
+
+        private void BuildKeysValuesFromDictionary(Dictionary<string, object> keyValuePairs, out string keys, out string vals)
+        {
+            keys = "";
+            vals = "";
+            int added = 0;
+
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
+            {
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
+
+                if (added > 0)
+                {
+                    keys += ",";
+                    vals += ",";
+                }
+
+                keys += PreparedFieldName(currKvp.Key);
+
+                if (currKvp.Value != null)
+                {
+                    if (currKvp.Value is DateTime
+                        || currKvp.Value is DateTime?)
+                    {
+                        vals += "'" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
+                    }
+                    else if (currKvp.Value is DateTimeOffset
+                        || currKvp.Value is DateTimeOffset?)
+                    {
+                        vals += "'" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
+                    }
+                    else if (currKvp.Value is int
+                        || currKvp.Value is long
+                        || currKvp.Value is decimal)
+                    {
+                        vals += currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is byte[])
+                    {
+                        vals += "x'" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
+                    }
+                    else
+                    {
+                        if (IsExtendedCharacters(currKvp.Value.ToString()))
+                        {
+                            vals += PreparedUnicodeValue(currKvp.Value.ToString());
+                        }
+                        else
+                        {
+                            vals += PreparedStringValue(currKvp.Value.ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    vals += "null";
+                }
+
+                added++;
+            }
+        }
+
+        private bool IsExtendedCharacters(string data)
+        {
+            if (String.IsNullOrEmpty(data)) return false;
+            foreach (char c in data)
+            {
+                if ((int)c > 255) return true;
+            }
+            return false;
+        }
+
+        private void ValidateInputDictionaries(List<Dictionary<string, object>> keyValuePairList)
+        {
+            Dictionary<string, object> reference = keyValuePairList[0];
+
+            if (keyValuePairList.Count > 1)
+            {
+                foreach (Dictionary<string, object> dict in keyValuePairList)
+                {
+                    if (!(reference.Count == dict.Count) || !(reference.Keys.SequenceEqual(dict.Keys)))
+                    {
+                        throw new ArgumentException("All supplied dictionaries must contain exactly the same keys.");
+                    }
+                }
+            }
+        }
+
+        private string BuildKeysFromDictionary(Dictionary<string, object> reference)
+        {
+            string keys = "";
+            int keysAdded = 0;
+            foreach (KeyValuePair<string, object> curr in reference)
+            {
+                if (keysAdded > 0) keys += ",";
+                keys += PreparedFieldName(curr.Key);
+                keysAdded++;
+            }
+
+            return keys;
+        }
+
+        private List<string> BuildValuesFromDictionaries(List<Dictionary<string, object>> dicts)
+        {
+            List<string> values = new List<string>();
+
+            foreach (Dictionary<string, object> currDict in dicts)
+            {
+                string vals = "";
+                int valsAdded = 0;
+
+                foreach (KeyValuePair<string, object> currKvp in currDict)
+                {
+                    if (valsAdded > 0) vals += ",";
+
+                    if (currKvp.Value != null)
+                    {
+                        if (currKvp.Value is DateTime
+                            || currKvp.Value is DateTime?)
+                        {
+                            vals += "'" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
+                        }
+                        else if (currKvp.Value is DateTimeOffset
+                            || currKvp.Value is DateTimeOffset?)
+                        {
+                            vals += "'" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
+                        }
+                        else if (currKvp.Value is int
+                            || currKvp.Value is long
+                            || currKvp.Value is decimal)
+                        {
+                            vals += currKvp.Value.ToString();
+                        }
+                        else if (currKvp.Value is byte[])
+                        {
+                            vals += "x'" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
+                        }
+                        else
+                        {
+                            if (IsExtendedCharacters(currKvp.Value.ToString()))
+                            {
+                                vals += PreparedUnicodeValue(currKvp.Value.ToString());
+                            }
+                            else
+                            {
+                                vals += PreparedStringValue(currKvp.Value.ToString());
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        vals += "null";
+                    }
+
+                    valsAdded++;
+                }
+
+                values.Add(vals);
+            }
+
+            return values;
+        }
+
+        private string BuildKeyValueClauseFromDictionary(Dictionary<string, object> keyValuePairs)
+        {
+            string keyValueClause = "";
+            int added = 0;
+
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
+            {
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
+
+                if (added > 0) keyValueClause += ",";
+
+                if (currKvp.Value != null)
+                {
+                    if (currKvp.Value is DateTime
+                        || currKvp.Value is DateTime?)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "='" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
+                    }
+                    else if (currKvp.Value is DateTimeOffset
+                        || currKvp.Value is DateTimeOffset?)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "='" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
+                    }
+                    else if (currKvp.Value is int
+                        || currKvp.Value is long
+                        || currKvp.Value is decimal)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is byte[])
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + "x'" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
+                    }
+                    else
+                    {
+                        if (IsExtendedCharacters(currKvp.Value.ToString()))
+                        {
+                            keyValueClause += PreparedFieldName(currKvp.Key) + "=" + PreparedUnicodeValue(currKvp.Value.ToString());
+                        }
+                        else
+                        {
+                            keyValueClause += PreparedFieldName(currKvp.Key) + "=" + PreparedStringValue(currKvp.Value.ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    keyValueClause += PreparedFieldName(currKvp.Key) + "= null";
+                }
+
+                added++;
+            }
+
+            return keyValueClause;
+        }
+
+        #endregion
     }
 }

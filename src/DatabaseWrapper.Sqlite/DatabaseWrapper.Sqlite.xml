@@ -36,6 +36,11 @@
             Database settings.
             </summary>
         </member>
+        <member name="E:DatabaseWrapper.Sqlite.DatabaseClient.QueryEvent">
+            <summary>
+            Event to fire when a query is handled.
+            </summary>
+        </member>
         <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">
             <summary>
             Create an instance of the database client.
@@ -233,19 +238,171 @@
             </summary>
             <param name="disposing">Disposing of resources.</param>
         </member>
-        <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.DbTimestamp(System.DateTime)">
+        <member name="T:DatabaseWrapper.Sqlite.SqliteHelper">
             <summary>
-            Convert a DateTime to a formatted string.
-            </summary> 
-            <param name="ts">The timestamp.</param>
-            <returns>A string formatted for use with the specified database.</returns>
+            Sqlite implementation of helper properties and methods.
+            </summary>
         </member>
-        <member name="M:DatabaseWrapper.Sqlite.DatabaseClient.DbTimestampOffset(System.DateTimeOffset)">
+        <member name="F:DatabaseWrapper.Sqlite.SqliteHelper.TimestampFormat">
             <summary>
-            Convert a DateTimeOffset to a formatted string.
-            </summary> 
-            <param name="ts">The timestamp.</param>
-            <returns>A string formatted for use with the specified database.</returns>
+            Timestamp format for use in DateTime.ToString([format]).
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Sqlite.SqliteHelper.TimestampOffsetFormat">
+            <summary>
+            Timestamp offset format for use in DateTimeOffset.ToString([format]).
+            </summary>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.ConnectionString(DatabaseWrapper.Core.DatabaseSettings)">
+            <summary>
+            Build a connection string from DatabaseSettings.
+            </summary>
+            <param name="settings">Settings.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.LoadTableNamesQuery(System.String)">
+            <summary>
+            Query to retrieve the names of tables from a database.
+            </summary>
+            <param name="database">Database name.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.LoadTableColumnsQuery(System.String,System.String)">
+            <summary>
+            Query to retrieve the list of columns for a table.
+            </summary>
+            <param name="database">Database name.</param>
+            <param name="table">Table name.</param>
+            <returns></returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.SanitizeString(System.String)">
+            <summary>
+            Method to sanitize a string.
+            </summary>
+            <param name="val">String.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.ColumnToCreateString(DatabaseWrapper.Core.Column)">
+            <summary>
+            Method to convert a Column object to the values used in a table create statement.
+            </summary>
+            <param name="col">Column.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.GetPrimaryKeyColumn(System.Collections.Generic.List{DatabaseWrapper.Core.Column})">
+            <summary>
+            Retrieve the primary key column from a list of columns.
+            </summary>
+            <param name="columns">List of Column.</param>
+            <returns>Column.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.CreateTableQuery(System.String,System.Collections.Generic.List{DatabaseWrapper.Core.Column})">
+            <summary>
+            Retrieve a query used for table creation.
+            </summary>
+            <param name="tableName">Table name.</param>
+            <param name="columns">List of columns.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.DropTableQuery(System.String)">
+            <summary>
+            Retrieve a query used for dropping a table.
+            </summary>
+            <param name="tableName">Table name.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.SelectQuery(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},ExpressionTree.Expr,DatabaseWrapper.Core.ResultOrder[])">
+            <summary>
+            Retrieve a query used for selecting data from a table.
+            </summary>
+            <param name="tableName">Table name.</param>
+            <param name="indexStart">Index start.</param>
+            <param name="maxResults">Maximum number of results to retrieve.</param>
+            <param name="returnFields">List of field names to return.</param>
+            <param name="filter">Expression filter.</param>
+            <param name="resultOrder">Result order.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.InsertQuery(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Retrieve a query used for inserting data into a table.
+            </summary>
+            <param name="tableName">The table in which you wish to INSERT.</param>
+            <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.InsertMultipleQuery(System.String,System.Collections.Generic.List{System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Retrieve a query for inserting multiple rows into a table.
+            </summary>
+            <param name="tableName">The table in which you wish to INSERT.</param>
+            <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.UpdateQuery(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},ExpressionTree.Expr)">
+            <summary>
+            Retrieve a query for updating data in a table.
+            </summary>
+            <param name="tableName">The table in which you wish to UPDATE.</param>
+            <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
+            <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.DeleteQuery(System.String,ExpressionTree.Expr)">
+            <summary>
+            Retrieve a query for deleting data from a table.
+            </summary>
+            <param name="tableName">Table name.</param>
+            <param name="filter">Expression filter.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.TruncateQuery(System.String)">
+            <summary>
+            Retrieve a query for truncating a table.
+            </summary>
+            <param name="tableName">Table name.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.ExistsQuery(System.String,ExpressionTree.Expr)">
+            <summary>
+            Retrieve a query for determing whether data matching specified conditions exists.
+            </summary>
+            <param name="tableName">Table name.</param>
+            <param name="filter">Expression filter.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.CountQuery(System.String,System.String,ExpressionTree.Expr)">
+            <summary>
+            Retrieve a query that returns a count of the number of rows matching the supplied conditions.
+            </summary>
+            <param name="tableName">Table name.</param>
+            <param name="countColumnName">Column name to use to temporarily store the result.</param>
+            <param name="filter">Expression filter.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.SumQuery(System.String,System.String,System.String,ExpressionTree.Expr)">
+            <summary>
+            Retrieve a query that sums the values found in the specified field.
+            </summary>
+            <param name="tableName">Table name.</param>
+            <param name="fieldName">Column containing values to sum.</param>
+            <param name="sumColumnName">Column name to temporarily store the result.</param>
+            <param name="filter">Expression filter.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.DbTimestamp(System.DateTime)">
+            <summary>
+            Retrieve a timestamp in the database format.
+            </summary>
+            <param name="ts">DateTime.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Sqlite.SqliteHelper.DbTimestampOffset(System.DateTimeOffset)">
+            <summary>
+            Retrieve a timestamp offset in the database format.
+            </summary>
+            <param name="ts">DateTimeOffset.</param>
+            <returns>String.</returns>
         </member>
     </members>
 </doc>

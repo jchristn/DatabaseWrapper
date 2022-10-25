@@ -9,13 +9,41 @@ using ExpressionTree;
 
 namespace DatabaseWrapper.Postgresql
 {
-    internal static class PostgresqlHelper
+    /// <summary>
+    /// PostgreSQL implementation of helper properties and methods.
+    /// </summary>
+    public class PostgresqlHelper : DatabaseHelperBase
     {
-        internal static string TimestampFormat = "MM/dd/yyyy hh:mm:ss.fffffff tt";
+        #region Public-Members
 
-        internal static string TimestampOffsetFormat = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
+        /// <summary>
+        /// Timestamp format for use in DateTime.ToString([format]).
+        /// </summary>
+        public new string TimestampFormat = "MM/dd/yyyy hh:mm:ss.fffffff tt";
 
-        internal static string ConnectionString(DatabaseSettings settings)
+        /// <summary>
+        /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
+        /// </summary>
+        public new string TimestampOffsetFormat = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
+
+        #endregion
+
+        #region Private-Members
+
+        #endregion
+
+        #region Constructors-and-Factories
+
+        #endregion
+
+        #region Public-Methods
+
+        /// <summary>
+        /// Build a connection string from DatabaseSettings.
+        /// </summary>
+        /// <param name="settings">Settings.</param>
+        /// <returns>String.</returns>
+        public override string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
 
@@ -32,12 +60,23 @@ namespace DatabaseWrapper.Postgresql
             return ret;
         }
 
-        internal static string LoadTableNamesQuery()
+        /// <summary>
+        /// Query to retrieve the names of tables from a database.
+        /// </summary>
+        /// <param name="database">Database name.</param>
+        /// <returns>String.</returns>
+        public override string LoadTableNamesQuery(string database)
         {
             return "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'";
         }
 
-        internal static string LoadTableColumnsQuery(string database, string table)
+        /// <summary>
+        /// Query to retrieve the list of columns for a table.
+        /// </summary>
+        /// <param name="database">Database name.</param>
+        /// <param name="table">Table name.</param>
+        /// <returns></returns>
+        public override string LoadTableColumnsQuery(string database, string table)
         {
             return
                 "SELECT " +
@@ -53,125 +92,23 @@ namespace DatabaseWrapper.Postgresql
                 "WHERE cols.TABLE_NAME = '" + ExtractTableName(table) + "';";
         }
 
-        internal static string SanitizeString(string val)
+        /// <summary>
+        /// Method to sanitize a string.
+        /// </summary>
+        /// <param name="val">String.</param>
+        /// <returns>String.</returns>
+        public override string SanitizeString(string val)
         {
             string tag = "$" + EscapeString(val, 2) + "$";
             return tag + val + tag;
         }
 
-        internal static string EscapeString(string val, int numChar)
-        {
-            string ret = "";
-            Random random = new Random();
-            if (numChar < 1) return ret;
-
-            while (true)
-            {
-                ret = "";
-                random = new Random();
-
-                int valid = 0; 
-                int num = 0;
-
-                for (int i = 0; i < numChar; i++)
-                {
-                    num = 0;
-                    valid = 0;
-                    while (valid == 0)
-                    {
-                        num = random.Next(126);
-                        if (((num > 64) && (num < 91)) ||
-                            ((num > 96) && (num < 123)))
-                        {
-                            valid = 1;
-                        }
-                    }
-                    ret += (char)num;
-                }
-
-                if (!val.Contains("$" + ret + "$")) break;
-            }
-
-            return ret;
-        }
-
-        internal static string SanitizeFieldname(string val)
-        {
-            string ret = "";
-
-            //
-            // null, below ASCII range, above ASCII range
-            //
-            for (int i = 0; i < val.Length; i++)
-            {
-                if (((int)(val[i]) == 10) ||      // Preserve carriage return
-                    ((int)(val[i]) == 13))        // and line feed
-                {
-                    ret += val[i];
-                }
-                else if ((int)(val[i]) < 32)
-                {
-                    continue;
-                }
-                else
-                {
-                    ret += val[i];
-                }
-            }
-
-            //
-            // double dash
-            //
-            int doubleDash = 0;
-            while (true)
-            {
-                doubleDash = ret.IndexOf("--");
-                if (doubleDash < 0)
-                {
-                    break;
-                }
-                else
-                {
-                    ret = ret.Remove(doubleDash, 2);
-                }
-            }
-
-            //
-            // open comment
-            // 
-            int openComment = 0;
-            while (true)
-            {
-                openComment = ret.IndexOf("/*");
-                if (openComment < 0) break;
-                else
-                {
-                    ret = ret.Remove(openComment, 2);
-                }
-            }
-
-            //
-            // close comment
-            //
-            int closeComment = 0;
-            while (true)
-            {
-                closeComment = ret.IndexOf("*/");
-                if (closeComment < 0) break;
-                else
-                {
-                    ret = ret.Remove(closeComment, 2);
-                }
-            }
-
-            //
-            // in-string replacement
-            //
-            ret = ret.Replace("'", "''");
-            return ret;
-        }
-
-        internal static string ColumnToCreateString(Column col)
+        /// <summary>
+        /// Method to convert a Column object to the values used in a table create statement.
+        /// </summary>
+        /// <param name="col">Column.</param>
+        /// <returns>String.</returns>
+        public override string ColumnToCreateString(Column col)
         {
             string ret =
                 "\"" + SanitizeFieldname(col.Name) + "\" ";
@@ -184,29 +121,32 @@ namespace DatabaseWrapper.Postgresql
 
             switch (col.Type)
             {
-                case DataType.Varchar:
-                case DataType.Nvarchar:
+                case DataTypeEnum.Varchar:
+                case DataTypeEnum.Nvarchar:
                     ret += "character varying(" + col.MaxLength + ") ";
                     break;
-                case DataType.Int:
+                case DataTypeEnum.Guid:
+                    ret += "character varying(36) ";
+                    break;
+                case DataTypeEnum.Int:
                     ret += "integer ";
                     break;
-                case DataType.Long:
+                case DataTypeEnum.Long:
                     ret += "bigint ";
                     break;
-                case DataType.Decimal:
+                case DataTypeEnum.Decimal:
                     ret += "numeric(" + col.MaxLength + "," + col.Precision + ") ";
                     break;
-                case DataType.Double:
+                case DataTypeEnum.Double:
                     ret += "float(" + col.MaxLength + ") ";
                     break;
-                case DataType.DateTime:
+                case DataTypeEnum.DateTime:
                     ret += "timestamp without time zone ";
                     break;
-                case DataType.DateTimeOffset:
+                case DataTypeEnum.DateTimeOffset:
                     ret += "timestamp with time zone ";
                     break;
-                case DataType.Blob:
+                case DataTypeEnum.Blob:
                     ret += "bytea ";
                     break;
                 default:
@@ -219,14 +159,25 @@ namespace DatabaseWrapper.Postgresql
             return ret;
         }
 
-        internal static Column GetPrimaryKeyColumn(List<Column> columns)
+        /// <summary>
+        /// Retrieve the primary key column from a list of columns.
+        /// </summary>
+        /// <param name="columns">List of Column.</param>
+        /// <returns>Column.</returns>
+        public override Column GetPrimaryKeyColumn(List<Column> columns)
         {
             Column c = columns.FirstOrDefault(d => d.PrimaryKey);
             if (c == null || c == default(Column)) return null;
             return c;
         }
 
-        internal static string CreateTableQuery(string tableName, List<Column> columns)
+        /// <summary>
+        /// Retrieve a query used for table creation.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="columns">List of columns.</param>
+        /// <returns>String.</returns>
+        public override string CreateTableQuery(string tableName, List<Column> columns)
         {
             string query =
                 "CREATE TABLE " + PreparedTableName(tableName) + " " +
@@ -250,13 +201,28 @@ namespace DatabaseWrapper.Postgresql
             return query; 
         }
 
-        internal static string DropTableQuery(string tableName)
+        /// <summary>
+        /// Retrieve a query used for dropping a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <returns>String.</returns>
+        public override string DropTableQuery(string tableName)
         {
             string query = "DROP TABLE IF EXISTS " + PreparedTableName(tableName) + " ";
             return query;
         }
 
-        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
+        /// <summary>
+        /// Retrieve a query used for selecting data from a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="indexStart">Index start.</param>
+        /// <param name="maxResults">Maximum number of results to retrieve.</param>
+        /// <param name="returnFields">List of field names to return.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <param name="resultOrder">Result order.</param>
+        /// <returns>String.</returns>
+        public override string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
         {
             string query = "";
             string whereClause = "";
@@ -314,95 +280,42 @@ namespace DatabaseWrapper.Postgresql
             return query;
         }
 
-        internal static string PreparedOrderByClause(string val)
-        {
-            string ret = "";
-
-            //
-            // null, below ASCII range, above ASCII range
-            //
-            for (int i = 0; i < val.Length; i++)
-            {
-                if (((int)(val[i]) == 10) ||      // Preserve carriage return
-                    ((int)(val[i]) == 13))        // and line feed
-                {
-                    ret += val[i];
-                }
-                else if ((int)(val[i]) < 32)
-                {
-                    continue;
-                }
-                else
-                {
-                    ret += val[i];
-                }
-            }
-
-            //
-            // double dash
-            //
-            int doubleDash = 0;
-            while (true)
-            {
-                doubleDash = ret.IndexOf("--");
-                if (doubleDash < 0)
-                {
-                    break;
-                }
-                else
-                {
-                    ret = ret.Remove(doubleDash, 2);
-                }
-            }
-
-            //
-            // open comment
-            // 
-            int openComment = 0;
-            while (true)
-            {
-                openComment = ret.IndexOf("/*");
-                if (openComment < 0) break;
-                else
-                {
-                    ret = ret.Remove(openComment, 2);
-                }
-            }
-
-            //
-            // close comment
-            //
-            int closeComment = 0;
-            while (true)
-            {
-                closeComment = ret.IndexOf("*/");
-                if (closeComment < 0) break;
-                else
-                {
-                    ret = ret.Remove(closeComment, 2);
-                }
-            }
-
-            //
-            // in-string replacement
-            //
-            ret = ret.Replace("'", "''");
-            return ret;
-        }
-
-        internal static string InsertQuery(string tableName, string keys, string values)
+        /// <summary>
+        /// Retrieve a query used for inserting data into a table.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
+        /// <returns>String.</returns>
+        public override string InsertQuery(string tableName, Dictionary<string, object> keyValuePairs)
         {
             string ret =
                 "INSERT INTO " + PreparedTableName(tableName) + " " +
-                "(" + keys + ") " +
+                "(";
+
+            string keys = "";
+            string vals = "";
+            BuildKeysValuesFromDictionary(keyValuePairs, out keys, out vals);
+
+            ret += keys + ") " +
                 "VALUES " +
-                "(" + values + ") " +
+                "(" + vals + ") " +
                 "RETURNING *;"; 
+
             return ret;
         }
 
-        internal static string InsertMultipleQuery(string tableName, string keys, List<string> values)
+        /// <summary>
+        /// Retrieve a query for inserting multiple rows into a table.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
+        /// <returns>String.</returns>
+        public override string InsertMultipleQuery(string tableName, List<Dictionary<string, object>> keyValuePairList)
         {
+            ValidateInputDictionaries(keyValuePairList);
+            string keys = BuildKeysFromDictionary(keyValuePairList[0]);
+            List<string> values = BuildValuesFromDictionaries(keyValuePairList);
+
             string ret =
                 "BEGIN TRANSACTION;" +
                 "  INSERT INTO " + PreparedTableName(tableName) + " " +
@@ -423,8 +336,17 @@ namespace DatabaseWrapper.Postgresql
             return ret;
         }
 
-        internal static string UpdateQuery(string tableName, string keyValueClause, Expr filter)
+        /// <summary>
+        /// Retrieve a query for updating data in a table.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to UPDATE.</param>
+        /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
+        /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
+        /// <returns>String.</returns>
+        public override string UpdateQuery(string tableName, Dictionary<string, object> keyValuePairs, Expr filter)
         {
+            string keyValueClause = BuildKeyValueClauseFromDictionary(keyValuePairs);
+
             string ret =
                 "UPDATE " + PreparedTableName(tableName) + " SET " +
                 keyValueClause + " ";
@@ -435,7 +357,13 @@ namespace DatabaseWrapper.Postgresql
             return ret;
         }
 
-        internal static string DeleteQuery(string tableName, Expr filter)
+        /// <summary>
+        /// Retrieve a query for deleting data from a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string DeleteQuery(string tableName, Expr filter)
         {
             string ret =
                 "DELETE FROM " + PreparedTableName(tableName) + " ";
@@ -445,12 +373,23 @@ namespace DatabaseWrapper.Postgresql
             return ret;
         }
 
-        internal static string TruncateQuery(string tableName)
+        /// <summary>
+        /// Retrieve a query for truncating a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <returns>String.</returns>
+        public override string TruncateQuery(string tableName)
         {
             return "TRUNCATE TABLE " + PreparedTableName(tableName) + " ";
         }
 
-        internal static string ExistsQuery(string tableName, Expr filter)
+        /// <summary>
+        /// Retrieve a query for determing whether data matching specified conditions exists.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string ExistsQuery(string tableName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -471,7 +410,14 @@ namespace DatabaseWrapper.Postgresql
             return query;
         }
 
-        internal static string CountQuery(string tableName, string countColumnName, Expr filter)
+        /// <summary>
+        /// Retrieve a query that returns a count of the number of rows matching the supplied conditions.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="countColumnName">Column name to use to temporarily store the result.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string CountQuery(string tableName, string countColumnName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -491,7 +437,15 @@ namespace DatabaseWrapper.Postgresql
             return query;
         }
 
-        internal static string SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter)
+        /// <summary>
+        /// Retrieve a query that sums the values found in the specified field.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="fieldName">Column containing values to sum.</param>
+        /// <param name="sumColumnName">Column name to temporarily store the result.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter)
         {
             string whereClause = "";
              
@@ -510,38 +464,32 @@ namespace DatabaseWrapper.Postgresql
             return query;
         }
 
-        internal static string PreparedFieldName(string s)
+        /// <summary>
+        /// Retrieve a timestamp in the database format.
+        /// </summary>
+        /// <param name="ts">DateTime.</param>
+        /// <returns>String.</returns>
+        public override string DbTimestamp(DateTime ts)
         {
-            return "\"" + s + "\"";
+            return ts.ToString(TimestampFormat);
         }
 
-        internal static string PreparedStringValue(string s)
+        /// <summary>
+        /// Retrieve a timestamp offset in the database format.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>String.</returns>
+        public override string DbTimestampOffset(DateTimeOffset ts)
         {
-            // uses $xx$ escaping
-            return PostgresqlHelper.SanitizeString(s);
+            return ts.ToString(TimestampOffsetFormat);
         }
 
-        internal static string PreparedTableName(string s)
-        {
-            s = s.Replace("[", "");
-            s = s.Replace("]", "");
-            if (s.Contains("."))
-            {
-                string[] parts = s.Split('.');
-                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
-                return
-                    SanitizeStringInternal(parts[0]) +
-                    "." +
-                    SanitizeStringInternal(parts[1]);
-            }
-            else
-            {
-                return
-                    SanitizeStringInternal(s);
-            }
-        }
-         
-        internal static string ExtractTableName(string s)
+        /// <summary>
+        /// Extract the table name from an encapsulated name.
+        /// </summary>
+        /// <param name="s">String.</param>
+        /// <returns>String.</returns>
+        public string ExtractTableName(string s)
         {
             s = s.Replace("[", "");
             s = s.Replace("]", "");
@@ -557,12 +505,27 @@ namespace DatabaseWrapper.Postgresql
             }
         }
 
-        internal static string PreparedUnicodeValue(string s)
+        #endregion
+
+        #region Private-Methods
+
+        private string PreparedFieldName(string fieldName)
+        {
+            return "\"" + fieldName + "\"";
+        }
+
+        private string PreparedStringValue(string str)
+        {
+            // uses $xx$ escaping
+            return SanitizeString(str);
+        }
+
+        private string PreparedUnicodeValue(string s)
         {
             return "U&" + PreparedStringValue(s);
         }
 
-        internal static string ExpressionToWhereClause(Expr expr)
+        private string ExpressionToWhereClause(Expr expr)
         {
             if (expr == null) return null;
 
@@ -740,7 +703,7 @@ namespace DatabaseWrapper.Postgresql
                         }
                         inAdded++;
                     }
-                    clause += ")"; 
+                    clause += ")";
                     break;
 
                 #endregion
@@ -771,7 +734,7 @@ namespace DatabaseWrapper.Postgresql
                         }
                         notInAdded++;
                     }
-                    clause += ")"; 
+                    clause += ")";
                     break;
 
                 #endregion
@@ -1030,17 +993,7 @@ namespace DatabaseWrapper.Postgresql
             return clause;
         }
 
-        internal static string DbTimestamp(DateTime ts)
-        {
-            return ts.ToString(TimestampFormat);
-        }
-
-        internal static string DbTimestampOffset(DateTimeOffset ts)
-        {
-            return ts.ToString(TimestampOffsetFormat);
-        }
-
-        private static string BuildOrderByClause(ResultOrder[] resultOrder)
+        private string BuildOrderByClause(ResultOrder[] resultOrder)
         {
             if (resultOrder == null || resultOrder.Length < 0) return null;
 
@@ -1050,15 +1003,15 @@ namespace DatabaseWrapper.Postgresql
             {
                 if (i > 0) ret += ", ";
                 ret += SanitizeFieldname(resultOrder[i].ColumnName) + " ";
-                if (resultOrder[i].Direction == OrderDirection.Ascending) ret += "ASC";
-                else if (resultOrder[i].Direction == OrderDirection.Descending) ret += "DESC";
+                if (resultOrder[i].Direction == OrderDirectionEnum.Ascending) ret += "ASC";
+                else if (resultOrder[i].Direction == OrderDirectionEnum.Descending) ret += "DESC";
             }
 
             ret += " ";
             return ret;
         }
          
-        private static string SanitizeStringInternal(string val)
+        private string SanitizeStringInternal(string val)
         {
             string ret = "";
 
@@ -1133,5 +1086,348 @@ namespace DatabaseWrapper.Postgresql
             ret = ret.Replace("'", "''");
             return ret;
         }
+
+        private string EscapeString(string val, int numChar)
+        {
+            string ret = "";
+            Random random = new Random();
+            if (numChar < 1) return ret;
+
+            while (true)
+            {
+                ret = "";
+                random = new Random();
+
+                int valid = 0;
+                int num = 0;
+
+                for (int i = 0; i < numChar; i++)
+                {
+                    num = 0;
+                    valid = 0;
+                    while (valid == 0)
+                    {
+                        num = random.Next(126);
+                        if (((num > 64) && (num < 91)) ||
+                            ((num > 96) && (num < 123)))
+                        {
+                            valid = 1;
+                        }
+                    }
+                    ret += (char)num;
+                }
+
+                if (!val.Contains("$" + ret + "$")) break;
+            }
+
+            return ret;
+        }
+
+        private string SanitizeFieldname(string val)
+        {
+            string ret = "";
+
+            //
+            // null, below ASCII range, above ASCII range
+            //
+            for (int i = 0; i < val.Length; i++)
+            {
+                if (((int)(val[i]) == 10) ||      // Preserve carriage return
+                    ((int)(val[i]) == 13))        // and line feed
+                {
+                    ret += val[i];
+                }
+                else if ((int)(val[i]) < 32)
+                {
+                    continue;
+                }
+                else
+                {
+                    ret += val[i];
+                }
+            }
+
+            //
+            // double dash
+            //
+            int doubleDash = 0;
+            while (true)
+            {
+                doubleDash = ret.IndexOf("--");
+                if (doubleDash < 0)
+                {
+                    break;
+                }
+                else
+                {
+                    ret = ret.Remove(doubleDash, 2);
+                }
+            }
+
+            //
+            // open comment
+            // 
+            int openComment = 0;
+            while (true)
+            {
+                openComment = ret.IndexOf("/*");
+                if (openComment < 0) break;
+                else
+                {
+                    ret = ret.Remove(openComment, 2);
+                }
+            }
+
+            //
+            // close comment
+            //
+            int closeComment = 0;
+            while (true)
+            {
+                closeComment = ret.IndexOf("*/");
+                if (closeComment < 0) break;
+                else
+                {
+                    ret = ret.Remove(closeComment, 2);
+                }
+            }
+
+            //
+            // in-string replacement
+            //
+            ret = ret.Replace("'", "''");
+            return ret;
+        }
+
+        private string PreparedTableName(string s)
+        {
+            s = s.Replace("[", "");
+            s = s.Replace("]", "");
+            if (s.Contains("."))
+            {
+                string[] parts = s.Split('.');
+                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
+                return
+                    SanitizeStringInternal(parts[0]) +
+                    "." +
+                    SanitizeStringInternal(parts[1]);
+            }
+            else
+            {
+                return
+                    SanitizeStringInternal(s);
+            }
+        }
+
+        private void BuildKeysValuesFromDictionary(Dictionary<string, object> keyValuePairs, out string keys, out string vals)
+        {
+            keys = "";
+            vals = "";
+            int added = 0;
+
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
+            {
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
+
+                if (added > 0)
+                {
+                    keys += ",";
+                    vals += ",";
+                }
+
+                keys += PreparedFieldName(currKvp.Key);
+
+                if (currKvp.Value != null)
+                {
+                    if (currKvp.Value is DateTime
+                        || currKvp.Value is DateTime?)
+                    {
+                        vals += "'" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
+                    }
+                    else if (currKvp.Value is DateTimeOffset
+                        || currKvp.Value is DateTimeOffset?)
+                    {
+                        vals += "'" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
+                    }
+                    else if (currKvp.Value is int
+                        || currKvp.Value is long
+                        || currKvp.Value is decimal)
+                    {
+                        vals += currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is byte[])
+                    {
+                        vals += "decode('" + Helper.ByteArrayToHexString((byte[])currKvp.Value) + "', 'hex')";
+                    }
+                    else
+                    {
+                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                        {
+                            vals += PreparedUnicodeValue(currKvp.Value.ToString());
+                        }
+                        else
+                        {
+                            vals += PreparedStringValue(currKvp.Value.ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    vals += "null";
+                }
+
+                added++;
+            }
+        }
+
+        private void ValidateInputDictionaries(List<Dictionary<string, object>> keyValuePairList)
+        {
+            Dictionary<string, object> reference = keyValuePairList[0];
+
+            if (keyValuePairList.Count > 1)
+            {
+                foreach (Dictionary<string, object> dict in keyValuePairList)
+                {
+                    if (!(reference.Count == dict.Count) || !(reference.Keys.SequenceEqual(dict.Keys)))
+                    {
+                        throw new ArgumentException("All supplied dictionaries must contain exactly the same keys.");
+                    }
+                }
+            }
+        }
+
+        private string BuildKeysFromDictionary(Dictionary<string, object> reference)
+        {
+            string keys = "";
+            int keysAdded = 0;
+            foreach (KeyValuePair<string, object> curr in reference)
+            {
+                if (keysAdded > 0) keys += ",";
+                keys += PreparedFieldName(curr.Key);
+                keysAdded++;
+            }
+
+            return keys;
+        }
+
+        private List<string> BuildValuesFromDictionaries(List<Dictionary<string, object>> dicts)
+        {
+            List<string> values = new List<string>();
+
+            foreach (Dictionary<string, object> currDict in dicts)
+            {
+                string vals = "";
+                int valsAdded = 0;
+
+                foreach (KeyValuePair<string, object> currKvp in currDict)
+                {
+                    if (valsAdded > 0) vals += ",";
+
+                    if (currKvp.Value != null)
+                    {
+                        if (currKvp.Value is DateTime
+                            || currKvp.Value is DateTime?)
+                        {
+                            vals += "'" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
+                        }
+                        else if (currKvp.Value is DateTimeOffset
+                            || currKvp.Value is DateTimeOffset?)
+                        {
+                            vals += "'" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
+                        }
+                        else if (currKvp.Value is int
+                            || currKvp.Value is long
+                            || currKvp.Value is decimal)
+                        {
+                            vals += currKvp.Value.ToString();
+                        }
+                        else if (currKvp.Value is byte[])
+                        {
+                            vals += "decode('" + Helper.ByteArrayToHexString((byte[])currKvp.Value) + "', 'hex')";
+                        }
+                        else
+                        {
+                            if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                            {
+                                vals += PreparedUnicodeValue(currKvp.Value.ToString());
+                            }
+                            else
+                            {
+                                vals += PreparedStringValue(currKvp.Value.ToString());
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        vals += "null";
+                    }
+
+                    valsAdded++;
+                }
+
+                values.Add(vals);
+            }
+
+            return values;
+        }
+
+        private string BuildKeyValueClauseFromDictionary(Dictionary<string, object> keyValuePairs)
+        {
+            string keyValueClause = "";
+            int added = 0;
+
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
+            {
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
+
+                if (added > 0) keyValueClause += ",";
+
+                if (currKvp.Value != null)
+                {
+                    if (currKvp.Value is DateTime
+                        || currKvp.Value is DateTime?)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "='" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
+                    }
+                    else if (currKvp.Value is DateTimeOffset
+                        || currKvp.Value is DateTimeOffset?)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "='" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
+                    }
+                    else if (currKvp.Value is int
+                        || currKvp.Value is long
+                        || currKvp.Value is decimal)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is byte[])
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + "decode('" + Helper.ByteArrayToHexString((byte[])currKvp.Value) + "', 'hex')";
+                    }
+                    else
+                    {
+                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                        {
+                            keyValueClause += PreparedFieldName(currKvp.Key) + "=" + PreparedUnicodeValue(currKvp.Value.ToString());
+                        }
+                        else
+                        {
+                            keyValueClause += PreparedFieldName(currKvp.Key) + "=" + PreparedStringValue(currKvp.Value.ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    keyValueClause += PreparedFieldName(currKvp.Key) + "= null";
+                }
+
+                added++;
+            }
+
+            return keyValueClause;
+        }
+
+        #endregion
     }
 }

@@ -8,13 +8,41 @@ using ExpressionTree;
 
 namespace DatabaseWrapper.SqlServer
 {
-    internal static class SqlServerHelper
+    /// <summary>
+    /// SQL Server implementation of helper properties and methods.
+    /// </summary>
+    public class SqlServerHelper : DatabaseHelperBase
     {
-        internal static string TimestampFormat = "MM/dd/yyyy hh:mm:ss.fffffff tt";
+        #region Public-Members
 
-        internal static string TimestampOffsetFormat = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
+        /// <summary>
+        /// Timestamp format for use in DateTime.ToString([format]).
+        /// </summary>
+        public new string TimestampFormat = "MM/dd/yyyy hh:mm:ss.fffffff tt";
 
-        internal static string ConnectionString(DatabaseSettings settings)
+        /// <summary>
+        /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
+        /// </summary>
+        public new string TimestampOffsetFormat = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
+
+        #endregion
+
+        #region Private-Members
+
+        #endregion
+
+        #region Constructors-and-Factories
+
+        #endregion
+
+        #region Public-Methods
+
+        /// <summary>
+        /// Build a connection string from DatabaseSettings.
+        /// </summary>
+        /// <param name="settings">Settings.</param>
+        /// <returns>String.</returns>
+        public override string ConnectionString(DatabaseSettings settings)
         {
             string ret = "";
 
@@ -47,12 +75,23 @@ namespace DatabaseWrapper.SqlServer
             return ret;
         }
 
-        internal static string LoadTableNamesQuery(string database)
+        /// <summary>
+        /// Query to retrieve the names of tables from a database.
+        /// </summary>
+        /// <param name="database">Database name.</param>
+        /// <returns>String.</returns>
+        public override string LoadTableNamesQuery(string database)
         {
             return "SELECT TABLE_NAME FROM " + SanitizeString(database) + ".INFORMATION_SCHEMA.Tables WHERE TABLE_TYPE = 'BASE TABLE'";
         }
 
-        internal static string LoadTableColumnsQuery(string database, string table)
+        /// <summary>
+        /// Query to retrieve the list of columns for a table.
+        /// </summary>
+        /// <param name="database">Database name.</param>
+        /// <param name="table">Table name.</param>
+        /// <returns></returns>
+        public override string LoadTableColumnsQuery(string database, string table)
         {
             return 
                 "SELECT " +
@@ -63,7 +102,12 @@ namespace DatabaseWrapper.SqlServer
                 "AND col.TABLE_CATALOG='" + SanitizeString(database) + "'";
         }
 
-        internal static string SanitizeString(string val)
+        /// <summary>
+        /// Method to sanitize a string.
+        /// </summary>
+        /// <param name="val">String.</param>
+        /// <returns>String.</returns>
+        public override string SanitizeString(string val)
         {
             string ret = "";
 
@@ -139,38 +183,46 @@ namespace DatabaseWrapper.SqlServer
             return ret;
         }
 
-        internal static string ColumnToCreateString(Column col)
+        /// <summary>
+        /// Method to convert a Column object to the values used in a table create statement.
+        /// </summary>
+        /// <param name="col">Column.</param>
+        /// <returns>String.</returns>
+        public override string ColumnToCreateString(Column col)
         {
             string ret =
                 "[" + SanitizeString(col.Name) + "] ";
 
             switch (col.Type)
             {
-                case DataType.Varchar:
+                case DataTypeEnum.Varchar:
                     ret += "[varchar](" + col.MaxLength + ") ";
                     break;
-                case DataType.Nvarchar:
+                case DataTypeEnum.Nvarchar:
                     ret += "[nvarchar](" + col.MaxLength + ") ";
                     break;
-                case DataType.Int:
+                case DataTypeEnum.Guid:
+                    ret += "[varchar](36) ";
+                    break;
+                case DataTypeEnum.Int:
                     ret += "[int] ";
                     break;
-                case DataType.Long:
+                case DataTypeEnum.Long:
                     ret += "[bigint] ";
                     break;
-                case DataType.Decimal:
+                case DataTypeEnum.Decimal:
                     ret += "[decimal](" + col.MaxLength + "," + col.Precision + ") ";
                     break;
-                case DataType.Double:
+                case DataTypeEnum.Double:
                     ret += "[float](" + col.MaxLength + ") ";
                     break;
-                case DataType.DateTime:
+                case DataTypeEnum.DateTime:
                     ret += "[datetime2] ";
                     break;
-                case DataType.DateTimeOffset:
+                case DataTypeEnum.DateTimeOffset:
                     ret += "[datetimeoffset] ";
                     break;
-                case DataType.Blob:
+                case DataTypeEnum.Blob:
                     ret += "[varbinary](max) ";
                     break;
                 default:
@@ -179,11 +231,11 @@ namespace DatabaseWrapper.SqlServer
 
             if (col.PrimaryKey)
             {
-                if (col.Type == DataType.Varchar || col.Type == DataType.Nvarchar)
+                if (col.Type == DataTypeEnum.Varchar || col.Type == DataTypeEnum.Nvarchar)
                 {
                     ret += "UNIQUE ";
                 }
-                else if (col.Type == DataType.Int || col.Type == DataType.Long)
+                else if (col.Type == DataTypeEnum.Int || col.Type == DataTypeEnum.Long)
                 {
                     ret += "IDENTITY(1,1) ";
                 }
@@ -199,14 +251,25 @@ namespace DatabaseWrapper.SqlServer
             return ret;
         }
 
-        internal static Column GetPrimaryKeyColumn(List<Column> columns)
+        /// <summary>
+        /// Retrieve the primary key column from a list of columns.
+        /// </summary>
+        /// <param name="columns">List of Column.</param>
+        /// <returns>Column.</returns>
+        public override Column GetPrimaryKeyColumn(List<Column> columns)
         {
             Column c = columns.FirstOrDefault(d => d.PrimaryKey);
             if (c == null || c == default(Column)) return null;
             return c;
         }
 
-        internal static string CreateTableQuery(string tableName, List<Column> columns)
+        /// <summary>
+        /// Retrieve a query used for table creation.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="columns">List of columns.</param>
+        /// <returns>String.</returns>
+        public override string CreateTableQuery(string tableName, List<Column> columns)
         {
             string query =
                 "CREATE TABLE " + PreparedTableName(tableName) + " " +
@@ -247,13 +310,28 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string DropTableQuery(string tableName)
+        /// <summary>
+        /// Retrieve a query used for dropping a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <returns>String.</returns>
+        public override string DropTableQuery(string tableName)
         {
             string query = "IF OBJECT_ID('" + PreparedTableNameUnenclosed(tableName) + "', 'U') IS NOT NULL DROP TABLE " + PreparedTableName(tableName);
             return query;
         }
 
-        internal static string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
+        /// <summary>
+        /// Retrieve a query used for selecting data from a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="indexStart">Index start.</param>
+        /// <param name="maxResults">Maximum number of results to retrieve.</param>
+        /// <param name="returnFields">List of field names to return.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <param name="resultOrder">Result order.</param>
+        /// <returns>String.</returns>
+        public override string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
         {
             string query = "";
             string whereClause = "";
@@ -315,20 +393,42 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string InsertQuery(string tableName, string keys, string values)
+        /// <summary>
+        /// Retrieve a query used for inserting data into a table.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
+        /// <returns>String.</returns>
+        public override string InsertQuery(string tableName, Dictionary<string, object> keyValuePairs)
         {
-            string ret = 
-                "INSERT INTO " + PreparedTableName(tableName) + " WITH (ROWLOCK) " + 
-                "(" + keys + ") " + 
-                "OUTPUT INSERTED.* " + 
-                "VALUES " + 
-                "(" + values + ") ";
+            string ret =
+                "INSERT INTO " + PreparedTableName(tableName) + " WITH (ROWLOCK) " +
+                "(";
+
+            string keys = "";
+            string vals = "";
+            BuildKeysValuesFromDictionary(keyValuePairs, out keys, out vals);
+
+            ret += keys + ") " +
+                "OUTPUT INSERTED.* " +
+                "VALUES " +
+                "(" + vals + ") ";
 
             return ret;
         }
 
-        internal static string InsertMultipleQuery(string tableName, string keys, List<string> values)
+        /// <summary>
+        /// Retrieve a query for inserting multiple rows into a table.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
+        /// <returns>String.</returns>
+        public override string InsertMultipleQuery(string tableName, List<Dictionary<string, object>> keyValuePairList)
         {
+            ValidateInputDictionaries(keyValuePairList);
+            string keys = BuildKeysFromDictionary(keyValuePairList[0]);
+            List<string> values = BuildValuesFromDictionaries(keyValuePairList);
+
             string txn = "txn_" + RandomCharacters(12);
             string ret =
                 "BEGIN TRANSACTION [" + txn + "] " +
@@ -355,8 +455,17 @@ namespace DatabaseWrapper.SqlServer
             return ret;
         }
 
-        internal static string UpdateQuery(string tableName, string keyValueClause, Expr filter)
+        /// <summary>
+        /// Retrieve a query for updating data in a table.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to UPDATE.</param>
+        /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
+        /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
+        /// <returns>String.</returns>
+        public override string UpdateQuery(string tableName, Dictionary<string, object> keyValuePairs, Expr filter)
         {
+            string keyValueClause = BuildKeyValueClauseFromDictionary(keyValuePairs);
+
             string ret =
                 "UPDATE " + PreparedTableName(tableName) + " WITH (ROWLOCK) SET " +
                 keyValueClause + " " +
@@ -367,7 +476,13 @@ namespace DatabaseWrapper.SqlServer
             return ret;
         }
 
-        internal static string DeleteQuery(string tableName, Expr filter)
+        /// <summary>
+        /// Retrieve a query for deleting data from a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string DeleteQuery(string tableName, Expr filter)
         {
             string ret =
                 "DELETE FROM " + PreparedTableName(tableName) + " WITH (ROWLOCK) ";
@@ -377,12 +492,23 @@ namespace DatabaseWrapper.SqlServer
             return ret;
         }
 
-        internal static string TruncateQuery(string tableName)
+        /// <summary>
+        /// Retrieve a query for truncating a table.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <returns>String.</returns>
+        public override string TruncateQuery(string tableName)
         {
             return "TRUNCATE TABLE " + PreparedTableName(tableName);
         }
 
-        internal static string ExistsQuery(string tableName, Expr filter)
+        /// <summary>
+        /// Retrieve a query for determing whether data matching specified conditions exists.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string ExistsQuery(string tableName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -402,7 +528,14 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string CountQuery(string tableName, string countColumnName, Expr filter)
+        /// <summary>
+        /// Retrieve a query that returns a count of the number of rows matching the supplied conditions.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="countColumnName">Column name to use to temporarily store the result.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string CountQuery(string tableName, string countColumnName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -422,7 +555,15 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter)
+        /// <summary>
+        /// Retrieve a query that sums the values found in the specified field.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="fieldName">Column containing values to sum.</param>
+        /// <param name="sumColumnName">Column name to temporarily store the result.</param>
+        /// <param name="filter">Expression filter.</param>
+        /// <returns>String.</returns>
+        public override string SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -442,72 +583,32 @@ namespace DatabaseWrapper.SqlServer
             return query;
         }
 
-        internal static string DbTimestamp(DateTime ts)
+        /// <summary>
+        /// Retrieve a timestamp in the database format.
+        /// </summary>
+        /// <param name="ts">DateTime.</param>
+        /// <returns>String.</returns>
+        public override string DbTimestamp(DateTime ts)
         {
             return ts.ToString(TimestampFormat);
         }
 
-        internal static string DbTimestampOffset(DateTimeOffset ts)
+        /// <summary>
+        /// Retrieve a timestamp offset in the database format.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>String.</returns>
+        public override string DbTimestampOffset(DateTimeOffset ts)
         {
             return ts.ToString(TimestampOffsetFormat);
         }
 
-        internal static string PreparedFieldName(string s)
-        {
-            return "[" + s + "]";
-        }
-
-        internal static string PreparedStringValue(string s)
-        {
-            return "'" + SqlServerHelper.SanitizeString(s) + "'";
-        }
-
-        internal static string PreparedTableName(string s)
-        {
-            s = s.Replace("[", "");
-            s = s.Replace("]", "");
-            if (s.Contains("."))
-            {
-                string[] parts = s.Split('.');
-                if (parts.Length > 0)
-                {
-                    string ret = "";
-                    for (int i = 0; i < parts.Length; i++)
-                    {
-                        if (i > 0) ret += ".";
-                        ret += "[" + SanitizeString(parts[i]) + "]";
-                    }
-                    return ret;
-                }
-            }
-
-            return
-                "[" +
-                SanitizeString(s) +
-                "]";
-        }
-
-        internal static string PreparedTableNameUnenclosed(string s)
-        {
-            s = s.Replace("[", "");
-            s = s.Replace("]", "");
-            if (s.Contains("."))
-            {
-                string[] parts = s.Split('.');
-                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
-                return
-                    SanitizeString(parts[0]) +
-                    "." +
-                    SanitizeString(parts[1]);
-            }
-            else
-            {
-                return
-                    SanitizeString(s);
-            }
-        }
-
-        internal static string ExtractTableName(string s)
+        /// <summary>
+        /// Extract the table name from an encapsulated name.
+        /// </summary>
+        /// <param name="s">String.</param>
+        /// <returns>String.</returns>
+        public string ExtractTableName(string s)
         {
             s = s.Replace("[", "");
             s = s.Replace("]", "");
@@ -523,12 +624,26 @@ namespace DatabaseWrapper.SqlServer
             }
         }
 
-        internal static string PreparedUnicodeValue(string s)
+        #endregion
+
+        #region Private-Members
+
+        private string PreparedUnicodeValue(string s)
         {
             return "N" + PreparedStringValue(s);
         }
 
-        internal static string ExpressionToWhereClause(Expr expr)
+        private string PreparedFieldName(string fieldName)
+        {
+            return "[" + fieldName + "]";
+        }
+
+        private string PreparedStringValue(string str)
+        {
+            return "'" + SanitizeString(str) + "'";
+        }
+
+        private string ExpressionToWhereClause(Expr expr)
         {
             if (expr == null) return null;
 
@@ -706,7 +821,7 @@ namespace DatabaseWrapper.SqlServer
                         }
                         inAdded++;
                     }
-                    clause += ")"; 
+                    clause += ")";
                     break;
 
                 #endregion
@@ -737,7 +852,7 @@ namespace DatabaseWrapper.SqlServer
                         }
                         notInAdded++;
                     }
-                    clause += ")"; 
+                    clause += ")";
                     break;
 
                 #endregion
@@ -996,7 +1111,7 @@ namespace DatabaseWrapper.SqlServer
             return clause;
         }
 
-        private static string BuildOrderByClause(ResultOrder[] resultOrder)
+        private string BuildOrderByClause(ResultOrder[] resultOrder)
         {
             if (resultOrder == null || resultOrder.Length < 0) return null;
 
@@ -1006,15 +1121,15 @@ namespace DatabaseWrapper.SqlServer
             {
                 if (i > 0) ret += ", ";
                 ret += SanitizeString(resultOrder[i].ColumnName) + " ";
-                if (resultOrder[i].Direction == OrderDirection.Ascending) ret += "ASC";
-                else if (resultOrder[i].Direction == OrderDirection.Descending) ret += "DESC";
+                if (resultOrder[i].Direction == OrderDirectionEnum.Ascending) ret += "ASC";
+                else if (resultOrder[i].Direction == OrderDirectionEnum.Descending) ret += "DESC";
             }
 
             ret += " ";
             return ret;
         }
 
-        private static string RandomCharacters(int len)
+        private string RandomCharacters(int len)
         {
             char[] letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
             Random rand = new Random();
@@ -1026,5 +1141,260 @@ namespace DatabaseWrapper.SqlServer
             }
             return word;
         }
+
+        private string PreparedTableName(string s)
+        {
+            s = s.Replace("[", "");
+            s = s.Replace("]", "");
+            if (s.Contains("."))
+            {
+                string[] parts = s.Split('.');
+                if (parts.Length > 0)
+                {
+                    string ret = "";
+                    for (int i = 0; i < parts.Length; i++)
+                    {
+                        if (i > 0) ret += ".";
+                        ret += "[" + SanitizeString(parts[i]) + "]";
+                    }
+                    return ret;
+                }
+            }
+
+            return
+                "[" +
+                SanitizeString(s) +
+                "]";
+        }
+
+        private string PreparedTableNameUnenclosed(string s)
+        {
+            s = s.Replace("[", "");
+            s = s.Replace("]", "");
+            if (s.Contains("."))
+            {
+                string[] parts = s.Split('.');
+                if (parts.Length != 2) throw new ArgumentException("Table name must have either zero or one period '.' character");
+                return
+                    SanitizeString(parts[0]) +
+                    "." +
+                    SanitizeString(parts[1]);
+            }
+            else
+            {
+                return
+                    SanitizeString(s);
+            }
+        }
+
+        private void BuildKeysValuesFromDictionary(Dictionary<string, object> keyValuePairs, out string keys, out string vals)
+        {
+            keys = "";
+            vals = "";
+            int added = 0;
+
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
+            {
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
+
+                if (added > 0)
+                {
+                    keys += ",";
+                    vals += ",";
+                }
+
+                keys += PreparedFieldName(currKvp.Key);
+
+                if (currKvp.Value != null)
+                {
+                    if (currKvp.Value is DateTime
+                        || currKvp.Value is DateTime?)
+                    {
+                        vals += "'" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
+                    }
+                    else if (currKvp.Value is DateTimeOffset
+                        || currKvp.Value is DateTimeOffset?)
+                    {
+                        vals += "'" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
+                    }
+                    else if (currKvp.Value is int
+                        || currKvp.Value is long
+                        || currKvp.Value is decimal)
+                    {
+                        vals += currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is byte[])
+                    {
+                        vals += "0x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "");
+                    }
+                    else
+                    {
+                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                        {
+                            vals += PreparedUnicodeValue(currKvp.Value.ToString());
+                        }
+                        else
+                        {
+                            vals += PreparedStringValue(currKvp.Value.ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    vals += "null";
+                }
+
+                added++;
+            }
+        }
+
+        private void ValidateInputDictionaries(List<Dictionary<string, object>> dicts)
+        {
+            Dictionary<string, object> reference = dicts[0];
+
+            if (dicts.Count > 1)
+            {
+                foreach (Dictionary<string, object> dict in dicts)
+                {
+                    if (!(reference.Count == dict.Count) || !(reference.Keys.SequenceEqual(dict.Keys)))
+                    {
+                        throw new ArgumentException("All supplied dictionaries must contain exactly the same keys.");
+                    }
+                }
+            }
+        }
+
+        private string BuildKeysFromDictionary(Dictionary<string, object> reference)
+        {
+            string keys = "";
+            int keysAdded = 0;
+            foreach (KeyValuePair<string, object> curr in reference)
+            {
+                if (keysAdded > 0) keys += ",";
+                keys += PreparedFieldName(curr.Key);
+                keysAdded++;
+            }
+
+            return keys;
+        }
+
+        private List<string> BuildValuesFromDictionaries(List<Dictionary<string, object>> dicts)
+        {
+            List<string> values = new List<string>();
+
+            foreach (Dictionary<string, object> currDict in dicts)
+            {
+                string vals = "";
+                int valsAdded = 0;
+
+                foreach (KeyValuePair<string, object> currKvp in currDict)
+                {
+                    if (valsAdded > 0) vals += ",";
+
+                    if (currKvp.Value != null)
+                    {
+                        if (currKvp.Value is DateTime
+                            || currKvp.Value is DateTime?)
+                        {
+                            vals += "'" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
+                        }
+                        else if (currKvp.Value is DateTimeOffset
+                            || currKvp.Value is DateTimeOffset?)
+                        {
+                            vals += "'" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
+                        }
+                        else if (currKvp.Value is int
+                            || currKvp.Value is long
+                            || currKvp.Value is decimal)
+                        {
+                            vals += currKvp.Value.ToString();
+                        }
+                        else if (currKvp.Value is byte[])
+                        {
+                            vals += "0x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "");
+                        }
+                        else
+                        {
+                            if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                            {
+                                vals += PreparedUnicodeValue(currKvp.Value.ToString());
+                            }
+                            else
+                            {
+                                vals += PreparedStringValue(currKvp.Value.ToString());
+                            }
+                        }
+                    }
+                    else
+                    {
+                        vals += "null";
+                    }
+
+                    valsAdded++;
+                }
+
+                values.Add(vals);
+            }
+
+            return values;
+        }
+
+        private string BuildKeyValueClauseFromDictionary(Dictionary<string, object> keyValuePairs)
+        {
+            string keyValueClause = "";
+            int added = 0;
+
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
+            {
+                if (String.IsNullOrEmpty(currKvp.Key)) continue;
+
+                if (added > 0) keyValueClause += ",";
+
+                if (currKvp.Value != null)
+                {
+                    if (currKvp.Value is DateTime
+                        || currKvp.Value is DateTime?)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "='" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
+                    }
+                    else if (currKvp.Value is DateTimeOffset
+                        || currKvp.Value is DateTimeOffset?)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "='" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
+                    }
+                    else if (currKvp.Value is int
+                        || currKvp.Value is long
+                        || currKvp.Value is decimal)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is byte[])
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + "0x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "");
+                    }
+                    else
+                    {
+                        if (Helper.IsExtendedCharacters(currKvp.Value.ToString()))
+                        {
+                            keyValueClause += PreparedFieldName(currKvp.Key) + "=" + PreparedUnicodeValue(currKvp.Value.ToString());
+                        }
+                        else
+                        {
+                            keyValueClause += PreparedFieldName(currKvp.Key) + "=" + PreparedStringValue(currKvp.Value.ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    keyValueClause += PreparedFieldName(currKvp.Key) + "= null";
+                }
+
+                added++;
+            }
+
+            return keyValueClause;
+        }
+
+        #endregion
     }
 }

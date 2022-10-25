@@ -9,19 +9,36 @@
             Database client for Microsoft SQL Server, Mysql, PostgreSQL, and Sqlite.
             </summary>
         </member>
-        <member name="P:DatabaseWrapper.DatabaseClient.Type">
-            <summary>
-            The type of database.
-            </summary>
-        </member>
         <member name="P:DatabaseWrapper.DatabaseClient.ConnectionString">
             <summary>
             The connection string used to connect to the database server.
             </summary>
         </member>
+        <member name="P:DatabaseWrapper.DatabaseClient.TimestampFormat">
+            <summary>
+            Timestamp format.
+            Default is yyyy-MM-dd HH:mm:ss.ffffff.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.DatabaseClient.TimestampOffsetFormat">
+            <summary>
+            Timestamp format with offset.
+            Default is yyyy-MM-dd HH:mm:ss.ffffffzzz.
+            </summary>
+        </member>
+        <member name="P:DatabaseWrapper.DatabaseClient.MaxStatementLength">
+            <summary>
+            Maximum supported statement length.
+            </summary>
+        </member>
         <member name="P:DatabaseWrapper.DatabaseClient.Settings">
             <summary>
             Settings.
+            </summary>
+        </member>
+        <member name="E:DatabaseWrapper.DatabaseClient.QueryEvent">
+            <summary>
+            Event to fire when a query is handled.
             </summary>
         </member>
         <member name="M:DatabaseWrapper.DatabaseClient.#ctor(DatabaseWrapper.Core.DatabaseSettings)">
@@ -36,7 +53,7 @@
             </summary>
             <param name="filename">Sqlite database.</param>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.#ctor(DatabaseWrapper.Core.DbTypes,System.String,System.Int32,System.String,System.String,System.String,System.String)">
+        <member name="M:DatabaseWrapper.DatabaseClient.#ctor(DatabaseWrapper.Core.DbTypeEnum,System.String,System.Int32,System.String,System.String,System.String,System.String)">
             <summary>
             Create an instance of the database client.
             </summary>
@@ -48,7 +65,7 @@
             <param name="instance">The instance on the database server (for use with Microsoft SQL Server).</param>
             <param name="database">The name of the database with which to connect.</param>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.#ctor(DatabaseWrapper.Core.DbTypes,System.String,System.Int32,System.String,System.String,System.String)">
+        <member name="M:DatabaseWrapper.DatabaseClient.#ctor(DatabaseWrapper.Core.DbTypeEnum,System.String,System.Int32,System.String,System.String,System.String)">
             <summary>
             Create an instance of the database client.
             </summary>
@@ -246,22 +263,6 @@
             Dispose of the object.
             </summary>
             <param name="disposing">Disposing of resources.</param>
-        </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.DbTimestamp(DatabaseWrapper.Core.DbTypes,System.DateTime)">
-            <summary>
-            Convert a DateTime to a string formatted for the specified database type.
-            </summary>
-            <param name="dbType">The type of database.</param>
-            <param name="ts">The timestamp.</param>
-            <returns>A string formatted for use with the specified database.</returns>
-        </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.DbTimestampOffset(DatabaseWrapper.Core.DbTypes,System.DateTimeOffset)">
-            <summary>
-            Convert a DateTimeOffset to a string formatted for the specified database type.
-            </summary>
-            <param name="dbType">The type of database.</param>
-            <param name="ts">The timestamp with offset.</param>
-            <returns>A string formatted for use with the specified database.</returns>
         </member>
     </members>
 </doc>

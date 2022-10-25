@@ -52,15 +52,16 @@ namespace Test.Sqlite
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Creating table '" + _Table + "'...");
                 List<Column> columns = new List<Column>();
-                columns.Add(new Column("id", true, DataType.Int, 11, null, false));
-                columns.Add(new Column("firstName", false, DataType.Nvarchar, 30, null, false));
-                columns.Add(new Column("lastName", false, DataType.Nvarchar, 30, null, false));
-                columns.Add(new Column("age", false, DataType.Int, 11, null, true));
-                columns.Add(new Column("value", false, DataType.Long, 12, null, true));
-                columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
-                columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
-                columns.Add(new Column("localtime", false, DataType.DateTimeOffset, null, null, true));
-                columns.Add(new Column("picture", false, DataType.Blob, true));
+                columns.Add(new Column("id", true, DataTypeEnum.Int, 11, null, false));
+                columns.Add(new Column("firstName", false, DataTypeEnum.Nvarchar, 30, null, false));
+                columns.Add(new Column("lastName", false, DataTypeEnum.Nvarchar, 30, null, false));
+                columns.Add(new Column("age", false, DataTypeEnum.Int, 11, null, true));
+                columns.Add(new Column("value", false, DataTypeEnum.Long, 12, null, true));
+                columns.Add(new Column("birthday", false, DataTypeEnum.DateTime, null, null, true));
+                columns.Add(new Column("hourly", false, DataTypeEnum.Decimal, 18, 2, true));
+                columns.Add(new Column("localtime", false, DataTypeEnum.DateTimeOffset, null, null, true));
+                columns.Add(new Column("picture", false, DataTypeEnum.Blob, true));
+                columns.Add(new Column("guid", false, DataTypeEnum.Guid, true));
 
                 _Database.CreateTable(_Table, columns);
                 Console.WriteLine("Press ENTER to continue...");
@@ -198,6 +199,8 @@ namespace Test.Sqlite
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 d.Add("picture", _FileBytes);
+                d.Add("guid", Guid.NewGuid());
+
                 _Database.Insert(_Table, d);
             }
 
@@ -211,6 +214,7 @@ namespace Test.Sqlite
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
+                d.Add("guid", Guid.NewGuid());
 
                 _Database.Insert(_Table, d);
             }
@@ -231,6 +235,8 @@ namespace Test.Sqlite
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 d.Add("picture", _FileBytes);
+                d.Add("guid", Guid.NewGuid());
+
                 dicts.Add(d);
             }
 
@@ -351,7 +357,7 @@ namespace Test.Sqlite
                 //
 
                 ResultOrder[] order = new ResultOrder[1];
-                order[0] = new ResultOrder("id", OrderDirection.Ascending);
+                order[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);
 
                 _Database.Select(_Table, (i - 10), 5, returnFields, e);
             }
@@ -371,8 +377,8 @@ namespace Test.Sqlite
             Expr e = Expr.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
             ResultOrder[] resultOrder = new ResultOrder[2];
-            resultOrder[0] = new ResultOrder("id", OrderDirection.Descending);
-            resultOrder[1] = new ResultOrder("firstName", OrderDirection.Ascending);
+            resultOrder[0] = new ResultOrder("id", OrderDirectionEnum.Descending);
+            resultOrder[1] = new ResultOrder("firstName", OrderDirectionEnum.Ascending);
             _Database.Select(_Table, null, null, returnFields, e, resultOrder);
         }
 

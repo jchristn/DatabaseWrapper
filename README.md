@@ -25,12 +25,14 @@ Core features:
 - Support for .NET Standard, .NET Core, and .NET Framework
 - Support for SQL Server, Sqlite, PostgreSQL, MySQL, MariaDB, both on-premises and in the cloud
 
-## New in v4.1
+## New in v5.0
 
-- Minor breaking changes
-- Moved debug settings and logger into ```DatabaseSettings```
-- Dependency updates
-- Validated support for MariaDB
+- Breaking changes (class and enum name changes)
+- Major internal refactor, code cleanup, and consistency
+- Event handler for query results
+- Abstract classes and implementations for for database-specific helpers and clients
+- Support for GUID type
+- More consistency in test projects
 
 ## Special Thanks
 

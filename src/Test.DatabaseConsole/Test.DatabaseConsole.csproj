@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DatabaseWrapper.Core\DatabaseWrapper.Core.csproj" />
     <ProjectReference Include="..\DatabaseWrapper\DatabaseWrapper.csproj" />
   </ItemGroup>
 

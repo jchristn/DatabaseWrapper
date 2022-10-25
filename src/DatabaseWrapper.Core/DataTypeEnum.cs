@@ -10,7 +10,7 @@ namespace DatabaseWrapper.Core
     /// <summary>
     /// Type of data contained in the column.
     /// </summary>
-    public enum DataType
+    public enum DataTypeEnum
     {
         /// <summary>
         /// Variable-length character.
@@ -57,6 +57,11 @@ namespace DatabaseWrapper.Core
         /// </summary>
         [EnumMember(Value = "Blob")]
         Blob,
+        /// <summary>
+        /// GUID.
+        /// </summary>
+        [EnumMember(Value = "Guid")]
+        Guid,
         /// <summary>
         /// Unknown
         /// </summary>

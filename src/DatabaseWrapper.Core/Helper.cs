@@ -209,8 +209,8 @@ namespace DatabaseWrapper.Core
         /// Retrieve the DataType from the column type.
         /// </summary>
         /// <param name="s">String containing column type.</param>
-        /// <returns>DataType.</returns>
-        public static DataType DataTypeFromString(string s)
+        /// <returns>DataTypeEnum.</returns>
+        public static DataTypeEnum DataTypeFromString(string s)
         {
             if (String.IsNullOrEmpty(s)) throw new ArgumentNullException(nameof(s));
 
@@ -221,7 +221,7 @@ namespace DatabaseWrapper.Core
             {
                 case "bigserial":               // pgsql
                 case "bigint":                  // mssql
-                    return DataType.Long;
+                    return DataTypeEnum.Long;
 
                 case "boolean":                 // pgsql
                 case "bit":                     // mssql
@@ -233,17 +233,17 @@ namespace DatabaseWrapper.Core
                 case "smallint":                // mssql, mysql
                 case "mediumint":               // mysql
                 case "serial":                  // pgsql
-                    return DataType.Int;
+                    return DataTypeEnum.Int;
 
                 case "real":                    // pgsql, sqlite
                 case "double":                  // mysql
                 case "double precision":        // pgsql
                 case "float":                   // mysql
-                    return DataType.Double;
+                    return DataTypeEnum.Double;
 
                 case "decimal":                 // mssql
                 case "numeric":                 // mssql
-                    return DataType.Decimal;
+                    return DataTypeEnum.Decimal;
 
                 case "timestamp without timezone":      // pgsql
                 case "timestamp without time zone":     // pgsql
@@ -254,14 +254,14 @@ namespace DatabaseWrapper.Core
                 case "datetime":                        // mssql, mysql
                 case "datetime2":                       // mssql
                 case "timestamp":                       // mysql
-                    return DataType.DateTime;
+                    return DataTypeEnum.DateTime;
 
                 case "time with timezone":              // pgsql
                 case "time with time zone":             // pgsql
                 case "timestamp with timezone":         // pgsql
                 case "timestamp with time zone":        // pgsql
                 case "datetimeoffset":                  // mssql
-                    return DataType.DateTimeOffset;
+                    return DataTypeEnum.DateTimeOffset;
 
                 case "enum":                    // mysql
                 case "character":               // pgsql
@@ -271,13 +271,13 @@ namespace DatabaseWrapper.Core
                 case "mediumtext":              // mysql
                 case "longtext":                // mysql
                 case "varchar":                 // mssql, mysql, pgsql
-                    return DataType.Varchar;
+                    return DataTypeEnum.Varchar;
 
                 case "character varying":       // pgsql
                 case "nchar":
                 case "ntext":
                 case "nvarchar":
-                    return DataType.Nvarchar;   // mssql
+                    return DataTypeEnum.Nvarchar;   // mssql
 
                 case "blob":                    // sqlite, mysql
                 case "tinyblob":                // mysql
@@ -285,10 +285,10 @@ namespace DatabaseWrapper.Core
                 case "longblob":                // mysql
                 case "bytea":                   // pgsql
                 case "varbinary":               // mssql
-                    return DataType.Blob;
+                    return DataTypeEnum.Blob;
 
                 default:
-                    return DataType.Unknown;
+                    return DataTypeEnum.Unknown;
             }
         }
 

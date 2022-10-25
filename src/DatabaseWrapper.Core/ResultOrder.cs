@@ -19,7 +19,7 @@ namespace DatabaseWrapper.Core
         /// <summary>
         /// Direction by which results should be returned.
         /// </summary>
-        public OrderDirection Direction { get; set; } = OrderDirection.Ascending;
+        public OrderDirectionEnum Direction { get; set; } = OrderDirectionEnum.Ascending;
 
         #endregion
 
@@ -41,7 +41,7 @@ namespace DatabaseWrapper.Core
         /// </summary>
         /// <param name="columnName">Column name on which to order results.</param>
         /// <param name="direction">Direction by which results should be returned.</param>
-        public ResultOrder(string columnName, OrderDirection direction)
+        public ResultOrder(string columnName, OrderDirectionEnum direction)
         {
             if (String.IsNullOrEmpty(columnName)) throw new ArgumentNullException(nameof(columnName));
             ColumnName = columnName;

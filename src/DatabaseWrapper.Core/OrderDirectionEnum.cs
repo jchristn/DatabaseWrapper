@@ -10,7 +10,7 @@ namespace DatabaseWrapper.Core
     /// <summary>
     /// Direction by which results should be returned.
     /// </summary>
-    public enum OrderDirection
+    public enum OrderDirectionEnum
     {
         /// <summary>
         /// Return results in ascending order.

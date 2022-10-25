@@ -54,11 +54,11 @@ namespace Test
                             _Database = new DatabaseClient(_Settings);
                             break;
                         case "mysql":
-                            _Settings = new DatabaseSettings(DbTypes.Mysql, "localhost", 3306, user, pass, "test");
+                            _Settings = new DatabaseSettings(DbTypeEnum.Mysql, "localhost", 3306, user, pass, "test");
                             _Database = new DatabaseClient(_Settings);
                             break;
                         case "postgresql":
-                            _Settings = new DatabaseSettings(DbTypes.Postgresql, "localhost", 5432, user, pass, "test");
+                            _Settings = new DatabaseSettings(DbTypeEnum.Postgresql, "localhost", 5432, user, pass, "test");
                             _Database = new DatabaseClient(_Settings);
                             break;
                         default:
@@ -101,15 +101,16 @@ namespace Test
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Creating table '" + _Table + "'...");
                 List<Column> columns = new List<Column>();
-                columns.Add(new Column("id", true, DataType.Int, 11, null, false));
-                columns.Add(new Column("firstname", false, DataType.Nvarchar, 30, null, false));
-                columns.Add(new Column("lastname", false, DataType.Nvarchar, 30, null, false));
-                columns.Add(new Column("age", false, DataType.Int, 11, null, true));
-                columns.Add(new Column("value", false, DataType.Long, 12, null, true));
-                columns.Add(new Column("birthday", false, DataType.DateTime, null, null, true));
-                columns.Add(new Column("hourly", false, DataType.Decimal, 18, 2, true));
-                columns.Add(new Column("localtime", false, DataType.DateTimeOffset, null, null, true));
-                columns.Add(new Column("picture", false, DataType.Blob, true));
+                columns.Add(new Column("id", true, DataTypeEnum.Int, 11, null, false));
+                columns.Add(new Column("firstname", false, DataTypeEnum.Nvarchar, 30, null, false));
+                columns.Add(new Column("lastname", false, DataTypeEnum.Nvarchar, 30, null, false));
+                columns.Add(new Column("age", false, DataTypeEnum.Int, 11, null, true));
+                columns.Add(new Column("value", false, DataTypeEnum.Long, 12, null, true));
+                columns.Add(new Column("birthday", false, DataTypeEnum.DateTime, null, null, true));
+                columns.Add(new Column("hourly", false, DataTypeEnum.Decimal, 18, 2, true));
+                columns.Add(new Column("localtime", false, DataTypeEnum.DateTimeOffset, null, null, true));
+                columns.Add(new Column("picture", false, DataTypeEnum.Blob, true));
+                columns.Add(new Column("guid", false, DataTypeEnum.Guid, true));
 
                 _Database.CreateTable(_Table, columns);
                 Console.WriteLine("Press ENTER to continue...");
@@ -247,6 +248,8 @@ namespace Test
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 d.Add("picture", _FileBytes);
+                d.Add("guid", Guid.NewGuid());
+
                 _Database.Insert(_Table, d);
             }
 
@@ -260,6 +263,7 @@ namespace Test
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
+                d.Add("guid", Guid.NewGuid());
 
                 _Database.Insert("person", d);
             }
@@ -280,6 +284,8 @@ namespace Test
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 d.Add("picture", _FileBytes);
+                d.Add("guid", Guid.NewGuid());
+
                 dicts.Add(d);
             }
 
@@ -354,7 +360,7 @@ namespace Test
                 //
 
                 ResultOrder[] resultOrder = new ResultOrder[1];
-                resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
+                resultOrder[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);
 
                 DataTable result = _Database.Select(_Table, 0, 3, returnFields, e, resultOrder);
                 if (result != null && result.Rows != null && result.Rows.Count > 0)
@@ -375,7 +381,7 @@ namespace Test
             Expr e = new Expr("lastname", OperatorEnum.StartsWith, "lasté");
 
             ResultOrder[] resultOrder = new ResultOrder[1];
-            resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
+            resultOrder[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);
 
             DataTable result = _Database.Select(_Table, 0, 5, returnFields, e, resultOrder);
             if (result != null && result.Rows != null && result.Rows.Count > 0)
@@ -406,7 +412,7 @@ namespace Test
                 //
 
                 ResultOrder[] resultOrder = new ResultOrder[1];
-                resultOrder[0] = new ResultOrder("id", OrderDirection.Ascending);
+                resultOrder[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);
 
                 _Database.Select(_Table, (i - 10), 5, returnFields, e, resultOrder);
             }
@@ -426,7 +432,7 @@ namespace Test
             Expr e = Expr.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
             ResultOrder[] resultOrder = new ResultOrder[1];
-            resultOrder[0] = new ResultOrder("firstname", OrderDirection.Ascending);
+            resultOrder[0] = new ResultOrder("firstname", OrderDirectionEnum.Ascending);
             _Database.Select(_Table, null, null, returnFields, e, resultOrder);
         }
 

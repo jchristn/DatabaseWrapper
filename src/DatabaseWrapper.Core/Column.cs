@@ -26,7 +26,7 @@ namespace DatabaseWrapper.Core
         /// <summary>
         /// The data type of the column.
         /// </summary>
-        public DataType Type = DataType.Varchar;
+        public DataTypeEnum Type = DataTypeEnum.Varchar;
 
         /// <summary>
         /// The maximum character length of the data contained within the column.
@@ -47,16 +47,16 @@ namespace DatabaseWrapper.Core
 
         #region Private-Members
 
-        private List<DataType> _RequiresLengthAndPrecision = new List<DataType>
+        private List<DataTypeEnum> _RequiresLengthAndPrecision = new List<DataTypeEnum>
         {
-            DataType.Decimal,
-            DataType.Double
+            DataTypeEnum.Decimal,
+            DataTypeEnum.Double
         };
 
-        private List<DataType> _RequiresLength = new List<DataType>
+        private List<DataTypeEnum> _RequiresLength = new List<DataTypeEnum>
         {
-            DataType.Nvarchar,
-            DataType.Varchar
+            DataTypeEnum.Nvarchar,
+            DataTypeEnum.Varchar
         };
 
         #endregion
@@ -77,7 +77,7 @@ namespace DatabaseWrapper.Core
         /// <param name="primaryKey">Indicate if this column is the primary key.</param>
         /// <param name="dt">DataType for the column.</param>
         /// <param name="nullable">Indicate if this column is nullable.</param>
-        public Column(string name, bool primaryKey, DataType dt, bool nullable)
+        public Column(string name, bool primaryKey, DataTypeEnum dt, bool nullable)
         {
             if (String.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             if (primaryKey && nullable) throw new ArgumentException("Primary key column '" + name + "' cannot be nullable.");
@@ -107,7 +107,7 @@ namespace DatabaseWrapper.Core
         /// <param name="maxLen">Max length for the column.</param>
         /// <param name="precision">Precision for the column.</param>
         /// <param name="nullable">Indicate if this column is nullable.</param>
-        public Column(string name, bool primaryKey, DataType dt, int? maxLen, int? precision, bool nullable)
+        public Column(string name, bool primaryKey, DataTypeEnum dt, int? maxLen, int? precision, bool nullable)
         {
             if (String.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             if (primaryKey && nullable) throw new ArgumentException("Primary key column '" + name + "' cannot be nullable.");

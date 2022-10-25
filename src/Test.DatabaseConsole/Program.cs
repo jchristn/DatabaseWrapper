@@ -20,7 +20,7 @@ namespace Test.DatabaseConsole
         static Random _Random = new Random(DateTime.Now.Millisecond);
         static DatabaseSettings _Settings;
         static DatabaseClient _Database;
-
+        
         // To use dbo.person, change _Table to either 'dbo.person' or just '" + _Table + "'
         // To use with a specific schema, use 'schema.table', i.e. 'foo.person'
         static string _DbType = "sqlserver";
@@ -51,6 +51,22 @@ namespace Test.DatabaseConsole
                 Console.WriteLine("Ensure the database has been created beforehand.");
                 Console.WriteLine("");
 
+                switch (_DbType)
+                {
+                    case "sqlserver":
+                        _Port = 1433;
+                        break;
+                    case "mysql":
+                        _Port = 3306;
+                        break;
+                    case "postgresql":
+                        _Port = 5432;
+                        break;
+                    default:
+                        _Port = 0;
+                        break;
+                }
+
                 _User = Inputty.GetString("User:", "root", false);
                 _Password = Inputty.GetString("Pass:", null, true);
                 _Hostname = Inputty.GetString("Host:", _Hostname, false);
@@ -64,11 +80,11 @@ namespace Test.DatabaseConsole
                         _Database = new DatabaseClient(_Settings);
                         break;
                     case "mysql":
-                        _Settings = new DatabaseSettings(DbTypes.Mysql, _Hostname, _Port, _User, _Password, _DbName);
+                        _Settings = new DatabaseSettings(DbTypeEnum.Mysql, _Hostname, _Port, _User, _Password, _DbName);
                         _Database = new DatabaseClient(_Settings);
                         break;
                     case "postgresql":
-                        _Settings = new DatabaseSettings(DbTypes.Postgresql, _Hostname, _Port, _User, _Password, _DbName);
+                        _Settings = new DatabaseSettings(DbTypeEnum.Postgresql, _Hostname, _Port, _User, _Password, _DbName);
                         _Database = new DatabaseClient(_Settings);
                         break;
                     default:
@@ -86,6 +102,8 @@ namespace Test.DatabaseConsole
                 Console.WriteLine("Invalid database type.");
                 return;
             }
+
+            _Database.QueryEvent += QueryEventHandler;
 
             #endregion
 
@@ -211,6 +229,15 @@ namespace Test.DatabaseConsole
             }
 
             #endregion
+        }
+
+        private static void QueryEventHandler(object sender, DatabaseQueryEvent e)
+        {
+            Console.WriteLine("---");
+            Console.WriteLine("  Query         : " + e.Query);
+            Console.WriteLine("  Time          : " + string.Format("{0:N2}", e.TotalMilliseconds) + "ms");
+            Console.WriteLine("  Rows returned : " + e.RowsReturned);
+            Console.WriteLine("  Exception     : " + (e.Exception != null ? e.Exception.Message + Environment.NewLine + e.ToString() : "none"));
         }
 
         private static string StackToString()

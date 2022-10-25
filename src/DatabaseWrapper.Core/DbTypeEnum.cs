@@ -10,7 +10,7 @@ namespace DatabaseWrapper.Core
     /// <summary>
     /// Enumeration containing the supported database types.
     /// </summary>
-    public enum DbTypes
+    public enum DbTypeEnum
     {
         /// <summary>
         /// Microsoft SQL Server
