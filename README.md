@@ -90,7 +90,7 @@ result = client.Update("person", d, e);
 fields = new List<string> { "firstName", "lastName" }; // leave null for *
 e = new Expr("lastName", OperatorEnum.Equals, "Christner"); 
 ResultOrder[] order = new ResultOrder[1];
-order = new ResultOrder("firstName", OrderDirection.Ascending)
+order = new ResultOrder("firstName", OrderDirectionEnum.Ascending)
 result = client.Select("person", 0, 10, fields, e, order);
 
 // delete a record
@@ -121,7 +121,7 @@ IMPORTANT: When doing pagination with SQL Server, you MUST specify an ```ResultO
 
 ```csharp
 ResultOrder[] order = new ResultOrder[1];
-order = new ResultOrder("firstName", OrderDirection.Ascending);
+order = new ResultOrder("firstName", OrderDirectionEnum.Ascending);
 DataTable result = client.Select("person", 5, 10, null, e, order);
 ```
 
@@ -130,12 +130,10 @@ DataTable result = client.Select("person", 5, 10, null, e, order);
 We added a simple static method for this which you can use when building expressions (or elsewhere).  An object method exists as well.
 
 ```csharp
-string SqlServer1 = DatabaseClient.DbTimestamp(DbTypes.SqlServer, DateTime.Now));
-string SqlServer2 = client.Timestamp(DateTime.Now);
+string ts = client.Timestamp(DateTime.Now);
 // 08/23/2016 05:34:32.4349034 PM
 
-string mysql1 = DatabaseClient.DbTimestamp(DbTypes.MySql, DateTime.Now));
-string mysql2 = client.Timestamp(DateTime.Now);
+string tso = client.Timestamp(DateTime.Now);
 // 2016-08-23 17:34:32.446913 
 ```
 
