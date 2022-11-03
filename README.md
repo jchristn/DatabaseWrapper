@@ -84,7 +84,7 @@ result = client.Insert("person", d);
 d = new Dictionary<string, object>();
 d.Add("notes", "The author :)");
 e = new Expr("firstName", OperatorEnum.Equals, "Joel"); 
-result = client.Update("person", d, e);
+client.Update("person", d, e);
 
 // retrieve 10 records
 fields = new List<string> { "firstName", "lastName" }; // leave null for *
@@ -95,10 +95,10 @@ result = client.Select("person", 0, 10, fields, e, order);
 
 // delete a record
 e = new Expr("firstName", Operators.Equals, "Joel"); 
-result = client.Delete("person", e);
+client.Delete("person", e);
 
 // execute a raw query
-result = client.RawQuery("SELECT customer_id FROM customer WHERE customer_id > 10");
+result = client.Query("SELECT customer_id FROM customer WHERE customer_id > 10");
 ```
 
 ## Sample Compound Expression
