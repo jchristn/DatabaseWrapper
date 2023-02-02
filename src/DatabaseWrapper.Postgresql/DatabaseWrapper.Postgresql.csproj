@@ -1,21 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
-		<Version>5.0.0</Version>
+		<TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net48;net5.0;net6.0;net7.0</TargetFrameworks>
+		<Version>5.0.2</Version>
+		<PackageReleaseNotes>Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0.</PackageReleaseNotes>
 		<Authors>Joel Christner</Authors>
 		<Description>Simple database wrapper for Postgresql written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, Sqlite, and MySQL.</Description>
-		<Copyright>(c)2022 Joel Christner</Copyright>
+		<Copyright>(c)2023 Joel Christner</Copyright>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageProjectUrl>https://github.com/jchristn/DatabaseWrapper</PackageProjectUrl>
 		<PackageIconUrl></PackageIconUrl>
 		<RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
 		<RepositoryType>Github</RepositoryType>
 		<PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
-		<PackageReleaseNotes>Breaking changes, add GUID data type, major internal refactor.</PackageReleaseNotes>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageIcon>icon.png</PackageIcon>
+		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
@@ -71,8 +72,8 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="DatabaseWrapper.Core" Version="5.0.0" />
-		<PackageReference Include="Npgsql" Version="6.0.7" />
+		<PackageReference Include="DatabaseWrapper.Core" Version="5.0.2" />
+		<PackageReference Include="Npgsql" Version="7.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

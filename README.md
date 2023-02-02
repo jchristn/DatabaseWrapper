@@ -38,7 +38,7 @@ Core features:
 
 Special thanks to those who have helped contribute or otherwise improve the library!  
 
-@shawty @constantinje @thedarklort @l-404-l @igrgurina @Vaelek @treyhay31 @daoye @twobytescy
+@shawty @constantinje @thedarklort @l-404-l @igrgurina @Vaelek @treyhay31 @daoye @twobytescy @rinkusahu1 
 
 ## A Note on Sanitization
 

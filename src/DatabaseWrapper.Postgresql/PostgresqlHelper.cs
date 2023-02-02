@@ -87,7 +87,7 @@ namespace DatabaseWrapper.Postgresql
                 "  CASE " +
                 "    WHEN cons.COLUMN_NAME IS NULL THEN 'NO' ELSE 'YES' " +
                 "  END AS IS_PRIMARY_KEY " +
-                "FROM test.INFORMATION_SCHEMA.COLUMNS cols " +
+                "FROM " + database + ".INFORMATION_SCHEMA.COLUMNS cols " +
                 "LEFT JOIN " + database + ".INFORMATION_SCHEMA.KEY_COLUMN_USAGE cons ON cols.COLUMN_NAME = cons.COLUMN_NAME " +
                 "WHERE cols.TABLE_NAME = '" + ExtractTableName(table) + "';";
         }

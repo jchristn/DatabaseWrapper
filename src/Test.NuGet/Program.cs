@@ -80,10 +80,6 @@ namespace Test
                     return;
                 }
 
-                _Database.Logger = Logger;
-                _Database.LogQueries = true;
-                _Database.LogResults = true;
-
                 #endregion
 
                 #region Drop-Table

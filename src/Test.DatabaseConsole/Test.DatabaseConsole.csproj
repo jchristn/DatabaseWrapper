@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-	<TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFrameworks>netcoreapp3.1;net5.0;net6.0;net7.0</TargetFrameworks>
+		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Inputty" Version="1.0.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Inputty" Version="1.0.5" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DatabaseWrapper.Core\DatabaseWrapper.Core.csproj" />
-    <ProjectReference Include="..\DatabaseWrapper\DatabaseWrapper.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\DatabaseWrapper\DatabaseWrapper.csproj" />
+	</ItemGroup>
 
 </Project>

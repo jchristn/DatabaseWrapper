@@ -10,6 +10,7 @@ v5.0.x
 - Abstract classes and implementations for for database-specific helpers and clients
 - Support for GUID type
 - More consistency in test projects
+- Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0
 
 ## Previous Versions
 
