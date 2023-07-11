@@ -39,14 +39,14 @@ namespace DatabaseWrapper.Core
         /// </summary>
         /// <param name="settings">Settings.</param>
         /// <returns>String.</returns>
-        public abstract string ConnectionString(DatabaseSettings settings);
+        public abstract string GenerateConnectionString(DatabaseSettings settings);
 
         /// <summary>
         /// Query to retrieve the names of tables from a database.
         /// </summary>
         /// <param name="database">Database name.</param>
         /// <returns>String.</returns>
-        public abstract string LoadTableNamesQuery(string database);
+        public abstract string RetrieveTableNamesQuery(string database);
 
         /// <summary>
         /// Query to retrieve the list of columns for a table.
@@ -54,7 +54,7 @@ namespace DatabaseWrapper.Core
         /// <param name="database">Database name.</param>
         /// <param name="table">Table name.</param>
         /// <returns></returns>
-        public abstract string LoadTableColumnsQuery(string database, string table);
+        public abstract string RetrieveTableColumnsQuery(string database, string table);
 
         /// <summary>
         /// Method to sanitize a string.
@@ -68,7 +68,7 @@ namespace DatabaseWrapper.Core
         /// </summary>
         /// <param name="col">Column.</param>
         /// <returns>String.</returns>
-        public abstract string ColumnToCreateString(Column col);
+        public abstract string ColumnToCreateQuery(Column col);
 
         /// <summary>
         /// Retrieve the primary key column from a list of columns.
@@ -176,14 +176,14 @@ namespace DatabaseWrapper.Core
         /// </summary>
         /// <param name="ts">DateTime.</param>
         /// <returns>String.</returns>
-        public abstract string DbTimestamp(DateTime ts);
+        public abstract string GenerateTimestamp(DateTime ts);
 
         /// <summary>
         /// Retrieve a timestamp offset in the database format.
         /// </summary>
         /// <param name="ts">DateTimeOffset.</param>
         /// <returns>String.</returns>
-        public abstract string DbTimestampOffset(DateTimeOffset ts);
+        public abstract string GenerateTimestampOffset(DateTimeOffset ts);
 
         #endregion
     }

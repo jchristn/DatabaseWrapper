@@ -2,6 +2,15 @@
 
 ## Current Version
 
+v6.0.x
+
+- Minor breaking changes (API name changes)
+- Asynchronous APIs
+- Updated dependencies
+- Bugfixes
+
+## Previous Versions
+
 v5.0.x
 
 - Breaking changes (class and enum name changes)
@@ -11,8 +20,6 @@ v5.0.x
 - Support for GUID type
 - More consistency in test projects
 - Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0
-
-## Previous Versions
 
 v4.1.x
 

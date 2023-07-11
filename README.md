@@ -24,15 +24,14 @@ Core features:
 - Built-in sanitization
 - Support for .NET Standard, .NET Core, and .NET Framework
 - Support for SQL Server, Sqlite, PostgreSQL, MySQL, MariaDB, both on-premises and in the cloud
+- Both synchronous and asynchronous APIs
 
-## New in v5.0
+## New in v6.0.x
 
-- Breaking changes (class and enum name changes)
-- Major internal refactor, code cleanup, and consistency
-- Event handler for query results
-- Abstract classes and implementations for for database-specific helpers and clients
-- Support for GUID type
-- More consistency in test projects
+- Minor breaking changes (API name changes)
+- Asynchronous APIs
+- Updated dependencies
+- Bugfixes
 
 ## Special Thanks
 
@@ -79,12 +78,14 @@ d.Add("firstName", "Joel");
 d.Add("lastName", "Christner");
 d.Add("notes", "Author");
 result = client.Insert("person", d);
+result = await client.InsertAsync("person", d);
 
 // update a record
 d = new Dictionary<string, object>();
 d.Add("notes", "The author :)");
 e = new Expr("firstName", OperatorEnum.Equals, "Joel"); 
 client.Update("person", d, e);
+await client.UpdateAsync("person", d, e);
 
 // retrieve 10 records
 fields = new List<string> { "firstName", "lastName" }; // leave null for *
@@ -92,13 +93,16 @@ e = new Expr("lastName", OperatorEnum.Equals, "Christner");
 ResultOrder[] order = new ResultOrder[1];
 order = new ResultOrder("firstName", OrderDirectionEnum.Ascending)
 result = client.Select("person", 0, 10, fields, e, order);
+result = await client.SelectAsync("person", 0, 10, fields, e, order);
 
 // delete a record
 e = new Expr("firstName", Operators.Equals, "Joel"); 
 client.Delete("person", e);
+await client.DeleteAsync("person", e);
 
 // execute a raw query
 result = client.Query("SELECT customer_id FROM customer WHERE customer_id > 10");
+result = await client.QueryAsync("SELECT customer_id FROM customer WHERE customer_id > 10");
 ```
 
 ## Sample Compound Expression

@@ -11,6 +11,8 @@ using DatabaseWrapper.Postgresql;
 using DatabaseWrapper.Sqlite;
 using DatabaseWrapper.SqlServer;
 using ExpressionTree;
+using Microsoft.Extensions.Primitives;
+using System.Threading;
 
 namespace DatabaseWrapper
 {
@@ -24,7 +26,7 @@ namespace DatabaseWrapper
         /// <summary>
         /// The connection string used to connect to the database server.
         /// </summary>
-        public new string ConnectionString 
+        public new string ConnectionString
         { 
             get
             {
@@ -435,8 +437,30 @@ namespace DatabaseWrapper
                 case DbTypeEnum.SqlServer:
                     return _SqlServer.ListTables();
                 default:
-                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'."); 
-            } 
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// List all tables in the database.
+        /// </summary>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>List of strings, each being a table name.</returns>
+        public override async Task<List<string>> ListTablesAsync(CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.ListTablesAsync(token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.ListTablesAsync(token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.ListTablesAsync(token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.ListTablesAsync(token).ConfigureAwait(false);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
         }
 
         /// <summary>
@@ -456,6 +480,29 @@ namespace DatabaseWrapper
                     return _Sqlite.TableExists(tableName);
                 case DbTypeEnum.SqlServer:
                     return _SqlServer.TableExists(tableName);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Check if a table exists in the database.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>True if exists.</returns>
+        public override async Task<bool> TableExistsAsync(string tableName, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.TableExistsAsync(tableName, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.TableExistsAsync(tableName, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.TableExistsAsync(tableName, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.TableExistsAsync(tableName, token).ConfigureAwait(false);
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
@@ -484,6 +531,29 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Show the columns and column metadata from a specific table.
+        /// </summary>
+        /// <param name="tableName">The table to view.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>A list of column objects.</returns>
+        public override async Task<List<Column>> DescribeTableAsync(string tableName, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.DescribeTableAsync(tableName, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.DescribeTableAsync(tableName, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.DescribeTableAsync(tableName, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.DescribeTableAsync(tableName, token).ConfigureAwait(false);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Describe each of the tables in the database.
         /// </summary>
         /// <returns>Dictionary.  Key is table name, value is List of Column objects.</returns>
@@ -499,6 +569,28 @@ namespace DatabaseWrapper
                     return _Sqlite.DescribeDatabase();
                 case DbTypeEnum.SqlServer:
                     return _SqlServer.DescribeDatabase();
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Describe each of the tables in the database.
+        /// </summary>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>Dictionary.  Key is table name, value is List of Column objects.</returns>
+        public override async Task<Dictionary<string, List<Column>>> DescribeDatabaseAsync(CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.DescribeDatabaseAsync(token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.DescribeDatabaseAsync(token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.DescribeDatabaseAsync(token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.DescribeDatabaseAsync(token).ConfigureAwait(false);
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
@@ -531,6 +623,33 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Create a table with a specified name.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="columns">Columns.</param>
+        /// <param name="token">Cancellation token.</param>
+        public override async Task CreateTableAsync(string tableName, List<Column> columns, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    await _Mysql.CreateTableAsync(tableName, columns, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Postgresql:
+                    await _Postgresql.CreateTableAsync(tableName, columns, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Sqlite:
+                    await _Sqlite.CreateTableAsync(tableName, columns, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.SqlServer:
+                    await _SqlServer.CreateTableAsync(tableName, columns, token).ConfigureAwait(false);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Drop the specified table.  
         /// </summary>
         /// <param name="tableName">The table to drop.</param>
@@ -549,6 +668,32 @@ namespace DatabaseWrapper
                     return;
                 case DbTypeEnum.SqlServer:
                     _SqlServer.DropTable(tableName);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Drop the specified table.  
+        /// </summary>
+        /// <param name="tableName">The table to drop.</param>
+        /// <param name="token">Cancellation token.</param>
+        public override async Task DropTableAsync(string tableName, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    await _Mysql.DropTableAsync(tableName, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Postgresql:
+                    await _Postgresql.DropTableAsync(tableName, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Sqlite:
+                    await _Sqlite.DropTableAsync(tableName, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.SqlServer:
+                    await _SqlServer.DropTableAsync(tableName, token).ConfigureAwait(false);
                     return;
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
@@ -624,6 +769,31 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Returns a DataTable containing at most one row with data from the specified table where the specified column contains the specified value.  Should only be used on key or unique fields.
+        /// </summary>
+        /// <param name="tableName">The table from which you wish to SELECT.</param>
+        /// <param name="columnName">The column containing key or unique fields where a match is desired.</param>
+        /// <param name="value">The value to match in the key or unique field column.  This should be an object that can be cast to a string value.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>A DataTable containing at most one row.</returns>
+        public override async Task<DataTable> GetUniqueObjectByIdAsync(string tableName, string columnName, object value, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.GetUniqueObjectByIdAsync(tableName, columnName, value, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.GetUniqueObjectByIdAsync(tableName, columnName, value, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.GetUniqueObjectByIdAsync(tableName, columnName, value, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.GetUniqueObjectByIdAsync(tableName, columnName, value, token).ConfigureAwait(false);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Execute a SELECT query.
         /// </summary>
         /// <param name="tableName">The table from which you wish to SELECT.</param>
@@ -657,6 +827,33 @@ namespace DatabaseWrapper
         /// <param name="maxResults">The maximum number of results to retrieve.</param>
         /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
         /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public override async Task<DataTable> SelectAsync(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.SelectAsync(tableName, indexStart, maxResults, returnFields, filter, null, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.SelectAsync(tableName, indexStart, maxResults, returnFields, filter, null, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.SelectAsync(tableName, indexStart, maxResults, returnFields, filter, null, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.SelectAsync(tableName, indexStart, maxResults, returnFields, filter, null, token).ConfigureAwait(false);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Execute a SELECT query.
+        /// </summary>
+        /// <param name="tableName">The table from which you wish to SELECT.</param>
+        /// <param name="indexStart">The starting index for retrieval.</param>
+        /// <param name="maxResults">The maximum number of results to retrieve.</param>
+        /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
+        /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
         /// <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
         /// <returns>A DataTable containing the results.</returns>
         public override DataTable Select(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
@@ -671,6 +868,34 @@ namespace DatabaseWrapper
                     return _Sqlite.Select(tableName, indexStart, maxResults, returnFields, filter, resultOrder);
                 case DbTypeEnum.SqlServer:
                     return _SqlServer.Select(tableName, indexStart, maxResults, returnFields, filter, resultOrder);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Execute a SELECT query.
+        /// </summary>
+        /// <param name="tableName">The table from which you wish to SELECT.</param>
+        /// <param name="indexStart">The starting index for retrieval.</param>
+        /// <param name="maxResults">The maximum number of results to retrieve.</param>
+        /// <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
+        /// <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
+        /// <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public override async Task<DataTable> SelectAsync(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.SelectAsync(tableName, indexStart, maxResults, returnFields, filter, resultOrder, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.SelectAsync(tableName, indexStart, maxResults, returnFields, filter, resultOrder, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.SelectAsync(tableName, indexStart, maxResults, returnFields, filter, resultOrder, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.SelectAsync(tableName, indexStart, maxResults, returnFields, filter, resultOrder, token).ConfigureAwait(false);
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
@@ -700,6 +925,30 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Execute an INSERT query.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public override async Task<DataTable> InsertAsync(string tableName, Dictionary<string, object> keyValuePairs, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.InsertAsync(tableName, keyValuePairs, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.InsertAsync(tableName, keyValuePairs, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.InsertAsync(tableName, keyValuePairs, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.InsertAsync(tableName, keyValuePairs, token).ConfigureAwait(false);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Execute an INSERT query with multiple values within a transaction.
         /// </summary>
         /// <param name="tableName">The table in which you wish to INSERT.</param>
@@ -719,6 +968,33 @@ namespace DatabaseWrapper
                     return;
                 case DbTypeEnum.SqlServer:
                     _SqlServer.InsertMultiple(tableName, keyValuePairList);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Execute an INSERT query with multiple values within a transaction.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to INSERT.</param>
+        /// <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
+        /// <param name="token">Cancellation token.</param>
+        public override async Task InsertMultipleAsync(string tableName, List<Dictionary<string, object>> keyValuePairList, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    await _Mysql.InsertMultipleAsync(tableName, keyValuePairList, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Postgresql:
+                    await _Postgresql.InsertMultipleAsync(tableName, keyValuePairList, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Sqlite:
+                    await _Sqlite.InsertMultipleAsync(tableName, keyValuePairList, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.SqlServer:
+                    await _SqlServer.InsertMultipleAsync(tableName, keyValuePairList, token).ConfigureAwait(false);
                     return;
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
@@ -756,6 +1032,37 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Execute an UPDATE query.
+        /// For Microsoft SQL Server and PostgreSQL, the updated rows are returned.
+        /// For MySQL and Sqlite, nothing is returned.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to UPDATE.</param>
+        /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
+        /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>For Microsoft SQL Server and PostgreSQL, a DataTable containing the results.  For MySQL and Sqlite, null.</returns>
+        public override async Task UpdateAsync(string tableName, Dictionary<string, object> keyValuePairs, Expr filter, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    await _Mysql.UpdateAsync(tableName, keyValuePairs, filter, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Postgresql:
+                    await _Postgresql.UpdateAsync(tableName, keyValuePairs, filter, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Sqlite:
+                    await _Sqlite.UpdateAsync(tableName, keyValuePairs, filter, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.SqlServer:
+                    await _SqlServer.UpdateAsync(tableName, keyValuePairs, filter, token).ConfigureAwait(false);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Execute a DELETE query.
         /// </summary>
         /// <param name="tableName">The table in which you wish to DELETE.</param>
@@ -775,6 +1082,33 @@ namespace DatabaseWrapper
                     return;
                 case DbTypeEnum.SqlServer:
                     _SqlServer.Delete(tableName, filter);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Execute a DELETE query.
+        /// </summary>
+        /// <param name="tableName">The table in which you wish to DELETE.</param>
+        /// <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param>
+        /// <param name="token">Cancellation token.</param>
+        public override async Task DeleteAsync(string tableName, Expr filter, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    await _Mysql.DeleteAsync(tableName, filter, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Postgresql:
+                    await _Postgresql.DeleteAsync(tableName, filter, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Sqlite:
+                    await _Sqlite.DeleteAsync(tableName, filter, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.SqlServer:
+                    await _SqlServer.DeleteAsync(tableName, filter, token).ConfigureAwait(false);
                     return;
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
@@ -807,6 +1141,32 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Empties a table completely.
+        /// </summary>
+        /// <param name="tableName">The table you wish to TRUNCATE.</param>
+        /// <param name="token">Cancellation token.</param>
+        public override async Task TruncateAsync(string tableName, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    await _Mysql.TruncateAsync(tableName, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Postgresql:
+                    await _Postgresql.TruncateAsync(tableName, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.Sqlite:
+                    await _Sqlite.TruncateAsync(tableName, token).ConfigureAwait(false);
+                    return;
+                case DbTypeEnum.SqlServer:
+                    await _SqlServer.TruncateAsync(tableName, token).ConfigureAwait(false);
+                    return;
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Execute a query.
         /// </summary>
         /// <param name="query">Database query defined outside of the database client.</param>
@@ -823,6 +1183,29 @@ namespace DatabaseWrapper
                     return _Sqlite.Query(query);
                 case DbTypeEnum.SqlServer:
                     return _SqlServer.Query(query);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Execute a query.
+        /// </summary>
+        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public override async Task<DataTable> QueryAsync(string query, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.QueryAsync(query, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.QueryAsync(query, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.QueryAsync(query, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.QueryAsync(query, token).ConfigureAwait(false);
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
@@ -852,6 +1235,30 @@ namespace DatabaseWrapper
         }
 
         /// <summary>
+        /// Determine if records exist by filter.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="filter">Expression.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>True if records exist.</returns>
+        public override async Task<bool> ExistsAsync(string tableName, Expr filter, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.ExistsAsync(tableName, filter, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.ExistsAsync(tableName, filter, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.ExistsAsync(tableName, filter, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.ExistsAsync(tableName, filter, token).ConfigureAwait(false);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
         /// Determine the number of records that exist by filter.
         /// </summary>
         /// <param name="tableName">The name of the table.</param>
@@ -869,6 +1276,30 @@ namespace DatabaseWrapper
                     return _Sqlite.Count(tableName, filter);
                 case DbTypeEnum.SqlServer:
                     return _SqlServer.Count(tableName, filter);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Determine the number of records that exist by filter.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="filter">Expression.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>The number of records.</returns>
+        public override async Task<long> CountAsync(string tableName, Expr filter, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.CountAsync(tableName, filter, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.CountAsync(tableName, filter, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.CountAsync(tableName, filter, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.CountAsync(tableName, filter, token).ConfigureAwait(false);
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
@@ -893,6 +1324,31 @@ namespace DatabaseWrapper
                     return _Sqlite.Sum(tableName, fieldName, filter);
                 case DbTypeEnum.SqlServer:
                     return _SqlServer.Sum(tableName, fieldName, filter);
+                default:
+                    throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
+            }
+        }
+
+        /// <summary>
+        /// Determine the sum of a column for records that match the supplied filter.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="fieldName">The name of the field.</param>
+        /// <param name="filter">Expression.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>The sum of the specified column from the matching rows.</returns>
+        public override async Task<decimal> SumAsync(string tableName, string fieldName, Expr filter, CancellationToken token = default)
+        {
+            switch (_Settings.Type)
+            {
+                case DbTypeEnum.Mysql:
+                    return await _Mysql.SumAsync(tableName, fieldName, filter, token).ConfigureAwait(false);
+                case DbTypeEnum.Postgresql:
+                    return await _Postgresql.SumAsync(tableName, fieldName, filter, token).ConfigureAwait(false);
+                case DbTypeEnum.Sqlite:
+                    return await _Sqlite.SumAsync(tableName, fieldName, filter, token).ConfigureAwait(false);
+                case DbTypeEnum.SqlServer:
+                    return await _SqlServer.SumAsync(tableName, fieldName, filter, token).ConfigureAwait(false);
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }

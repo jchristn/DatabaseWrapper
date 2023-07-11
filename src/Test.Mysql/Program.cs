@@ -223,7 +223,7 @@ namespace Test
             {
                 Dictionary<string, object> d = new Dictionary<string, object>();
                 d.Add("firstname", "firsté" + i);
-                d.Add("lastname", "lasté" + i);
+                d.Add("lastname", "lastШЋЖŠĆŽ" + i);
                 d.Add("age", i);
                 d.Add("value", i * 1000);
                 d.Add("birthday", DateTime.Now);

@@ -111,11 +111,26 @@
             </summary>
             <returns>List of strings, each being a table name.</returns>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.ListTablesAsync(System.Threading.CancellationToken)">
+            <summary>
+            List all tables in the database.
+            </summary>
+            <param name="token">Cancellation token.</param>
+            <returns>List of strings, each being a table name.</returns>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.TableExists(System.String)">
             <summary>
             Check if a table exists in the database.
             </summary>
             <param name="tableName">The name of the table.</param>
+            <returns>True if exists.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.TableExistsAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Check if a table exists in the database.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="token">Cancellation token.</param>
             <returns>True if exists.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.DescribeTable(System.String)">
@@ -125,10 +140,25 @@
             <param name="tableName">The table to view.</param>
             <returns>A list of column objects.</returns>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.DescribeTableAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Show the columns and column metadata from a specific table.
+            </summary>
+            <param name="tableName">The table to view.</param>
+            <param name="token">Cancellation token.</param>
+            <returns>A list of column objects.</returns>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.DescribeDatabase">
             <summary>
             Describe each of the tables in the database.
             </summary>
+            <returns>Dictionary where Key is table name, value is List of Column objects.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.DescribeDatabaseAsync(System.Threading.CancellationToken)">
+            <summary>
+            Describe each of the tables in the database.
+            </summary>
+            <param name="token">Cancellation token.</param>
             <returns>Dictionary where Key is table name, value is List of Column objects.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.CreateTable(System.String,System.Collections.Generic.List{DatabaseWrapper.Core.Column})">
@@ -138,11 +168,26 @@
             <param name="tableName">The name of the table.</param>
             <param name="columns">Columns.</param>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.CreateTableAsync(System.String,System.Collections.Generic.List{DatabaseWrapper.Core.Column},System.Threading.CancellationToken)">
+            <summary>
+            Create a table with a specified name.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="token">Cancellation token.</param>
+            <param name="columns">Columns.</param>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.DropTable(System.String)">
             <summary>
             Drop the specified table.  
             </summary>
             <param name="tableName">The table to drop.</param>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.DropTableAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Drop the specified table.  
+            </summary>
+            <param name="tableName">The table to drop.</param>
+            <param name="token">Cancellation token.</param>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.GetPrimaryKeyColumn(System.String)">
             <summary>
@@ -167,6 +212,16 @@
             <param name="value">The value to match in the key or unique field column.  This should be an object that can be cast to a string value.</param>
             <returns>A DataTable containing at most one row.</returns>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.GetUniqueObjectByIdAsync(System.String,System.String,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Returns a DataTable containing at most one row with data from the specified table where the specified column contains the specified value.  Should only be used on key or unique fields.
+            </summary>
+            <param name="tableName">The table from which you wish to SELECT.</param>
+            <param name="columnName">The column containing key or unique fields where a match is desired.</param>
+            <param name="value">The value to match in the key or unique field column.  This should be an object that can be cast to a string value.</param>
+            <param name="token">Cancellation token.</param>
+            <returns>A DataTable containing at most one row.</returns>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},ExpressionTree.Expr)">
             <summary>
             Execute a SELECT query.
@@ -176,6 +231,18 @@
             <param name="maxResults">The maximum number of results to retrieve.</param>
             <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
             <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
+            <returns>A DataTable containing the results.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.SelectAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},ExpressionTree.Expr,System.Threading.CancellationToken)">
+            <summary>
+            Execute a SELECT query.
+            </summary>
+            <param name="tableName">The table from which you wish to SELECT.</param>
+            <param name="indexStart">The starting index for retrieval.</param>
+            <param name="maxResults">The maximum number of results to retrieve.</param>
+            <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
+            <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
+            <param name="token">Cancellation token.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Select(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},ExpressionTree.Expr,DatabaseWrapper.Core.ResultOrder[])">
@@ -190,12 +257,34 @@
             <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.SelectAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.List{System.String},ExpressionTree.Expr,DatabaseWrapper.Core.ResultOrder[],System.Threading.CancellationToken)">
+            <summary>
+            Execute a SELECT query.
+            </summary>
+            <param name="tableName">The table from which you wish to SELECT.</param>
+            <param name="indexStart">The starting index for retrieval.</param>
+            <param name="maxResults">The maximum number of results to retrieve.</param>
+            <param name="returnFields">The fields you wish to have returned.  Null returns all.</param>
+            <param name="filter">The expression containing the SELECT filter (i.e. WHERE clause data).</param>
+            <param name="resultOrder">Specify on which columns and in which direction results should be ordered.</param>
+            <param name="token">Cancellation token.</param>
+            <returns>A DataTable containing the results.</returns>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Insert(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
             <summary>
             Execute an INSERT query.
             </summary>
             <param name="tableName">The table in which you wish to INSERT.</param>
             <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
+            <returns>A DataTable containing the results.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.InsertAsync(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.Threading.CancellationToken)">
+            <summary>
+            Execute an INSERT query.
+            </summary>
+            <param name="tableName">The table in which you wish to INSERT.</param>
+            <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
+            <param name="token">Cancellation token.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.InsertMultiple(System.String,System.Collections.Generic.List{System.Collections.Generic.Dictionary{System.String,System.Object}})">
@@ -205,6 +294,14 @@
             <param name="tableName">The table in which you wish to INSERT.</param>
             <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.InsertMultipleAsync(System.String,System.Collections.Generic.List{System.Collections.Generic.Dictionary{System.String,System.Object}},System.Threading.CancellationToken)">
+            <summary>
+            Execute an INSERT query with multiple values within a transaction.
+            </summary>
+            <param name="tableName">The table in which you wish to INSERT.</param>
+            <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
+            <param name="token">Cancellation token.</param>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Update(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},ExpressionTree.Expr)">
             <summary>
             Execute an UPDATE query. 
@@ -213,6 +310,15 @@
             <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
             <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param> 
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.UpdateAsync(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},ExpressionTree.Expr,System.Threading.CancellationToken)">
+            <summary>
+            Execute an UPDATE query. 
+            </summary>
+            <param name="tableName">The table in which you wish to UPDATE.</param>
+            <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
+            <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param> 
+            <param name="token">Cancellation token.</param>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Delete(System.String,ExpressionTree.Expr)">
             <summary>
             Execute a DELETE query.
@@ -220,17 +326,40 @@
             <param name="tableName">The table in which you wish to DELETE.</param>
             <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param> 
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.DeleteAsync(System.String,ExpressionTree.Expr,System.Threading.CancellationToken)">
+            <summary>
+            Execute a DELETE query.
+            </summary>
+            <param name="tableName">The table in which you wish to DELETE.</param>
+            <param name="filter">The expression containing the DELETE filter (i.e. WHERE clause data).</param> 
+            <param name="token">Cancellation token.</param>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Truncate(System.String)">
             <summary>
             Empties a table completely.
             </summary>
             <param name="tableName">The table you wish to TRUNCATE.</param>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.TruncateAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Empties a table completely.
+            </summary>
+            <param name="tableName">The table you wish to TRUNCATE.</param>
+            <param name="token">Cancellation token.</param>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Query(System.String)">
             <summary>
             Execute a query.
             </summary>
             <param name="query">Database query defined outside of the database client.</param>
+            <returns>A DataTable containing the results.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.QueryAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Execute a query.
+            </summary>
+            <param name="query">Database query defined outside of the database client.</param>
+            <param name="token">Cancellation token.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Exists(System.String,ExpressionTree.Expr)">
@@ -241,12 +370,30 @@
             <param name="filter">Expression.</param>
             <returns>True if records exist.</returns>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.ExistsAsync(System.String,ExpressionTree.Expr,System.Threading.CancellationToken)">
+            <summary>
+            Determine if records exist by filter.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="filter">Expression.</param>
+            <param name="token">Cancellation token.</param>
+            <returns>True if records exist.</returns>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Count(System.String,ExpressionTree.Expr)">
             <summary>
             Determine the number of records that exist by filter.
             </summary>
             <param name="tableName">The name of the table.</param>
             <param name="filter">Expression.</param>
+            <returns>The number of records.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.CountAsync(System.String,ExpressionTree.Expr,System.Threading.CancellationToken)">
+            <summary>
+            Determine the number of records that exist by filter.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="filter">Expression.</param>
+            <param name="token">Cancellation token.</param>
             <returns>The number of records.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Sum(System.String,System.String,ExpressionTree.Expr)">
@@ -256,6 +403,16 @@
             <param name="tableName">The name of the table.</param>
             <param name="fieldName">The name of the field.</param>
             <param name="filter">Expression.</param>
+            <returns>The sum of the specified column from the matching rows.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.SumAsync(System.String,System.String,ExpressionTree.Expr,System.Threading.CancellationToken)">
+            <summary>
+            Determine the sum of a column for records that match the supplied filter.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <param name="fieldName">The name of the field.</param>
+            <param name="filter">Expression.</param>
+            <param name="token">Cancellation token.</param>
             <returns>The sum of the specified column from the matching rows.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Timestamp(System.DateTime)">
@@ -294,21 +451,21 @@
             Timestamp offset format for use in DateTimeOffset.ToString([format]).
             </summary>
         </member>
-        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.ConnectionString(DatabaseWrapper.Core.DatabaseSettings)">
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.GenerateConnectionString(DatabaseWrapper.Core.DatabaseSettings)">
             <summary>
             Build a connection string from DatabaseSettings.
             </summary>
             <param name="settings">Settings.</param>
             <returns>String.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.LoadTableNamesQuery(System.String)">
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.RetrieveTableNamesQuery(System.String)">
             <summary>
             Query to retrieve the names of tables from a database.
             </summary>
             <param name="database">Database name.</param>
             <returns>String.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.LoadTableColumnsQuery(System.String,System.String)">
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.RetrieveTableColumnsQuery(System.String,System.String)">
             <summary>
             Query to retrieve the list of columns for a table.
             </summary>
@@ -323,7 +480,7 @@
             <param name="val">String.</param>
             <returns>String.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.ColumnToCreateString(DatabaseWrapper.Core.Column)">
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.ColumnToCreateQuery(DatabaseWrapper.Core.Column)">
             <summary>
             Method to convert a Column object to the values used in a table create statement.
             </summary>
@@ -431,14 +588,14 @@
             <param name="filter">Expression filter.</param>
             <returns>String.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.DbTimestamp(System.DateTime)">
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.GenerateTimestamp(System.DateTime)">
             <summary>
             Retrieve a timestamp in the database format.
             </summary>
             <param name="ts">DateTime.</param>
             <returns>String.</returns>
         </member>
-        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.DbTimestampOffset(System.DateTimeOffset)">
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.GenerateTimestampOffset(System.DateTimeOffset)">
             <summary>
             Retrieve a timestamp offset in the database format.
             </summary>

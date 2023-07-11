@@ -207,8 +207,8 @@ namespace Test.Sqlite
             for (int i = 0; i < 10; i++)
             {
                 Dictionary<string, object> d = new Dictionary<string, object>();
-                d.Add("firstname", "firsté" + i);
-                d.Add("lastname", "lasté" + i);
+                d.Add("firstname", "firsté" + i); 
+                d.Add("lastname", "lastШЋЖŠĆŽ" + i);
                 d.Add("age", i);
                 d.Add("value", i * 1000);
                 d.Add("birthday", DateTime.Now);

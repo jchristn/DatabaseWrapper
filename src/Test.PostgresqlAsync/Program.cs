@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DatabaseWrapper.SqlServer;
+using DatabaseWrapper.Postgresql;
 using DatabaseWrapper.Core;
 using ExpressionTree;
 
@@ -20,14 +20,13 @@ namespace Test
         static byte[] _FileBytes = File.ReadAllBytes("./headshot.png");
 
         static string _Host = "localhost";
-        static int _Port = 1433;
-        static string _Instance = null; // set to SQLEXPRESS for typical SQL Server Express installations
+        static int _Port = 5432;
 
         // To use dbo.person, change _Table to either 'dbo.person' or just 'person'
         // To use with a specific schema, use 'schema.table', i.e. 'foo.person'
-        static string _Table = "dbo.person";
+        static string _Table = "person";
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -40,19 +39,19 @@ namespace Test
                  * 
                  * 
                  */
-                  
+
                 Console.Write("User: ");
                 string user = Console.ReadLine();
 
                 Console.Write("Password: ");
                 string pass = Console.ReadLine();
-                 
-                _Settings = new DatabaseSettings(_Host, _Port, user, pass, _Instance, "test");
+
+                _Settings = new DatabaseSettings(DbTypeEnum.Postgresql, _Host, _Port, user, pass, "test");
                 _Settings.Debug.Logger = Logger;
                 _Settings.Debug.EnableForQueries = true;
                 _Settings.Debug.EnableForResults = true;
 
-                _Database = new DatabaseClient(_Settings); 
+                _Database = new DatabaseClient(_Settings);
 
                 #endregion
 
@@ -60,7 +59,7 @@ namespace Test
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Dropping table '" + _Table + "'...");
-                _Database.DropTable(_Table);
+                await _Database.DropTableAsync(_Table);
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -82,7 +81,7 @@ namespace Test
                 columns.Add(new Column("picture", false, DataTypeEnum.Blob, true));
                 columns.Add(new Column("guid", false, DataTypeEnum.Guid, true));
 
-                _Database.CreateTable(_Table, columns);
+                await _Database.CreateTableAsync(_Table, columns);
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
@@ -91,9 +90,9 @@ namespace Test
                 #region Check-Existence-and-Describe
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
-                Console.WriteLine("Table '" + _Table + "' exists: " + _Database.TableExists(_Table));
+                Console.WriteLine("Table '" + _Table + "' exists: " + await _Database.TableExistsAsync(_Table));
                 Console.WriteLine("Table '" + _Table + "' configuration:");
-                columns = _Database.DescribeTable(_Table);
+                columns = await _Database.DescribeTableAsync(_Table);
                 foreach (Column col in columns) Console.WriteLine(col.ToString());
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
@@ -104,70 +103,70 @@ namespace Test
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Loading rows...");
-                LoadRows();
+                await LoadRows();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Loading multiple rows...");
-                LoadMultipleRows();
+                await LoadMultipleRows();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 Console.WriteLine("Checking existence...");
-                ExistsRows();
+                await ExistsRows();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 Console.WriteLine("Counting age...");
-                CountAge();
+                await CountAge();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 Console.WriteLine("Summing age...");
-                SumAge();
+                await SumAge();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Updating rows...");
-                UpdateRows();
+                await UpdateRows();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Retrieving rows...");
-                RetrieveRows();
+                await RetrieveRows();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Retrieving rows with special character...");
-                RetrieveRowsWithSpecialCharacter();
+                await RetrieveRowsWithSpecialCharacter();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Retrieving rows by index...");
-                RetrieveRowsByIndex();
+                await RetrieveRowsByIndex();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Retrieving rows by between...");
-                RetrieveRowsByBetween();
+                await RetrieveRowsByBetween();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Retrieving sorted rows...");
-                RetrieveRowsSorted();
+                await RetrieveRowsSorted();
                 Console.WriteLine("Press ENTER to continue...");
                 Console.ReadLine();
 
                 for (int i = 0; i < 24; i++) Console.WriteLine("");
                 Console.WriteLine("Deleting rows...");
-                DeleteRows();
+                await DeleteRows();
                 Console.WriteLine("Press ENTER to continue");
                 Console.ReadLine();
 
@@ -205,7 +204,7 @@ namespace Test
             }
         }
 
-        static void LoadRows()
+        static async Task LoadRows()
         {
             for (int i = 0; i < 50; i++)
             {
@@ -220,7 +219,7 @@ namespace Test
                 d.Add("picture", _FileBytes);
                 d.Add("guid", Guid.NewGuid());
 
-                _Database.Insert(_Table, d);
+                await _Database.InsertAsync(_Table, d);
             }
 
             for (int i = 0; i < 10; i++)
@@ -235,11 +234,11 @@ namespace Test
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 d.Add("guid", Guid.NewGuid());
 
-                _Database.Insert(_Table, d);
+                await _Database.InsertAsync(_Table, d);
             }
         }
 
-        static void LoadMultipleRows()
+        static async Task LoadMultipleRows()
         {
             List<Dictionary<string, object>> dicts = new List<Dictionary<string, object>>();
 
@@ -275,28 +274,28 @@ namespace Test
              *
              */
 
-            _Database.InsertMultiple(_Table, dicts);
+            await _Database.InsertMultipleAsync(_Table, dicts);
         }
 
-        static void ExistsRows()
+        static async Task ExistsRows()
         {
             Expr e = new Expr("firstname", OperatorEnum.IsNotNull, null);
-            Console.WriteLine("Exists: " + _Database.Exists(_Table, e));
+            Console.WriteLine("Exists: " + await _Database.ExistsAsync(_Table, e));
         }
 
-        static void CountAge()
+        static async Task CountAge()
         {
             Expr e = new Expr("age", OperatorEnum.GreaterThan, 25);
-            Console.WriteLine("Age count: " + _Database.Count(_Table, e));
+            Console.WriteLine("Age count: " + await _Database.CountAsync(_Table, e));
         }
 
-        static void SumAge()
+        static async Task SumAge()
         {
             Expr e = new Expr("age", OperatorEnum.GreaterThan, 0);
-            Console.WriteLine("Age sum: " + _Database.Sum(_Table, "age", e));
+            Console.WriteLine("Age sum: " + await _Database.SumAsync(_Table, "age", e));
         }
 
-        static void UpdateRows()
+        static async Task UpdateRows()
         {
             for (int i = 10; i < 20; i++)
             {
@@ -307,11 +306,11 @@ namespace Test
                 d.Add("birthday", null);
 
                 Expr e = new Expr("id", OperatorEnum.Equals, i);
-                _Database.Update(_Table, d, e);
+                await _Database.UpdateAsync(_Table, d, e);
             }
         }
 
-        static void RetrieveRows()
+        static async Task RetrieveRows()
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age", "picture" };
 
@@ -332,7 +331,7 @@ namespace Test
                 ResultOrder[] resultOrder = new ResultOrder[1];
                 resultOrder[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);
 
-                DataTable result = _Database.Select(_Table, 0, 3, returnFields, e, resultOrder);
+                DataTable result = await _Database.SelectAsync(_Table, 0, 3, returnFields, e, resultOrder);
                 if (result != null && result.Rows != null && result.Rows.Count > 0)
                 {
                     foreach (DataRow row in result.Rows)
@@ -344,7 +343,7 @@ namespace Test
             }
         }
 
-        static void RetrieveRowsWithSpecialCharacter()
+        static async Task RetrieveRowsWithSpecialCharacter()
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
 
@@ -353,7 +352,7 @@ namespace Test
             ResultOrder[] resultOrder = new ResultOrder[1];
             resultOrder[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);
 
-            DataTable result = _Database.Select(_Table, 0, 5, returnFields, e, resultOrder);
+            DataTable result = await _Database.SelectAsync(_Table, 0, 5, returnFields, e, resultOrder);
             if (result != null && result.Rows != null && result.Rows.Count > 0)
             {
                 foreach (DataRow row in result.Rows)
@@ -363,7 +362,7 @@ namespace Test
             }
         }
 
-        static void RetrieveRowsByIndex()
+        static async Task RetrieveRowsByIndex()
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
 
@@ -384,34 +383,34 @@ namespace Test
                 ResultOrder[] resultOrder = new ResultOrder[1];
                 resultOrder[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);
 
-                _Database.Select(_Table, (i - 10), 5, returnFields, e, resultOrder);
+                await _Database.SelectAsync(_Table, (i - 10), 5, returnFields, e, resultOrder);
             }
         }
 
-        static void RetrieveRowsByBetween()
+        static async Task RetrieveRowsByBetween()
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
             Expr e = Expr.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
-            _Database.Select(_Table, null, null, returnFields, e);
+            await _Database.SelectAsync(_Table, null, null, returnFields, e);
         }
 
-        static void RetrieveRowsSorted()
+        static async Task RetrieveRowsSorted()
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
             Expr e = Expr.Between("id", new List<object> { 10, 20 });
             Console.WriteLine("Expression: " + e.ToString());
             ResultOrder[] resultOrder = new ResultOrder[1];
             resultOrder[0] = new ResultOrder("firstname", OrderDirectionEnum.Ascending);
-            _Database.Select(_Table, null, null, returnFields, e, resultOrder);
+            await _Database.SelectAsync(_Table, null, null, returnFields, e, resultOrder);
         }
 
-        private static void DeleteRows()
+        private static async Task DeleteRows()
         {
             for (int i = 20; i < 30; i++)
             {
                 Expr e = new Expr("id", OperatorEnum.Equals, i);
-                _Database.Delete(_Table, e);
+                await _Database.DeleteAsync(_Table, e);
             }
         }
 

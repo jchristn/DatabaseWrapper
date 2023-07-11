@@ -43,7 +43,7 @@ namespace DatabaseWrapper.Postgresql
         /// </summary>
         /// <param name="settings">Settings.</param>
         /// <returns>String.</returns>
-        public override string ConnectionString(DatabaseSettings settings)
+        public override string GenerateConnectionString(DatabaseSettings settings)
         {
             string ret = "";
 
@@ -65,7 +65,7 @@ namespace DatabaseWrapper.Postgresql
         /// </summary>
         /// <param name="database">Database name.</param>
         /// <returns>String.</returns>
-        public override string LoadTableNamesQuery(string database)
+        public override string RetrieveTableNamesQuery(string database)
         {
             return "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'";
         }
@@ -76,7 +76,7 @@ namespace DatabaseWrapper.Postgresql
         /// <param name="database">Database name.</param>
         /// <param name="table">Table name.</param>
         /// <returns></returns>
-        public override string LoadTableColumnsQuery(string database, string table)
+        public override string RetrieveTableColumnsQuery(string database, string table)
         {
             return
                 "SELECT " +
@@ -108,7 +108,7 @@ namespace DatabaseWrapper.Postgresql
         /// </summary>
         /// <param name="col">Column.</param>
         /// <returns>String.</returns>
-        public override string ColumnToCreateString(Column col)
+        public override string ColumnToCreateQuery(Column col)
         {
             string ret =
                 "\"" + SanitizeFieldname(col.Name) + "\" ";
@@ -187,7 +187,7 @@ namespace DatabaseWrapper.Postgresql
             foreach (Column curr in columns)
             {
                 if (added > 0) query += ", ";
-                query += ColumnToCreateString(curr);
+                query += ColumnToCreateQuery(curr);
                 added++;
             }
              
@@ -469,7 +469,7 @@ namespace DatabaseWrapper.Postgresql
         /// </summary>
         /// <param name="ts">DateTime.</param>
         /// <returns>String.</returns>
-        public override string DbTimestamp(DateTime ts)
+        public override string GenerateTimestamp(DateTime ts)
         {
             return ts.ToString(TimestampFormat);
         }
@@ -479,7 +479,7 @@ namespace DatabaseWrapper.Postgresql
         /// </summary>
         /// <param name="ts">DateTimeOffset.</param>
         /// <returns>String.</returns>
-        public override string DbTimestampOffset(DateTimeOffset ts)
+        public override string GenerateTimestampOffset(DateTimeOffset ts)
         {
             return ts.ToString(TimestampOffsetFormat);
         }
@@ -522,7 +522,8 @@ namespace DatabaseWrapper.Postgresql
 
         private string PreparedUnicodeValue(string s)
         {
-            return "U&" + PreparedStringValue(s);
+            // return "U&" + PreparedStringValue(s);
+            return PreparedStringValue(s);
         }
 
         private string ExpressionToWhereClause(Expr expr)
@@ -578,7 +579,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
                         else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
@@ -606,7 +607,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
                         else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
@@ -634,7 +635,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
                         else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
@@ -662,7 +663,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
                         else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
@@ -691,7 +692,7 @@ namespace DatabaseWrapper.Postgresql
                         if (inAdded > 0) clause += ",";
                         if (currObj is DateTime || currObj is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(currObj)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(currObj)) + "'";
                         }
                         else if (currObj is int || currObj is long || currObj is decimal)
                         {
@@ -722,7 +723,7 @@ namespace DatabaseWrapper.Postgresql
                         if (notInAdded > 0) clause += ",";
                         if (currObj is DateTime || currObj is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(currObj)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(currObj)) + "'";
                         }
                         else if (currObj is int || currObj is long || currObj is decimal)
                         {
@@ -870,7 +871,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
                         else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
@@ -898,7 +899,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
                         else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
@@ -926,7 +927,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
                         else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
@@ -954,7 +955,7 @@ namespace DatabaseWrapper.Postgresql
                     {
                         if (expr.Right is DateTime || expr.Right is DateTime?)
                         {
-                            clause += "'" + DbTimestamp(Convert.ToDateTime(expr.Right)) + "'";
+                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
                         }
                         else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
                         {
