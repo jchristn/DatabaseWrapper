@@ -408,12 +408,12 @@
             PostgreSQL implementation of helper properties and methods.
             </summary>
         </member>
-        <member name="F:DatabaseWrapper.Postgresql.PostgresqlHelper.TimestampFormat">
+        <member name="P:DatabaseWrapper.Postgresql.PostgresqlHelper.TimestampFormat">
             <summary>
             Timestamp format for use in DateTime.ToString([format]).
             </summary>
         </member>
-        <member name="F:DatabaseWrapper.Postgresql.PostgresqlHelper.TimestampOffsetFormat">
+        <member name="P:DatabaseWrapper.Postgresql.PostgresqlHelper.TimestampOffsetFormat">
             <summary>
             Timestamp offset format for use in DateTimeOffset.ToString([format]).
             </summary>

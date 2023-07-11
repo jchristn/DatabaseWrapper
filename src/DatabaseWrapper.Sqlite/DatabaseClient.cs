@@ -22,7 +22,7 @@ namespace DatabaseWrapper.Sqlite
         /// <summary>
         /// The connection string used to connect to the database.
         /// </summary>
-        public new string ConnectionString 
+        public new string ConnectionString
         { 
             get
             {

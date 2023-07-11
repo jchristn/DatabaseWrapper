@@ -409,12 +409,12 @@
             SQL Server implementation of helper properties and methods.
             </summary>
         </member>
-        <member name="F:DatabaseWrapper.SqlServer.SqlServerHelper.TimestampFormat">
+        <member name="P:DatabaseWrapper.SqlServer.SqlServerHelper.TimestampFormat">
             <summary>
             Timestamp format for use in DateTime.ToString([format]).
             </summary>
         </member>
-        <member name="F:DatabaseWrapper.SqlServer.SqlServerHelper.TimestampOffsetFormat">
+        <member name="P:DatabaseWrapper.SqlServer.SqlServerHelper.TimestampOffsetFormat">
             <summary>
             Timestamp offset format for use in DateTimeOffset.ToString([format]).
             </summary>

@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;net461;net48;net6.0;net7.0</TargetFrameworks>
-		<Version>6.0.2</Version>
+		<Version>6.0.4</Version>
 		<PackageReleaseNotes>Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0.</PackageReleaseNotes>
 		<Authors>Joel Christner</Authors>
 		<Description>Do not install this package directly.  Core classes for DatabaseWrapper packages.</Description>
@@ -18,7 +18,7 @@
 		<PackageIcon>icon.png</PackageIcon>
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>C:\Code\Misc\DatabaseWrapper-5.0\DatabaseWrapper.snk</AssemblyOriginatorKeyFile>
+		<AssemblyOriginatorKeyFile>../../DatabaseWrapper.snk</AssemblyOriginatorKeyFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 

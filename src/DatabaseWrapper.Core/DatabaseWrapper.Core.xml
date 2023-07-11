@@ -775,6 +775,11 @@
             Variable-length unicode character.
             </summary>
         </member>
+        <member name="F:DatabaseWrapper.Core.DataTypeEnum.TinyInt">
+            <summary>
+            Tiny integer.
+            </summary>
+        </member>
         <member name="F:DatabaseWrapper.Core.DataTypeEnum.Int">
             <summary>
             Integer.
@@ -813,6 +818,11 @@
         <member name="F:DatabaseWrapper.Core.DataTypeEnum.Guid">
             <summary>
             GUID.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DataTypeEnum.Boolean">
+            <summary>
+            Boolean.
             </summary>
         </member>
         <member name="F:DatabaseWrapper.Core.DataTypeEnum.Unknown">

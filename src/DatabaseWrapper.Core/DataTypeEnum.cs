@@ -23,6 +23,11 @@ namespace DatabaseWrapper.Core
         [EnumMember(Value = "Nvarchar")]
         Nvarchar,
         /// <summary>
+        /// Tiny integer.
+        /// </summary>
+        [EnumMember(Value = "TinyInt")]
+        TinyInt,
+        /// <summary>
         /// Integer.
         /// </summary>
         [EnumMember(Value = "Int")]
@@ -62,6 +67,11 @@ namespace DatabaseWrapper.Core
         /// </summary>
         [EnumMember(Value = "Guid")]
         Guid,
+        /// <summary>
+        /// Boolean.
+        /// </summary>
+        [EnumMember(Value = "Boolean")]
+        Boolean,
         /// <summary>
         /// Unknown
         /// </summary>

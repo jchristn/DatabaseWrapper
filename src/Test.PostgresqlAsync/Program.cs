@@ -80,6 +80,7 @@ namespace Test
                 columns.Add(new Column("localtime", false, DataTypeEnum.DateTimeOffset, null, null, true));
                 columns.Add(new Column("picture", false, DataTypeEnum.Blob, true));
                 columns.Add(new Column("guid", false, DataTypeEnum.Guid, true));
+                columns.Add(new Column("active", false, DataTypeEnum.Boolean, true));
 
                 await _Database.CreateTableAsync(_Table, columns);
                 Console.WriteLine("Press ENTER to continue...");
@@ -218,6 +219,7 @@ namespace Test
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 d.Add("picture", _FileBytes);
                 d.Add("guid", Guid.NewGuid());
+                d.Add("active", (i % 2 > 0));
 
                 await _Database.InsertAsync(_Table, d);
             }
@@ -233,6 +235,7 @@ namespace Test
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 d.Add("guid", Guid.NewGuid());
+                d.Add("active", (i % 2 > 0));
 
                 await _Database.InsertAsync(_Table, d);
             }
@@ -254,6 +257,7 @@ namespace Test
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
                 d.Add("picture", _FileBytes);
                 d.Add("guid", Guid.NewGuid());
+                d.Add("active", (i % 2 > 0));
 
                 dicts.Add(d);
             }

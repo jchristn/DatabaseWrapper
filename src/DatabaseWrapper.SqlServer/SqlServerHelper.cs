@@ -18,12 +18,12 @@ namespace DatabaseWrapper.SqlServer
         /// <summary>
         /// Timestamp format for use in DateTime.ToString([format]).
         /// </summary>
-        public new string TimestampFormat = "MM/dd/yyyy hh:mm:ss.fffffff tt";
+        public new string TimestampFormat { get; set; } = "MM/dd/yyyy hh:mm:ss.fffffff tt";
 
         /// <summary>
         /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
         /// </summary>
-        public new string TimestampOffsetFormat = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
+        public new string TimestampOffsetFormat { get; set; } = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
 
         #endregion
 
@@ -224,6 +224,10 @@ namespace DatabaseWrapper.SqlServer
                     break;
                 case DataTypeEnum.Blob:
                     ret += "[varbinary](max) ";
+                    break;
+                case DataTypeEnum.Boolean:
+                case DataTypeEnum.TinyInt:
+                    ret += "[tinyint] ";
                     break;
                 default:
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
@@ -1223,6 +1227,10 @@ namespace DatabaseWrapper.SqlServer
                     {
                         vals += currKvp.Value.ToString();
                     }
+                    else if (currKvp.Value is bool)
+                    {
+                        vals += ((bool)currKvp.Value ? "1" : "0");
+                    }
                     else if (currKvp.Value is byte[])
                     {
                         vals += "0x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "");
@@ -1309,6 +1317,10 @@ namespace DatabaseWrapper.SqlServer
                         {
                             vals += currKvp.Value.ToString();
                         }
+                        else if (currKvp.Value is bool)
+                        {
+                            vals += ((bool)currKvp.Value ? "1" : "0");
+                        }
                         else if (currKvp.Value is byte[])
                         {
                             vals += "0x" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "");
@@ -1367,6 +1379,10 @@ namespace DatabaseWrapper.SqlServer
                         || currKvp.Value is decimal)
                     {
                         keyValueClause += PreparedFieldName(currKvp.Key) + "=" + currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is bool)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + ((bool)currKvp.Value ? "1" : "0");
                     }
                     else if (currKvp.Value is byte[])
                     {

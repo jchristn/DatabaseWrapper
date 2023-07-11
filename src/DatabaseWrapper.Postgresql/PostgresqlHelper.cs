@@ -19,12 +19,12 @@ namespace DatabaseWrapper.Postgresql
         /// <summary>
         /// Timestamp format for use in DateTime.ToString([format]).
         /// </summary>
-        public new string TimestampFormat = "MM/dd/yyyy hh:mm:ss.fffffff tt";
+        public new string TimestampFormat { get; set; } = "MM/dd/yyyy hh:mm:ss.fffffff tt";
 
         /// <summary>
         /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
         /// </summary>
-        public new string TimestampOffsetFormat = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
+        public new string TimestampOffsetFormat { get; set; } = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
 
         #endregion
 
@@ -148,6 +148,10 @@ namespace DatabaseWrapper.Postgresql
                     break;
                 case DataTypeEnum.Blob:
                     ret += "bytea ";
+                    break;
+                case DataTypeEnum.Boolean:
+                case DataTypeEnum.TinyInt:
+                    ret += "smallint ";
                     break;
                 default:
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
@@ -1256,6 +1260,10 @@ namespace DatabaseWrapper.Postgresql
                     {
                         vals += currKvp.Value.ToString();
                     }
+                    else if (currKvp.Value is bool)
+                    {
+                        vals += ((bool)currKvp.Value ? "1" : "0");
+                    }
                     else if (currKvp.Value is byte[])
                     {
                         vals += "decode('" + Helper.ByteArrayToHexString((byte[])currKvp.Value) + "', 'hex')";
@@ -1342,6 +1350,10 @@ namespace DatabaseWrapper.Postgresql
                         {
                             vals += currKvp.Value.ToString();
                         }
+                        else if (currKvp.Value is bool)
+                        {
+                            vals += ((bool)currKvp.Value ? "1" : "0");
+                        }
                         else if (currKvp.Value is byte[])
                         {
                             vals += "decode('" + Helper.ByteArrayToHexString((byte[])currKvp.Value) + "', 'hex')";
@@ -1401,6 +1413,10 @@ namespace DatabaseWrapper.Postgresql
                         || currKvp.Value is decimal)
                     {
                         keyValueClause += PreparedFieldName(currKvp.Key) + "=" + currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is bool)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + ((bool)currKvp.Value ? "1" : "0");
                     }
                     else if (currKvp.Value is byte[])
                     {

@@ -18,12 +18,12 @@ namespace DatabaseWrapper.Sqlite
         /// <summary>
         /// Timestamp format for use in DateTime.ToString([format]).
         /// </summary>
-        public new string TimestampFormat = "yyyy-MM-dd HH:mm:ss.ffffff";
+        public new string TimestampFormat { get; set; } = "yyyy-MM-dd HH:mm:ss.ffffff";
 
         /// <summary>
         /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
         /// </summary>
-        public new string TimestampOffsetFormat = "yyyy-MM-dd HH:mm:ss.fffffff zzz";
+        public new string TimestampOffsetFormat { get; set; } = "yyyy-MM-dd HH:mm:ss.fffffff zzz";
 
         #endregion
 
@@ -213,6 +213,10 @@ namespace DatabaseWrapper.Sqlite
                     break;
                 case DataTypeEnum.Blob:
                     ret += "BLOB ";
+                    break;
+                case DataTypeEnum.Boolean:
+                case DataTypeEnum.TinyInt:
+                    ret += "TINYINT ";
                     break;
                 default:
                     throw new ArgumentException("Unknown DataType: " + col.Type.ToString());
@@ -1122,6 +1126,10 @@ namespace DatabaseWrapper.Sqlite
                     {
                         vals += currKvp.Value.ToString();
                     }
+                    else if (currKvp.Value is bool)
+                    {
+                        vals += ((bool)currKvp.Value ? "1" : "0");
+                    }
                     else if (currKvp.Value is byte[])
                     {
                         vals += "X'" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
@@ -1201,6 +1209,10 @@ namespace DatabaseWrapper.Sqlite
                         {
                             vals += currKvp.Value.ToString();
                         }
+                        else if (currKvp.Value is bool)
+                        {
+                            vals += ((bool)currKvp.Value ? "1" : "0");
+                        }
                         else if (currKvp.Value is byte[])
                         {
                             vals += "X'" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
@@ -1253,6 +1265,10 @@ namespace DatabaseWrapper.Sqlite
                         || currKvp.Value is decimal)
                     {
                         keyValueClause += PreparedFieldName(currKvp.Key) + "=" + currKvp.Value.ToString();
+                    }
+                    else if (currKvp.Value is bool)
+                    {
+                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + ((bool)currKvp.Value ? "1" : "0");
                     }
                     else if (currKvp.Value is byte[])
                     {

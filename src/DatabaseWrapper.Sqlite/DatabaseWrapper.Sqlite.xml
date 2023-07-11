@@ -400,12 +400,12 @@
             Sqlite implementation of helper properties and methods.
             </summary>
         </member>
-        <member name="F:DatabaseWrapper.Sqlite.SqliteHelper.TimestampFormat">
+        <member name="P:DatabaseWrapper.Sqlite.SqliteHelper.TimestampFormat">
             <summary>
             Timestamp format for use in DateTime.ToString([format]).
             </summary>
         </member>
-        <member name="F:DatabaseWrapper.Sqlite.SqliteHelper.TimestampOffsetFormat">
+        <member name="P:DatabaseWrapper.Sqlite.SqliteHelper.TimestampOffsetFormat">
             <summary>
             Timestamp offset format for use in DateTimeOffset.ToString([format]).
             </summary>
