@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>6.0.3</Version>
-		<PackageReleaseNotes>Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0.</PackageReleaseNotes>
 		<TargetFrameworks>netstandard2.1;net461;net48;net6.0;net7.0</TargetFrameworks>
+		<Version>6.0.5</Version>
+		<PackageReleaseNotes>Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0.</PackageReleaseNotes>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
 		<Description>Simple database wrapper for MySQL written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, Sqlite, and PostgreSQL.</Description>
@@ -76,8 +76,8 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="DatabaseWrapper.Core" Version="6.0.4" />
-		<PackageReference Include="MySql.Data" Version="8.0.33" />
+		<PackageReference Include="DatabaseWrapper.Core" Version="6.0.5" />
+		<PackageReference Include="MySql.Data" Version="8.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>

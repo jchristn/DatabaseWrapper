@@ -2,8 +2,8 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;net461;net48;net6.0;net7.0</TargetFrameworks>
-		<Version>6.0.3</Version>
-		<PackageReleaseNotes>Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0.</PackageReleaseNotes>
+		<Version>6.0.5</Version>
+		<PackageReleaseNotes>Dependency update</PackageReleaseNotes>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Joel Christner</Authors>
@@ -90,10 +90,10 @@
 	</Target>
 
 	<ItemGroup>
-		<PackageReference Include="DatabaseWrapper.Mysql" Version="6.0.3" />
-		<PackageReference Include="DatabaseWrapper.Postgresql" Version="6.0.3" />
-		<PackageReference Include="DatabaseWrapper.Sqlite" Version="6.0.3" />
-		<PackageReference Include="DatabaseWrapper.SqlServer" Version="6.0.3" />
+		<PackageReference Include="DatabaseWrapper.Mysql" Version="6.0.5" />
+		<PackageReference Include="DatabaseWrapper.Postgresql" Version="6.0.5" />
+		<PackageReference Include="DatabaseWrapper.Sqlite" Version="6.0.5" />
+		<PackageReference Include="DatabaseWrapper.SqlServer" Version="6.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>
