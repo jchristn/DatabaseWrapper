@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net461;net48;net6.0;net7.0</TargetFrameworks>
-		<Version>6.0.5</Version>
+		<TargetFrameworks>netstandard2.1;net462;net48;net6.0;net7.0</TargetFrameworks>
+		<Version>6.0.6</Version>
 		<PackageReleaseNotes>Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0.</PackageReleaseNotes>
 		<Authors>Joel Christner</Authors>
 		<Description>Simple database wrapper for Sqlite written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for SQL Server, MySQL, and PostgreSQL.</Description>
@@ -20,6 +20,8 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>../../DatabaseWrapper.snk</AssemblyOriginatorKeyFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
@@ -75,8 +77,8 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="DatabaseWrapper.Core" Version="6.0.5" />
-		<PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.10" />
+		<PackageReference Include="DatabaseWrapper.Core" Version="6.0.6" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.11" />
 	</ItemGroup>
 
 	<ItemGroup>

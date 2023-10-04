@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net461;net48;net6.0;net7.0</TargetFrameworks>
-		<Version>6.0.5</Version>
+		<TargetFrameworks>netstandard2.1;net462;net48;net6.0;net7.0</TargetFrameworks>
+		<Version>6.0.6</Version>
 		<PackageReleaseNotes>Dependency update</PackageReleaseNotes>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -23,6 +23,8 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>../../DatabaseWrapper.snk</AssemblyOriginatorKeyFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
 	</PropertyGroup>
 
@@ -90,10 +92,10 @@
 	</Target>
 
 	<ItemGroup>
-		<PackageReference Include="DatabaseWrapper.Mysql" Version="6.0.5" />
-		<PackageReference Include="DatabaseWrapper.Postgresql" Version="6.0.5" />
-		<PackageReference Include="DatabaseWrapper.Sqlite" Version="6.0.5" />
-		<PackageReference Include="DatabaseWrapper.SqlServer" Version="6.0.5" />
+		<PackageReference Include="DatabaseWrapper.Mysql" Version="6.0.6" />
+		<PackageReference Include="DatabaseWrapper.Postgresql" Version="6.0.6" />
+		<PackageReference Include="DatabaseWrapper.Sqlite" Version="6.0.6" />
+		<PackageReference Include="DatabaseWrapper.SqlServer" Version="6.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>

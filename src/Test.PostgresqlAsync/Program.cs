@@ -351,7 +351,7 @@ namespace Test
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
 
-            Expr e = new Expr("lastname", OperatorEnum.StartsWith, "lasté");
+            Expr e = new Expr("firstname", OperatorEnum.StartsWith, "firsté");
 
             ResultOrder[] resultOrder = new ResultOrder[1];
             resultOrder[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);

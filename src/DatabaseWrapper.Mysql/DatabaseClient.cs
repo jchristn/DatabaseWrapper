@@ -813,21 +813,28 @@ namespace DatabaseWrapper.Mysql
                 using (MySqlConnection conn = new MySqlConnection(_ConnectionString))
                 {
                     conn.Open();
-                    MySqlCommand cmd = new MySqlCommand();
-                    cmd.Connection = conn;
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    cmd.CommandText = query;
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                    MySqlDataAdapter sda = new MySqlDataAdapter(cmd);
-                    DataSet ds = new DataSet();
-                    sda.Fill(ds);
-                    if (ds != null)
+
+                    using (MySqlCommand cmd = new MySqlCommand())
                     {
-                        if (ds.Tables != null)
+                        cmd.Connection = conn;
+
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+                        cmd.CommandText = query;
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+
+                        using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                         {
-                            if (ds.Tables.Count > 0)
+                            DataSet ds = new DataSet();
+                            sda.Fill(ds);
+                            if (ds != null)
                             {
-                                result = ds.Tables[0];
+                                if (ds.Tables != null)
+                                {
+                                    if (ds.Tables.Count > 0)
+                                    {
+                                        result = ds.Tables[0];
+                                    }
+                                }
                             }
                         }
                     }
@@ -886,24 +893,28 @@ namespace DatabaseWrapper.Mysql
                 {
                     await conn.OpenAsync(token).ConfigureAwait(false);
 
-                    MySqlCommand cmd = new MySqlCommand();
-                    cmd.Connection = conn;
+                    using (MySqlCommand cmd = new MySqlCommand())
+                    {
+                        cmd.Connection = conn;
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    cmd.CommandText = query;
+                        cmd.CommandText = query;
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
-                    MySqlDataAdapter sda = new MySqlDataAdapter(cmd);
-                    DataSet ds = new DataSet();
-
-                    await sda.FillAsync(ds, token).ConfigureAwait(false);
-                    if (ds != null)
-                    {
-                        if (ds.Tables != null)
+                        using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                         {
-                            if (ds.Tables.Count > 0)
+                            DataSet ds = new DataSet();
+
+                            await sda.FillAsync(ds, token).ConfigureAwait(false);
+                            if (ds != null)
                             {
-                                result = ds.Tables[0];
+                                if (ds.Tables != null)
+                                {
+                                    if (ds.Tables.Count > 0)
+                                    {
+                                        result = ds.Tables[0];
+                                    }
+                                }
                             }
                         }
                     }

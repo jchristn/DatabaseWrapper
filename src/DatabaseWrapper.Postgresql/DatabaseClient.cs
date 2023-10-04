@@ -752,15 +752,19 @@ namespace DatabaseWrapper.Postgresql
                 using (NpgsqlConnection conn = new NpgsqlConnection(_ConnectionString))
                 {
                     conn.Open();
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn);
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                    DataSet ds = new DataSet();
-                    da.Fill(ds);
 
-                    if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+                    using (NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn))
                     {
-                        result = ds.Tables[0];
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+
+                        DataSet ds = new DataSet();
+                        da.Fill(ds);
+
+                        if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
+                        {
+                            result = ds.Tables[0];
+                        }
                     }
 
                     conn.Close();
@@ -818,15 +822,17 @@ namespace DatabaseWrapper.Postgresql
                     await conn.OpenAsync(token).ConfigureAwait(false);
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn);
+                    using (NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn))
+                    {
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
-                    DataSet ds = new DataSet();
-                    da.Fill(ds);
+                        DataSet ds = new DataSet();
+                        da.Fill(ds);
 
-                    if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
-                    {
-                        result = ds.Tables[0];
+                        if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
+                        {
+                            result = ds.Tables[0];
+                        }
                     }
 
                     conn.Close();

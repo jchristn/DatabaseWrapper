@@ -766,10 +766,15 @@ namespace DatabaseWrapper.SqlServer
                 using (SqlConnection conn = new SqlConnection(_ConnectionString))
                 {
                     conn.Open();
+
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    SqlDataAdapter sda = new SqlDataAdapter(query, conn);
+                    using (SqlDataAdapter sda = new SqlDataAdapter(query, conn))
+                    {
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                    sda.Fill(result);
+
+                        sda.Fill(result);
+                    }
+
                     conn.Dispose();
                     conn.Close();
                 }
@@ -823,13 +828,15 @@ namespace DatabaseWrapper.SqlServer
             {
                 using (SqlConnection conn = new SqlConnection(_ConnectionString))
                 {
-                    await conn.OpenAsync(token).ConfigureAwait(false); 
+                    await conn.OpenAsync(token).ConfigureAwait(false);
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    SqlDataAdapter sda = new SqlDataAdapter(query, conn);
+                    using (SqlDataAdapter sda = new SqlDataAdapter(query, conn))
+                    {
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities4
 
-                    sda.Fill(result);
+                        sda.Fill(result);
+                    }
 
 #if NET6_0_OR_GREATER
                     

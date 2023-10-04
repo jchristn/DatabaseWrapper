@@ -330,7 +330,7 @@ namespace Test.Sqlite
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
 
-            Expr e = new Expr("lastname", OperatorEnum.StartsWith, "lasté");
+            Expr e = new Expr("firstname", OperatorEnum.StartsWith, "firsté");
 
             DataTable result = _Database.Select(_Table, 0, 5, returnFields, e);
             if (result != null && result.Rows != null && result.Rows.Count > 0)
