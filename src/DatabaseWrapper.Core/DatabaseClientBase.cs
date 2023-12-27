@@ -305,9 +305,25 @@ namespace DatabaseWrapper.Core
         /// <summary>
         /// Execute a query.
         /// </summary>
+        /// <param name="queryAndParameters">A tuple of the aatabase query defined outside of the database client and query parameters.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public abstract DataTable Query((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters);
+
+        /// <summary>
+        /// Execute a query.
+        /// </summary>
         /// <param name="query">Database query defined outside of the database client.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public abstract DataTable Query(string query);
+        public DataTable Query(string query)
+            => Query((query, null));
+
+        /// <summary>
+        /// Execute a query.
+        /// </summary>
+        /// <param name="queryAndParameters">A tuple of the aatabase query defined outside of the database client and query parameters.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public abstract Task<DataTable> QueryAsync((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Execute a query.
@@ -315,7 +331,8 @@ namespace DatabaseWrapper.Core
         /// <param name="query">Database query defined outside of the database client.</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public abstract Task<DataTable> QueryAsync(string query, CancellationToken token = default);
+        public Task<DataTable> QueryAsync(string query, CancellationToken token = default(CancellationToken))
+            => QueryAsync((query, null), token);
 
         /// <summary>
         /// Determine if records exist by filter.
@@ -369,20 +386,6 @@ namespace DatabaseWrapper.Core
         /// <param name="token">Cancellation token.</param>
         /// <returns>The sum of the specified column from the matching rows.</returns>
         public abstract Task<decimal> SumAsync(string tableName, string fieldName, Expr filter, CancellationToken token = default);
-
-        /// <summary>
-        /// Create a string timestamp from the given DateTime.
-        /// </summary>
-        /// <param name="ts">DateTime.</param>
-        /// <returns>A string with formatted timestamp.</returns>
-        public abstract string Timestamp(DateTime ts);
-
-        /// <summary>
-        /// Create a string timestamp with offset from the given DateTimeOffset.
-        /// </summary>
-        /// <param name="ts">DateTimeOffset.</param>
-        /// <returns>A string with formatted timestamp.</returns>
-        public abstract string TimestampOffset(DateTimeOffset ts);
 
         /// <summary>
         /// Sanitize an input string.

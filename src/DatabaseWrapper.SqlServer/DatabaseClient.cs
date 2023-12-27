@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Data.SqlClient;
+using static System.FormattableString;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks; 
@@ -747,10 +748,11 @@ namespace DatabaseWrapper.SqlServer
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Tuple of a database query defined outside of the database client and of query parameters</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override DataTable Query(string query)
+        public override DataTable Query((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -768,11 +770,15 @@ namespace DatabaseWrapper.SqlServer
                     conn.Open();
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    using (SqlDataAdapter sda = new SqlDataAdapter(query, conn))
+                    using (var cmd = new SqlCommand(query, conn))
                     {
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+                        AddParametersIfAny(cmd, parameters);
+                        using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                        {
 
-                        sda.Fill(result);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+                            sda.Fill(result);
+                        }
                     }
 
                     conn.Dispose();
@@ -809,11 +815,12 @@ namespace DatabaseWrapper.SqlServer
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Tuple of a database query defined outside of the database client and of query parameters</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override async Task<DataTable> QueryAsync(string query, CancellationToken token = default)
+        public override async Task<DataTable> QueryAsync((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters, CancellationToken token = default)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -831,11 +838,15 @@ namespace DatabaseWrapper.SqlServer
                     await conn.OpenAsync(token).ConfigureAwait(false);
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    using (SqlDataAdapter sda = new SqlDataAdapter(query, conn))
+                    using (var cmd = new SqlCommand(query, conn))
                     {
+                        AddParametersIfAny(cmd, parameters);
+                        using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                        {
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities4
 
-                        sda.Fill(result);
+                            sda.Fill(result);
+                        }
                     }
 
 #if NET6_0_OR_GREATER
@@ -998,26 +1009,6 @@ namespace DatabaseWrapper.SqlServer
         }
 
         /// <summary>
-        /// Create a string timestamp from the given DateTime.
-        /// </summary>
-        /// <param name="ts">DateTime.</param>
-        /// <returns>A string with formatted timestamp.</returns>
-        public override string Timestamp(DateTime ts)
-        {
-            return _Helper.GenerateTimestamp(ts);
-        }
-
-        /// <summary>
-        /// Create a string timestamp with offset from the given DateTimeOffset.
-        /// </summary>
-        /// <param name="ts">DateTimeOffset.</param>
-        /// <returns>A string with formatted timestamp.</returns>
-        public override string TimestampOffset(DateTimeOffset ts)
-        {
-            return _Helper.GenerateTimestampOffset(ts);
-        }
-
-        /// <summary>
         /// Sanitize an input string.
         /// </summary>
         /// <param name="s">The value to sanitize.</param>
@@ -1031,6 +1022,72 @@ namespace DatabaseWrapper.SqlServer
 #endregion
 
 #region Private-Methods
+
+        static readonly Dictionary<Type, SqlDbType> SqlTypeMap = new Dictionary<Type, SqlDbType>() {
+            { typeof(Int32), SqlDbType.Int },
+            { typeof(Int64), SqlDbType.BigInt },
+            { typeof(double), SqlDbType.Float },
+            { typeof(Guid), SqlDbType.UniqueIdentifier },
+            { typeof(byte[]), SqlDbType.Image },
+            { typeof(DateTimeOffset), SqlDbType.DateTimeOffset },
+        };
+
+        private static void AddParametersIfAny(SqlCommand cmd, IEnumerable<KeyValuePair<string,object>> parameters)
+        {
+            if (parameters==null)
+            {
+                return;
+            }
+            foreach (var kv in parameters)
+            {
+                int param_index = cmd.Parameters.Count;
+                var param_name = kv.Key;
+                var p = kv.Value;
+                if (p == null)
+                {
+                    cmd.Parameters.Add(new SqlParameter(param_name, SqlDbType.NVarChar));
+                    cmd.Parameters[param_index].Value = DBNull.Value;
+                    continue;
+                }
+                var t = p.GetType();
+                SqlDbType sql_type;
+                if (SqlTypeMap.TryGetValue(t, out sql_type))
+                {
+                    cmd.Parameters.Add(param_name, sql_type);
+                    cmd.Parameters[param_index].Value = p;
+                    continue;
+                }
+                if (t == typeof(string))
+                {
+                    var s_string = p as string;
+                    cmd.Parameters.Add(param_name, s_string.Length > 4000 ? System.Data.SqlDbType.NText : System.Data.SqlDbType.NVarChar);
+                    cmd.Parameters[param_index].Value = s_string;
+                    continue;
+                }
+                if (t == typeof(bool)) {
+                    cmd.Parameters.Add(param_name, System.Data.SqlDbType.Bit);
+                    cmd.Parameters[param_index].Value = (bool)p ? 1 : 0;
+                    continue;
+                }
+                if (t == typeof(DateTime))
+                {
+                    var dt_object = DBNull.Value as object;
+                    var dt_datetime = (DateTime)p;
+                    if (dt_datetime != DateTime.MinValue)
+                    {
+                        var dt = dt_datetime.ToLocalTime();
+                        if (dt != DateTime.MinValue)
+                        {
+                            dt_object = dt;
+                        }
+                    }
+                    cmd.Parameters.Add(param_name, System.Data.SqlDbType.DateTime);
+                    cmd.Parameters[param_index].Value = dt_object;
+                    continue;
+                }
+                throw new ApplicationException(Invariant($"DatabaseClient: Unknown type: {t.Name}"));
+            }
+        }
 
         /// <summary>
         /// Dispose of the object.

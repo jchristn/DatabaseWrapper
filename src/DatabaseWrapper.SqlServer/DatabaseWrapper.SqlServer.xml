@@ -309,18 +309,18 @@
             <param name="tableName">The table you wish to TRUNCATE.</param>
             <param name="token">Cancellation token.</param>
         </member>
-        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.Query(System.String)">
+        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.Query(System.ValueTuple{System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}}})">
             <summary>
             Execute a query.
             </summary>
-            <param name="query">Database query defined outside of the database client.</param>
+            <param name="queryAndParameters">Tuple of a database query defined outside of the database client and of query parameters</param>
             <returns>A DataTable containing the results.</returns>
         </member>
-        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.QueryAsync(System.String,System.Threading.CancellationToken)">
+        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.QueryAsync(System.ValueTuple{System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}}},System.Threading.CancellationToken)">
             <summary>
             Execute a query.
             </summary>
-            <param name="query">Database query defined outside of the database client.</param>
+            <param name="queryAndParameters">Tuple of a database query defined outside of the database client and of query parameters</param>
             <param name="token">Cancellation token.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
@@ -377,20 +377,6 @@
             <param name="token">Cancellation token.</param>
             <returns>The sum of the specified column from the matching rows.</returns>
         </member>
-        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.Timestamp(System.DateTime)">
-            <summary>
-            Create a string timestamp from the given DateTime.
-            </summary>
-            <param name="ts">DateTime.</param>
-            <returns>A string with formatted timestamp.</returns>
-        </member>
-        <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.TimestampOffset(System.DateTimeOffset)">
-            <summary>
-            Create a string timestamp with offset from the given DateTimeOffset.
-            </summary>
-            <param name="ts">DateTimeOffset.</param>
-            <returns>A string with formatted timestamp.</returns>
-        </member>
         <member name="M:DatabaseWrapper.SqlServer.DatabaseClient.SanitizeString(System.String)">
             <summary>
             Sanitize an input string.
@@ -407,16 +393,6 @@
         <member name="T:DatabaseWrapper.SqlServer.SqlServerHelper">
             <summary>
             SQL Server implementation of helper properties and methods.
-            </summary>
-        </member>
-        <member name="P:DatabaseWrapper.SqlServer.SqlServerHelper.TimestampFormat">
-            <summary>
-            Timestamp format for use in DateTime.ToString([format]).
-            </summary>
-        </member>
-        <member name="P:DatabaseWrapper.SqlServer.SqlServerHelper.TimestampOffsetFormat">
-            <summary>
-            Timestamp offset format for use in DateTimeOffset.ToString([format]).
             </summary>
         </member>
         <member name="M:DatabaseWrapper.SqlServer.SqlServerHelper.GenerateConnectionString(DatabaseWrapper.Core.DatabaseSettings)">
@@ -556,26 +532,33 @@
             <param name="filter">Expression filter.</param>
             <returns>String.</returns>
         </member>
-        <member name="M:DatabaseWrapper.SqlServer.SqlServerHelper.GenerateTimestamp(System.DateTime)">
-            <summary>
-            Retrieve a timestamp in the database format.
-            </summary>
-            <param name="ts">DateTime.</param>
-            <returns>String.</returns>
-        </member>
-        <member name="M:DatabaseWrapper.SqlServer.SqlServerHelper.GenerateTimestampOffset(System.DateTimeOffset)">
-            <summary>
-            Retrieve a timestamp offset in the database format.
-            </summary>
-            <param name="ts">DateTimeOffset.</param>
-            <returns>String.</returns>
-        </member>
         <member name="M:DatabaseWrapper.SqlServer.SqlServerHelper.ExtractTableName(System.String)">
             <summary>
             Extract the table name from an encapsulated name.
             </summary>
             <param name="s">String.</param>
             <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.SqlServer.SqlServerHelper.AppendParameter(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Object)">
+            <summary>
+            Append object as the parameter to the parameters list.
+            
+            Returns the parameter name, that is to be used in the query currently under construction.
+            </summary>
+            <param name="parameters">List of the parameters.</param>
+            <param name="o">Object to be added.</param>
+            <returns>Parameter name.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.SqlServer.SqlServerHelper.AppendParameterByType(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Object)">
+            <summary>
+            Append object as the parameter to the parameters list.
+            Use the object type to apply conversions, if any needed.
+            
+            Returns the parameter name, that is to be used in the query currently under construction.
+            </summary>
+            <param name="parameters">List of the parameters.</param>
+            <param name="untypedObject">Object to be added.</param>
+            <returns>Parameter name.</returns>
         </member>
     </members>
 </doc>

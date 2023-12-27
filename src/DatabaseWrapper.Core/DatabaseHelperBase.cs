@@ -5,6 +5,8 @@ using ExpressionTree;
 
 namespace DatabaseWrapper.Core
 {
+    using QueryAndParameters = System.ValueTuple<string, IEnumerable<KeyValuePair<string,object>>>;
+
     /// <summary>
     /// Base implementation of helper properties and methods.
     /// </summary>
@@ -102,7 +104,7 @@ namespace DatabaseWrapper.Core
         /// <param name="filter">Expression filter.</param>
         /// <param name="resultOrder">Result order.</param>
         /// <returns>String.</returns>
-        public abstract string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder);
+        public abstract QueryAndParameters SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder);
 
         /// <summary>
         /// Retrieve a query used for inserting data into a table.
@@ -110,7 +112,7 @@ namespace DatabaseWrapper.Core
         /// <param name="tableName">The table in which you wish to INSERT.</param>
         /// <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
         /// <returns>String.</returns>
-        public abstract string InsertQuery(string tableName, Dictionary<string, object> keyValuePairs);
+        public abstract QueryAndParameters InsertQuery(string tableName, Dictionary<string, object> keyValuePairs);
 
         /// <summary>
         /// Retrieve a query for inserting multiple rows into a table.
@@ -118,7 +120,7 @@ namespace DatabaseWrapper.Core
         /// <param name="tableName">The table in which you wish to INSERT.</param>
         /// <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
         /// <returns>String.</returns>
-        public abstract string InsertMultipleQuery(string tableName, List<Dictionary<string, object>> keyValuePairList);
+        public abstract QueryAndParameters InsertMultipleQuery(string tableName, List<Dictionary<string, object>> keyValuePairList);
 
         /// <summary>
         /// Retrieve a query for updating data in a table.
@@ -127,7 +129,7 @@ namespace DatabaseWrapper.Core
         /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
         /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
         /// <returns>String.</returns>
-        public abstract string UpdateQuery(string tableName, Dictionary<string, object> keyValuePairs, Expr filter);
+        public abstract QueryAndParameters UpdateQuery(string tableName, Dictionary<string, object> keyValuePairs, Expr filter);
 
         /// <summary>
         /// Retrieve a query for deleting data from a table.
@@ -135,7 +137,7 @@ namespace DatabaseWrapper.Core
         /// <param name="tableName">Table name.</param>
         /// <param name="filter">Expression filter.</param>
         /// <returns>String.</returns>
-        public abstract string DeleteQuery(string tableName, Expr filter);
+        public abstract QueryAndParameters DeleteQuery(string tableName, Expr filter);
 
         /// <summary>
         /// Retrieve a query for truncating a table.
@@ -150,7 +152,7 @@ namespace DatabaseWrapper.Core
         /// <param name="tableName">Table name.</param>
         /// <param name="filter">Expression filter.</param>
         /// <returns>String.</returns>
-        public abstract string ExistsQuery(string tableName, Expr filter);
+        public abstract QueryAndParameters ExistsQuery(string tableName, Expr filter);
 
         /// <summary>
         /// Retrieve a query that returns a count of the number of rows matching the supplied conditions.
@@ -159,7 +161,7 @@ namespace DatabaseWrapper.Core
         /// <param name="countColumnName">Column name to use to temporarily store the result.</param>
         /// <param name="filter">Expression filter.</param>
         /// <returns>String.</returns>
-        public abstract string CountQuery(string tableName, string countColumnName, Expr filter);
+        public abstract QueryAndParameters CountQuery(string tableName, string countColumnName, Expr filter);
 
         /// <summary>
         /// Retrieve a query that sums the values found in the specified field.
@@ -169,21 +171,7 @@ namespace DatabaseWrapper.Core
         /// <param name="sumColumnName">Column name to temporarily store the result.</param>
         /// <param name="filter">Expression filter.</param>
         /// <returns>String.</returns>
-        public abstract string SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter);
-
-        /// <summary>
-        /// Retrieve a timestamp in the database format.
-        /// </summary>
-        /// <param name="ts">DateTime.</param>
-        /// <returns>String.</returns>
-        public abstract string GenerateTimestamp(DateTime ts);
-
-        /// <summary>
-        /// Retrieve a timestamp offset in the database format.
-        /// </summary>
-        /// <param name="ts">DateTimeOffset.</param>
-        /// <returns>String.</returns>
-        public abstract string GenerateTimestampOffset(DateTimeOffset ts);
+        public abstract QueryAndParameters SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter);
 
         #endregion
     }
