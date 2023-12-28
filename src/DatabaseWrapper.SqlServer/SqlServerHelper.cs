@@ -614,6 +614,11 @@ namespace DatabaseWrapper.SqlServer
 
         #region Private-Members
 
+        /// <summary>
+        /// Prepare a field name for use in a SQL query.
+        /// </summary>
+        /// <param name="fieldName">Name of the field to be prepared.</param>
+        /// <returns>Field name for use in a SQL query.</returns>
         public override string PreparedFieldName(string fieldName)
         {
             return "[" + fieldName + "]";
