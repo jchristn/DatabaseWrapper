@@ -794,10 +794,11 @@ namespace DatabaseWrapper.Mysql
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Database query defined outside of the database client, and, the corresponding parameters.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override DataTable Query(string query)
+        public override DataTable Query((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -822,6 +823,7 @@ namespace DatabaseWrapper.Mysql
                         cmd.CommandText = query;
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
+                        DatabaseHelperBase.AddParameters(cmd, (name, type) => new MySqlParameter(name, type), parameters);
                         using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                         {
                             DataSet ds = new DataSet();
@@ -872,11 +874,12 @@ namespace DatabaseWrapper.Mysql
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Database query defined outside of the database client, and, the corresponding parameters.</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override async Task<DataTable> QueryAsync(string query, CancellationToken token = default)
+        public override async Task<DataTable> QueryAsync((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters, CancellationToken token = default)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -901,6 +904,7 @@ namespace DatabaseWrapper.Mysql
                         cmd.CommandText = query;
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
+                        DatabaseHelperBase.AddParameters(cmd, (name, type) => new MySqlParameter(name, type), parameters);
                         using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                         {
                             DataSet ds = new DataSet();
