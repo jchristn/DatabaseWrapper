@@ -655,7 +655,7 @@ namespace DatabaseWrapper.SqlServer
             }
             if (untypedObject is bool)
             {
-                return (bool)untypedObject ? "1" : "0";
+                return AppendParameter(parameters, (bool)untypedObject ? 1 : 0);
             }
             if (untypedObject is byte[])
             {
