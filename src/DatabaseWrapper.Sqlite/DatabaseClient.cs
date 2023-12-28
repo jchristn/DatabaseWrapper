@@ -786,7 +786,7 @@ namespace DatabaseWrapper.Sqlite
                     using (SqliteCommand cmd = new SqliteCommand(query, conn))
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
                     {
-                        AddParametersIfAny(cmd, parameters);
+                        DatabaseHelperBase.AddParameters(cmd, (name,type) => new SqliteParameter(name, type), parameters);
                         using (SqliteDataReader rdr = cmd.ExecuteReader())
                         {
                             result.Load(rdr);
@@ -852,7 +852,7 @@ namespace DatabaseWrapper.Sqlite
                     using (SqliteCommand cmd = new SqliteCommand(query, conn))
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
                     {
-                        AddParametersIfAny(cmd, parameters);
+                        DatabaseHelperBase.AddParameters(cmd, (name,type) => new SqliteParameter(name, type), parameters);
                         using (SqliteDataReader rdr = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false))
                         {
                             result.Load(rdr);
@@ -1022,73 +1022,6 @@ namespace DatabaseWrapper.Sqlite
 #endregion
 
 #region Private-Methods
-
-        static readonly Dictionary<Type, SqlDbType> SqlTypeMap = new Dictionary<Type, SqlDbType>() {
-            { typeof(Int32), SqlDbType.Int },
-            { typeof(Int64), SqlDbType.BigInt },
-            { typeof(double), SqlDbType.Float },
-            { typeof(Guid), SqlDbType.UniqueIdentifier },
-            { typeof(byte[]), SqlDbType.Image },
-            { typeof(DateTimeOffset), SqlDbType.DateTimeOffset },
-        };
-
-        private static void AddParametersIfAny(SqliteCommand  cmd, IEnumerable<KeyValuePair<string,object>> parameters)
-        {
-            if (parameters==null)
-            {
-                return;
-            }
-            foreach (var kv in parameters)
-            {
-                int param_index = cmd.Parameters.Count;
-                var param_name = kv.Key;
-                var p = kv.Value;
-                if (p == null)
-                {
-                    cmd.Parameters.Add(new SqliteParameter(param_name, SqlDbType.NVarChar));
-                    cmd.Parameters[param_index].Value = DBNull.Value;
-                    continue;
-                }
-                var t = p.GetType();
-                SqlDbType sql_type;
-                if (SqlTypeMap.TryGetValue(t, out sql_type))
-                {
-                    cmd.Parameters.Add(new SqliteParameter(param_name, sql_type));
-                    cmd.Parameters[param_index].Value = p;
-                    continue;
-                }
-                if (t == typeof(string))
-                {
-                    var s_string = p as string;
-                    cmd.Parameters.Add(new SqliteParameter(param_name, s_string.Length > 4000 ? System.Data.SqlDbType.NText : System.Data.SqlDbType.NVarChar));
-                    cmd.Parameters[param_index].Value = s_string;
-                    continue;
-                }
-                if (t == typeof(bool)) {
-                    cmd.Parameters.Add(new SqliteParameter(param_name, System.Data.SqlDbType.Bit));
-                    cmd.Parameters[param_index].Value = (bool)p ? 1 : 0;
-                    continue;
-                }
-                if (t == typeof(DateTime))
-                {
-                    var dt_object = DBNull.Value as object;
-                    var dt_datetime = (DateTime)p;
-                    if (dt_datetime != DateTime.MinValue)
-                    {
-                        var dt = dt_datetime.ToLocalTime();
-                        if (dt != DateTime.MinValue)
-                        {
-                            dt_object = dt;
-                        }
-                    }
-                    cmd.Parameters.Add(new SqliteParameter(param_name, System.Data.SqlDbType.DateTime));
-                    cmd.Parameters[param_index].Value = dt_object;
-                    continue;
-                }
-                throw new ApplicationException(Invariant($"DatabaseClient: Unknown type: {t.Name}"));
-            }
-        }
-
         /// <summary>
         /// Dispose of the object.
         /// </summary>

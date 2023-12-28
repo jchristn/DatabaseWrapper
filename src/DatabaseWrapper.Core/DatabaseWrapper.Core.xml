@@ -443,25 +443,46 @@
             </summary>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.AppendParameter(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Object)">
-            <summary>
-            Append object as the parameter to the parameters list.
+             <summary>
+             Append object as the parameter to the parameters list.
             
-            Returns the parameter name, that is to be used in the query currently under construction.
-            </summary>
-            <param name="parameters">List of the parameters.</param>
-            <param name="o">Object to be added.</param>
-            <returns>Parameter name.</returns>
+             Returns the parameter name, that is to be used in the query currently under construction.
+             </summary>
+             <param name="parameters">List of the parameters.</param>
+             <param name="o">Object to be added.</param>
+             <returns>Parameter name.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.AppendParameterByType(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Object)">
-            <summary>
-            Append object as the parameter to the parameters list.
-            Use the object type to apply conversions, if any needed.
+             <summary>
+             Append object as the parameter to the parameters list.
+             Use the object type to apply conversions, if any needed.
             
-            Returns the parameter name, that is to be used in the query currently under construction.
+             Returns the parameter name, that is to be used in the query currently under construction.
+             </summary>
+             <param name="parameters">List of the parameters.</param>
+             <param name="untypedObject">Object to be added.</param>
+             <returns>Parameter name.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.ExpressionToWhereClause(ExpressionTree.Expr,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
+            <summary>
+            Compose a where-cluase corresponding to the tree expression.
             </summary>
-            <param name="parameters">List of the parameters.</param>
-            <param name="untypedObject">Object to be added.</param>
-            <returns>Parameter name.</returns>
+            <param name="expr">Expression to be converted.</param>
+            <param name="parameters">Parameters to append SQL query parameters to.</param>
+            <returns>Where-clause.</returns>
+            <exception cref="T:System.ArgumentException"></exception>
+            <exception cref="T:System.ApplicationException"></exception>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.AddParameters``2(``0,System.Func{System.String,System.Data.SqlDbType,``1},System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
+            <summary>
+            Add parameters to the SQL command.
+            </summary>
+            <typeparam name="TC">Subtype of DbCommand</typeparam>
+            <typeparam name="TP">Subtype of DbPaameter</typeparam>
+            <param name="cmd">Command to add parameters to.</param>
+            <param name="createParameter">Parameter constructor.</param>
+            <param name="parameters">Parameters to be added.</param>
+            <exception cref="T:System.ApplicationException"></exception>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.GenerateConnectionString(DatabaseWrapper.Core.DatabaseSettings)">
             <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using static System.FormattableString;
 using System.Text;
 using ExpressionTree;
@@ -94,6 +95,14 @@ namespace DatabaseWrapper.Core
             { OperatorEnum.IsNotNull, "IS NOT NULL" },
         };
 
+        static readonly Dictionary<Type, SqlDbType> SqlTypeMap = new Dictionary<Type, SqlDbType>() {
+            { typeof(Int32), SqlDbType.Int },
+            { typeof(Int64), SqlDbType.BigInt },
+            { typeof(double), SqlDbType.Float },
+            { typeof(Guid), SqlDbType.UniqueIdentifier },
+            { typeof(byte[]), SqlDbType.Image },
+            { typeof(DateTimeOffset), SqlDbType.DateTimeOffset },
+        };
 
         #endregion
 
@@ -214,6 +223,73 @@ namespace DatabaseWrapper.Core
             return clause;
         }
 
+        /// <summary>
+        /// Add parameters to the SQL command.
+        /// </summary>
+        /// <typeparam name="TC">Subtype of DbCommand</typeparam>
+        /// <typeparam name="TP">Subtype of DbPaameter</typeparam>
+        /// <param name="cmd">Command to add parameters to.</param>
+        /// <param name="createParameter">Parameter constructor.</param>
+        /// <param name="parameters">Parameters to be added.</param>
+        /// <exception cref="ApplicationException"></exception>
+        public static void AddParameters<TC, TP>(TC  cmd, Func<string, SqlDbType,TP> createParameter, IEnumerable<KeyValuePair<string,object>> parameters)
+            where TC : System.Data.Common.DbCommand
+            where TP : System.Data.Common.DbParameter
+        {
+            if (parameters==null)
+            {
+                return;
+            }
+            foreach (var kv in parameters)
+            {
+                int param_index = cmd.Parameters.Count;
+                var param_name = kv.Key;
+                var p = kv.Value;
+                if (p == null)
+                {
+                    cmd.Parameters.Add(createParameter(param_name, SqlDbType.NVarChar));
+                    cmd.Parameters[param_index].Value = DBNull.Value;
+                    continue;
+                }
+                var t = p.GetType();
+                SqlDbType sql_type;
+                if (SqlTypeMap.TryGetValue(t, out sql_type))
+                {
+                    cmd.Parameters.Add(createParameter(param_name, sql_type));
+                    cmd.Parameters[param_index].Value = p;
+                    continue;
+                }
+                if (t == typeof(string))
+                {
+                    var s_string = p as string;
+                    cmd.Parameters.Add(createParameter(param_name, s_string.Length > 4000 ? System.Data.SqlDbType.NText : System.Data.SqlDbType.NVarChar));
+                    cmd.Parameters[param_index].Value = s_string;
+                    continue;
+                }
+                if (t == typeof(bool)) {
+                    cmd.Parameters.Add(createParameter(param_name, System.Data.SqlDbType.Bit));
+                    cmd.Parameters[param_index].Value = (bool)p ? 1 : 0;
+                    continue;
+                }
+                if (t == typeof(DateTime))
+                {
+                    var dt_object = DBNull.Value as object;
+                    var dt_datetime = (DateTime)p;
+                    if (dt_datetime != DateTime.MinValue)
+                    {
+                        var dt = dt_datetime.ToLocalTime();
+                        if (dt != DateTime.MinValue)
+                        {
+                            dt_object = dt;
+                        }
+                    }
+                    cmd.Parameters.Add(createParameter(param_name, System.Data.SqlDbType.DateTime));
+                    cmd.Parameters[param_index].Value = dt_object;
+                    continue;
+                }
+                throw new ApplicationException(Invariant($"{nameof(AddParameters)}: Unknown type: {t.Name}"));
+            }
+        }
 
         /// <summary>
         /// Build a connection string from DatabaseSettings.
