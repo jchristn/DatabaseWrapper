@@ -430,6 +430,20 @@
             <param name="token">Cancellation token.</param>
             <returns>The sum of the specified column from the matching rows.</returns>
         </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.Timestamp(System.DateTime)">
+            <summary>
+            Create a string timestamp from the given DateTime.
+            </summary>
+            <param name="ts">DateTime.</param>
+            <returns>A string with formatted timestamp.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseClientBase.TimestampOffset(System.DateTimeOffset)">
+            <summary>
+            Create a string timestamp with offset from the given DateTimeOffset.
+            </summary>
+            <param name="ts">DateTimeOffset.</param>
+            <returns>A string with formatted timestamp.</returns>
+        </member>
         <member name="M:DatabaseWrapper.Core.DatabaseClientBase.SanitizeString(System.String)">
             <summary>
             Sanitize an input string.
@@ -440,6 +454,16 @@
         <member name="T:DatabaseWrapper.Core.DatabaseHelperBase">
             <summary>
             Base implementation of helper properties and methods.
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DatabaseHelperBase.TimestampFormat">
+            <summary>
+            Timestamp format for use in DateTime.ToString([format]).
+            </summary>
+        </member>
+        <member name="F:DatabaseWrapper.Core.DatabaseHelperBase.TimestampOffsetFormat">
+            <summary>
+            Timestamp offset format for use in DateTimeOffset.ToString([format]).
             </summary>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.AppendParameter(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Object)">
@@ -626,6 +650,20 @@
             <param name="fieldName">Column containing values to sum.</param>
             <param name="sumColumnName">Column name to temporarily store the result.</param>
             <param name="filter">Expression filter.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.GenerateTimestamp(System.DateTime)">
+            <summary>
+            Retrieve a timestamp in the database format.
+            </summary>
+            <param name="ts">DateTime.</param>
+            <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.GenerateTimestampOffset(System.DateTimeOffset)">
+            <summary>
+            Retrieve a timestamp offset in the database format.
+            </summary>
+            <param name="ts">DateTimeOffset.</param>
             <returns>String.</returns>
         </member>
         <member name="T:DatabaseWrapper.Core.DatabaseQueryEvent">

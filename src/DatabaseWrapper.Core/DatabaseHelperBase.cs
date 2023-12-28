@@ -15,6 +15,17 @@ namespace DatabaseWrapper.Core
     public abstract class DatabaseHelperBase
     {
         #region Public-Members
+
+        /// <summary>
+        /// Timestamp format for use in DateTime.ToString([format]).
+        /// </summary>
+        public string TimestampFormat;
+
+        /// <summary>
+        /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
+        /// </summary>
+        public string TimestampOffsetFormat;
+
         #endregion
 
         #region Private-Members
@@ -434,6 +445,20 @@ namespace DatabaseWrapper.Core
         /// <param name="filter">Expression filter.</param>
         /// <returns>String.</returns>
         public abstract QueryAndParameters SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter);
+
+        /// <summary>
+        /// Retrieve a timestamp in the database format.
+        /// </summary>
+        /// <param name="ts">DateTime.</param>
+        /// <returns>String.</returns>
+        public abstract string GenerateTimestamp(DateTime ts);
+
+        /// <summary>
+        /// Retrieve a timestamp offset in the database format.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>String.</returns>
+        public abstract string GenerateTimestampOffset(DateTimeOffset ts);
 
         #endregion
     }

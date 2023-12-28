@@ -35,7 +35,6 @@ namespace DatabaseWrapper.Postgresql
             }
         }
 
-#if (false)
         /// <summary>
         /// Timestamp format.
         /// Default is MM/dd/yyyy hh:mm:ss.fffffff tt.
@@ -69,7 +68,6 @@ namespace DatabaseWrapper.Postgresql
                 _Helper.TimestampOffsetFormat = value;
             }
         }
-#endif
 
         /// <summary>
         /// Maximum supported statement length.
@@ -1007,7 +1005,6 @@ namespace DatabaseWrapper.Postgresql
             return 0m;
         }
 
-#if (false)
         /// <summary>
         /// Create a string timestamp from the given DateTime.
         /// </summary>
@@ -1027,7 +1024,6 @@ namespace DatabaseWrapper.Postgresql
         {
             return _Helper.GenerateTimestampOffset(ts);
         }
-#endif
 
         /// <summary>
         /// Sanitize an input string.

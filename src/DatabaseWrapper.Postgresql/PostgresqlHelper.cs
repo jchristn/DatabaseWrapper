@@ -19,7 +19,7 @@ namespace DatabaseWrapper.Postgresql
     public class PostgresqlHelper : DatabaseHelperBase
     {
         #region Public-Members
-#if (false)
+
         /// <summary>
         /// Timestamp format for use in DateTime.ToString([format]).
         /// </summary>
@@ -29,7 +29,7 @@ namespace DatabaseWrapper.Postgresql
         /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
         /// </summary>
         public new string TimestampOffsetFormat { get; set; } = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
-#endif
+
         #endregion
 
         #region Private-Members
@@ -479,7 +479,6 @@ namespace DatabaseWrapper.Postgresql
             return (query, parameters);
         }
 
-#if (false)
         /// <summary>
         /// Retrieve a timestamp in the database format.
         /// </summary>
@@ -499,7 +498,6 @@ namespace DatabaseWrapper.Postgresql
         {
             return ts.ToString(TimestampOffsetFormat);
         }
-#endif
 
         /// <summary>
         /// Extract the table name from an encapsulated name.

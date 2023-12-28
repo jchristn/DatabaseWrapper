@@ -36,6 +36,41 @@ namespace DatabaseWrapper.Sqlite
         }
 
         /// <summary>
+        /// Timestamp format.
+        /// Default is yyyy-MM-dd HH:mm:ss.ffffff.
+        /// </summary>
+        public new string TimestampFormat
+        {
+            get
+            {
+                return _Helper.TimestampFormat;
+            }
+            set
+            {
+                if (String.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(TimestampFormat));
+                _Helper.TimestampFormat = value;
+            }
+        }
+
+        /// <summary>
+        /// Timestamp format with offset.
+        /// Default is MM/dd/yyyy hh:mm:ss.fffffff zzz.
+        /// </summary>
+        public new string TimestampOffsetFormat
+        {
+            get
+            {
+                return _Helper.TimestampOffsetFormat;
+            }
+            set
+            {
+                if (String.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(TimestampOffsetFormat));
+                _Helper.TimestampOffsetFormat = value;
+            }
+        }
+
+
+        /// <summary>
         /// Maximum supported statement length.
         /// </summary>
         public new int MaxStatementLength
@@ -1006,6 +1041,26 @@ namespace DatabaseWrapper.Sqlite
                 return Convert.ToDecimal(result.Rows[0][_SumColumnName]);
             }
             return 0m;
+        }
+
+        /// <summary>
+        /// Create a string timestamp from the given DateTime.
+        /// </summary>
+        /// <param name="ts">DateTime.</param>
+        /// <returns>A string with formatted timestamp.</returns>
+        public override string Timestamp(DateTime ts)
+        {
+            return _Helper.GenerateTimestamp(ts);
+        }
+
+        /// <summary>
+        /// Create a string timestamp with offset from the given DateTimeOffset.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>A string with formatted timestamp.</returns>
+        public override string TimestampOffset(DateTimeOffset ts)
+        {
+            return _Helper.GenerateTimestampOffset(ts);
         }
 
         /// <summary>

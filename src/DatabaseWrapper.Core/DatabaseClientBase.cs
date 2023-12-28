@@ -391,6 +391,20 @@ namespace DatabaseWrapper.Core
         public abstract Task<decimal> SumAsync(string tableName, string fieldName, Expr filter, CancellationToken token = default);
 
         /// <summary>
+        /// Create a string timestamp from the given DateTime.
+        /// </summary>
+        /// <param name="ts">DateTime.</param>
+        /// <returns>A string with formatted timestamp.</returns>
+        public abstract string Timestamp(DateTime ts);
+
+        /// <summary>
+        /// Create a string timestamp with offset from the given DateTimeOffset.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>A string with formatted timestamp.</returns>
+        public abstract string TimestampOffset(DateTimeOffset ts);
+
+        /// <summary>
         /// Sanitize an input string.
         /// </summary>
         /// <param name="s">The value to sanitize.</param>

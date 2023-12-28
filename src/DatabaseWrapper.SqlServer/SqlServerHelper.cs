@@ -19,6 +19,16 @@ namespace DatabaseWrapper.SqlServer
     {
         #region Public-Members
 
+        /// <summary>
+        /// Timestamp format for use in DateTime.ToString([format]).
+        /// </summary>
+        public new string TimestampFormat { get; set; } = "MM/dd/yyyy hh:mm:ss.fffffff tt";
+
+        /// <summary>
+        /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
+        /// </summary>
+        public new string TimestampOffsetFormat { get; set; } = "MM/dd/yyyy hh:mm:ss.fffffff zzz";
+
         #endregion
 
         #region Private-Members
@@ -587,6 +597,26 @@ namespace DatabaseWrapper.SqlServer
             }
 
             return (query, parameters);
+        }
+
+        /// <summary>
+        /// Retrieve a timestamp in the database format.
+        /// </summary>
+        /// <param name="ts">DateTime.</param>
+        /// <returns>String.</returns>
+        public override string GenerateTimestamp(DateTime ts)
+        {
+            return ts.ToLocalTime().ToString(TimestampFormat);
+        }
+
+        /// <summary>
+        /// Retrieve a timestamp offset in the database format.
+        /// </summary>
+        /// <param name="ts">DateTimeOffset.</param>
+        /// <returns>String.</returns>
+        public override string GenerateTimestampOffset(DateTimeOffset ts)
+        {
+            return ts.ToString(TimestampOffsetFormat);
         }
 
         /// <summary>
