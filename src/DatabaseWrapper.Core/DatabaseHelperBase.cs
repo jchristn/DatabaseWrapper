@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static System.FormattableString;
 using System.Text;
 using ExpressionTree;
 
@@ -13,20 +14,86 @@ namespace DatabaseWrapper.Core
     public abstract class DatabaseHelperBase
     {
         #region Public-Members
-
-        /// <summary>
-        /// Timestamp format for use in DateTime.ToString([format]).
-        /// </summary>
-        public string TimestampFormat;
-
-        /// <summary>
-        /// Timestamp offset format for use in DateTimeOffset.ToString([format]).
-        /// </summary>
-        public string TimestampOffsetFormat;
-
         #endregion
 
         #region Private-Members
+
+        /// <summary>
+        /// Append object as the parameter to the parameters list.
+        ///
+        /// Returns the parameter name, that is to be used in the query currently under construction.
+        /// </summary>
+        /// <param name="parameters">List of the parameters.</param>
+        /// <param name="o">Object to be added.</param>
+        /// <returns>Parameter name.</returns>
+        static string AppendParameter(List<KeyValuePair<string, object>> parameters, object o)
+        {
+            var r = Invariant($"@E{parameters.Count}");
+            parameters.Add(new KeyValuePair<string, object>(r, o));
+            return r;
+        }
+
+        /// <summary>
+        /// Append object as the parameter to the parameters list.
+        /// Use the object type to apply conversions, if any needed.
+        ///
+        /// Returns the parameter name, that is to be used in the query currently under construction.
+        /// </summary>
+        /// <param name="parameters">List of the parameters.</param>
+        /// <param name="untypedObject">Object to be added.</param>
+        /// <returns>Parameter name.</returns>
+        static string AppendParameterByType(List<KeyValuePair<string, object>> parameters, object untypedObject)
+        {
+            if (untypedObject is DateTime || untypedObject is DateTime?)
+            {
+                return AppendParameter(parameters, Convert.ToDateTime(untypedObject));
+            }
+            if (untypedObject is int || untypedObject is long || untypedObject is decimal)
+            {
+                return AppendParameter(parameters, untypedObject);
+            }
+            if (untypedObject is bool)
+            {
+                return AppendParameter(parameters, (bool)untypedObject ? 1 : 0);
+            }
+            if (untypedObject is byte[])
+            {
+                return AppendParameter(parameters, untypedObject);
+            }
+            return AppendParameter(parameters, untypedObject);
+        }
+
+        static readonly Dictionary<OperatorEnum, string> BinaryOperators = new Dictionary<OperatorEnum, string>() {
+            { OperatorEnum.And, "AND" },
+            { OperatorEnum.Or, "OR" },
+            { OperatorEnum.Equals, "=" },
+            { OperatorEnum.NotEquals, "<>" },
+            { OperatorEnum.GreaterThan, ">" },
+            { OperatorEnum.GreaterThanOrEqualTo, ">=" },
+            { OperatorEnum.LessThan, "<" },
+            { OperatorEnum.LessThanOrEqualTo, "<=" },
+        };
+
+        static readonly Dictionary<OperatorEnum, string> InListOperators = new Dictionary<OperatorEnum, string>() {
+            { OperatorEnum.In, "IN" },
+            { OperatorEnum.NotIn, "NOT IN" },
+        };
+
+        static readonly Dictionary<OperatorEnum, (string,string)> ContainsOperators = new Dictionary<OperatorEnum, (string,string)>() {
+            { OperatorEnum.Contains, ("LIKE", "OR") },
+            { OperatorEnum.ContainsNot, ("NOT LIKE", "AND") },
+        };
+        static readonly Dictionary<OperatorEnum, (string,string,string)> LikeOperators = new Dictionary<OperatorEnum, (string,string,string)>() {
+            { OperatorEnum.StartsWith, ("LIKE", "", "%") },
+            { OperatorEnum.StartsWithNot, ("NOT LIKE", "", "%") },
+            { OperatorEnum.EndsWith, ("LIKE", "%", "") },
+            { OperatorEnum.EndsWithNot, ("NOT LIKE", "%", "") },
+        };
+        static readonly Dictionary<OperatorEnum, string> IsNullOperators = new Dictionary<OperatorEnum, string>() {
+            { OperatorEnum.IsNull, "IS NULL" },
+            { OperatorEnum.IsNotNull, "IS NOT NULL" },
+        };
+
 
         #endregion
 
@@ -35,6 +102,118 @@ namespace DatabaseWrapper.Core
         #endregion
 
         #region Public-Methods
+        /// <summary>
+        /// Compose a where-cluase corresponding to the tree expression.
+        /// </summary>
+        /// <param name="expr">Expression to be converted.</param>
+        /// <param name="parameters">Parameters to append SQL query parameters to.</param>
+        /// <returns>Where-clause.</returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ApplicationException"></exception>
+        public string ExpressionToWhereClause(Expr expr, List<KeyValuePair<string, object>> parameters)
+        {
+            if (expr == null) return null;
+
+            string clause = "";
+
+            if (expr.Left == null) return null;
+
+            clause += "(";
+
+            if (expr.Left is Expr)
+            {
+                clause += ExpressionToWhereClause((Expr)expr.Left, parameters) + " ";
+            }
+            else
+            {
+                if (!(expr.Left is string))
+                {
+                    throw new ArgumentException("Left term must be of type Expression or String");
+                }
+
+                if (expr.Operator != OperatorEnum.Contains
+                    && expr.Operator != OperatorEnum.ContainsNot
+                    && expr.Operator != OperatorEnum.StartsWith
+                    && expr.Operator != OperatorEnum.StartsWithNot
+                    && expr.Operator != OperatorEnum.EndsWith
+                    && expr.Operator != OperatorEnum.EndsWithNot)
+                {
+                    //
+                    // These operators will add the left term
+                    //
+                    clause += PreparedFieldName(expr.Left.ToString()) + " ";
+                }
+            }
+
+            string operator_name;
+            string logic_operator_name;
+            string prefix;
+            string suffix;
+            (string, string) operator_pair;
+            (string, string, string) operator_triple;
+            if (BinaryOperators.TryGetValue(expr.Operator, out operator_name))
+            {
+                if (expr.Right == null) return null;
+                clause +=  operator_name + " ";
+
+                if (expr.Right is Expr)
+                {
+                    clause += ExpressionToWhereClause((Expr)expr.Right, parameters);
+                }
+                else
+                {
+                    clause += AppendParameterByType(parameters, expr.Right);
+                }
+            }
+            else if (InListOperators.TryGetValue(expr.Operator, out operator_name))
+            {
+                if (expr.Right == null) return null;
+                int inAdded = 0;
+                if (!Helper.IsList(expr.Right)) return null;
+                List<object> inTempList = Helper.ObjectToList(expr.Right);
+                clause += Invariant($" {operator_name} (");
+                foreach (object currObj in inTempList)
+                {
+                    if (currObj == null) continue;
+                    if (inAdded > 0) clause += ",";
+                    clause += AppendParameterByType(parameters, currObj);
+                    inAdded++;
+                }
+                clause += ")";
+            }
+            else if (ContainsOperators.TryGetValue(expr.Operator, out operator_pair))
+            {
+                if (expr.Right == null) return null;
+                if (!(expr.Right is string)) return null;
+                (operator_name, logic_operator_name) = operator_pair;
+                var field = PreparedFieldName(expr.Left.ToString());
+                var p1_name = AppendParameterByType(parameters, "%" + expr.Right.ToString());
+                var p2_name = AppendParameterByType(parameters, "%" + expr.Right.ToString() + "%");
+                var p3_name = AppendParameterByType(parameters, expr.Right.ToString() + "%");
+                clause += Invariant($"({field} {operator_name} {p1_name} {logic_operator_name} {field} {operator_name} {p2_name} {logic_operator_name} {field} {operator_name} {p3_name})");
+            }
+            else if (LikeOperators.TryGetValue(expr.Operator, out operator_triple))
+            {
+                if (expr.Right == null) return null;
+                if (!(expr.Right is string)) return null;
+                (operator_name, prefix, suffix) = operator_triple;
+                var p_name = AppendParameterByType(parameters, prefix + expr.Right.ToString() + suffix);
+                clause += Invariant($"({PreparedFieldName(expr.Left.ToString())} {operator_name} {p_name})");
+            }
+            else if (IsNullOperators.TryGetValue(expr.Operator, out operator_name))
+            {
+                clause += " " + operator_name;
+            }
+            else
+            {
+                throw new ApplicationException(Invariant($"Error in SqlServerHelper.ExpressionToWhereClause: Unknown operator {expr.Operator}"));
+            }
+
+            clause += ")";
+
+            return clause;
+        }
+
 
         /// <summary>
         /// Build a connection string from DatabaseSettings.
@@ -64,6 +243,13 @@ namespace DatabaseWrapper.Core
         /// <param name="val">String.</param>
         /// <returns>String.</returns>
         public abstract string SanitizeString(string val);
+
+        /// <summary>
+        /// Prepare a field name for use in a SQL query.
+        /// </summary>
+        /// <param name="fieldName">Name of the field to be prepared.</param>
+        /// <returns>Field name for use in a SQL query.</returns>
+        public abstract string PreparedFieldName(string fieldName);
 
         /// <summary>
         /// Method to convert a Column object to the values used in a table create statement.

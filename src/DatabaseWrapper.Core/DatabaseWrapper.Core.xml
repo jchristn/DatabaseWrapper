@@ -442,15 +442,26 @@
             Base implementation of helper properties and methods.
             </summary>
         </member>
-        <member name="F:DatabaseWrapper.Core.DatabaseHelperBase.TimestampFormat">
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.AppendParameter(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Object)">
             <summary>
-            Timestamp format for use in DateTime.ToString([format]).
+            Append object as the parameter to the parameters list.
+            
+            Returns the parameter name, that is to be used in the query currently under construction.
             </summary>
+            <param name="parameters">List of the parameters.</param>
+            <param name="o">Object to be added.</param>
+            <returns>Parameter name.</returns>
         </member>
-        <member name="F:DatabaseWrapper.Core.DatabaseHelperBase.TimestampOffsetFormat">
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.AppendParameterByType(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Object)">
             <summary>
-            Timestamp offset format for use in DateTimeOffset.ToString([format]).
+            Append object as the parameter to the parameters list.
+            Use the object type to apply conversions, if any needed.
+            
+            Returns the parameter name, that is to be used in the query currently under construction.
             </summary>
+            <param name="parameters">List of the parameters.</param>
+            <param name="untypedObject">Object to be added.</param>
+            <returns>Parameter name.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.GenerateConnectionString(DatabaseWrapper.Core.DatabaseSettings)">
             <summary>
@@ -480,6 +491,13 @@
             </summary>
             <param name="val">String.</param>
             <returns>String.</returns>
+        </member>
+        <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.PreparedFieldName(System.String)">
+            <summary>
+            Prepare a field name for use in a SQL query.
+            </summary>
+            <param name="fieldName">Name of the field to be prepared.</param>
+            <returns>Field name for use in a SQL query.</returns>
         </member>
         <member name="M:DatabaseWrapper.Core.DatabaseHelperBase.ColumnToCreateQuery(DatabaseWrapper.Core.Column)">
             <summary>

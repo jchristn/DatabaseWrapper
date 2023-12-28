@@ -14,18 +14,6 @@
             The connection string used to connect to the database.
             </summary>
         </member>
-        <member name="P:DatabaseWrapper.SqlServer.DatabaseClient.TimestampFormat">
-            <summary>
-            Timestamp format.
-            Default is MM/dd/yyyy hh:mm:ss.fffffff tt.
-            </summary>
-        </member>
-        <member name="P:DatabaseWrapper.SqlServer.DatabaseClient.TimestampOffsetFormat">
-            <summary>
-            Timestamp format with offset.
-            Default is MM/dd/yyyy hh:mm:ss.fffffff zzz.
-            </summary>
-        </member>
         <member name="P:DatabaseWrapper.SqlServer.DatabaseClient.MaxStatementLength">
             <summary>
             Maximum supported statement length.
@@ -538,27 +526,6 @@
             </summary>
             <param name="s">String.</param>
             <returns>String.</returns>
-        </member>
-        <member name="M:DatabaseWrapper.SqlServer.SqlServerHelper.AppendParameter(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Object)">
-            <summary>
-            Append object as the parameter to the parameters list.
-            
-            Returns the parameter name, that is to be used in the query currently under construction.
-            </summary>
-            <param name="parameters">List of the parameters.</param>
-            <param name="o">Object to be added.</param>
-            <returns>Parameter name.</returns>
-        </member>
-        <member name="M:DatabaseWrapper.SqlServer.SqlServerHelper.AppendParameterByType(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.String,System.Object}},System.Object)">
-            <summary>
-            Append object as the parameter to the parameters list.
-            Use the object type to apply conversions, if any needed.
-            
-            Returns the parameter name, that is to be used in the query currently under construction.
-            </summary>
-            <param name="parameters">List of the parameters.</param>
-            <param name="untypedObject">Object to be added.</param>
-            <returns>Parameter name.</returns>
         </member>
     </members>
 </doc>

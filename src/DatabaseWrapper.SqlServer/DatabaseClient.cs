@@ -36,40 +36,6 @@ namespace DatabaseWrapper.SqlServer
         }
 
         /// <summary>
-        /// Timestamp format.
-        /// Default is MM/dd/yyyy hh:mm:ss.fffffff tt.
-        /// </summary>
-        public new string TimestampFormat
-        {
-            get
-            {
-                return _Helper.TimestampFormat;
-            }
-            set
-            {
-                if (String.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(TimestampFormat));
-                _Helper.TimestampFormat = value;
-            }
-        }
-
-        /// <summary>
-        /// Timestamp format with offset.
-        /// Default is MM/dd/yyyy hh:mm:ss.fffffff zzz.
-        /// </summary>
-        public new string TimestampOffsetFormat
-        {
-            get
-            {
-                return _Helper.TimestampOffsetFormat;
-            }
-            set
-            {
-                if (String.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(TimestampOffsetFormat));
-                _Helper.TimestampOffsetFormat = value;
-            }
-        }
-
-        /// <summary>
         /// Maximum supported statement length.
         /// </summary>
         public new int MaxStatementLength
