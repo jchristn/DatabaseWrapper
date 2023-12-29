@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static System.FormattableString;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,8 @@ using ExpressionTree;
 
 namespace DatabaseWrapper.Mysql
 {
+    using QueryAndParameters = System.ValueTuple<string, IEnumerable<KeyValuePair<string,object>>>;
+
     /// <summary>
     /// MySQL implementation of helper properties and methods.
     /// </summary>
@@ -227,7 +230,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="filter">Expression filter.</param>
         /// <param name="resultOrder">Result order.</param>
         /// <returns>String.</returns>
-        public override string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
+        public override QueryAndParameters SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
         { 
             string query = "";
             string whereClause = "";
@@ -268,7 +271,8 @@ namespace DatabaseWrapper.Mysql
             //
             // expressions
             //
-            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            var parameters_list = new List<KeyValuePair<string,object>>();
+            if (filter != null) whereClause = ExpressionToWhereClause(filter, parameters_list);
             if (!String.IsNullOrEmpty(whereClause))
             {
                 query += "WHERE " + whereClause + " ";
@@ -294,7 +298,7 @@ namespace DatabaseWrapper.Mysql
                 }
             }
 
-            return query;
+            return (query, parameters_list);
         }
 
         /// <summary>
@@ -303,24 +307,21 @@ namespace DatabaseWrapper.Mysql
         /// <param name="tableName">The table in which you wish to INSERT.</param>
         /// <param name="keyValuePairs">The key-value pairs for the row you wish to INSERT.</param>
         /// <returns>String.</returns>
-        public override string InsertQuery(string tableName, Dictionary<string, object> keyValuePairs)
+        public override QueryAndParameters InsertQuery(string tableName, Dictionary<string, object> keyValuePairs)
         {
+            var o_ret = keyValuePairs.Select(kv => new KeyValuePair<string,object>("@F_" + kv.Key, kv.Value));
             string ret =
                 "START TRANSACTION; " +
                 "INSERT INTO `" + SanitizeString(tableName) + "` " +
                 "(";
 
-            string keys = "";
-            string vals = "";
-            BuildKeysValuesFromDictionary(keyValuePairs, out keys, out vals);
-
-            ret += keys + ") " +
+            ret += string.Join(", ", keyValuePairs.Keys.Select(k => PreparedFieldName(k))) + ") " +
                 "VALUES " +
-                "(" + vals + "); " + 
+                "(" + string.Join(", ", o_ret.Select(k => k.Key)) + "); " + 
                 "SELECT LAST_INSERT_ID() AS id; " + 
                 "COMMIT; ";
 
-            return ret;
+            return (ret, o_ret);
         }
 
         /// <summary>
@@ -329,11 +330,11 @@ namespace DatabaseWrapper.Mysql
         /// <param name="tableName">The table in which you wish to INSERT.</param>
         /// <param name="keyValuePairList">List of dictionaries containing key-value pairs for the rows you wish to INSERT.</param>
         /// <returns>String.</returns>
-        public override string InsertMultipleQuery(string tableName, List<Dictionary<string, object>> keyValuePairList)
+        public override QueryAndParameters InsertMultipleQuery(string tableName, List<Dictionary<string, object>> keyValuePairList)
         {
             ValidateInputDictionaries(keyValuePairList);
             string keys = BuildKeysFromDictionary(keyValuePairList[0]);
-            List<string> values = BuildValuesFromDictionaries(keyValuePairList);
+            var ret_values = new List<KeyValuePair<string,object>>();
 
             string ret =
                 "START TRANSACTION;" +
@@ -341,18 +342,22 @@ namespace DatabaseWrapper.Mysql
                 "  (" + keys + ") " +
                 "  VALUES ";
 
-            int added = 0;
-            foreach (string value in values)
+            for (int i_dict=0; i_dict<keyValuePairList.Count; ++i_dict)
             {
-                if (added > 0) ret += ",";
-                ret += "  (" + value + ")";
-                added++;
+                var dict = keyValuePairList[i_dict];
+                var prefix = Invariant($"@F{i_dict}_");
+                var this_round = dict.Select(kv => new KeyValuePair<string, object>(prefix + kv.Key, kv.Value));
+                if (i_dict>0) {
+                    ret += ", ";
+                }
+                ret += "(" + string.Join(", ", this_round.Select(kv => kv.Key)) + ")";
+                ret_values.AddRange(this_round);
             }
 
             ret +=
                 ";  COMMIT; ";
 
-            return ret;
+            return (ret, ret_values);
         }
 
         /// <summary>
@@ -362,17 +367,18 @@ namespace DatabaseWrapper.Mysql
         /// <param name="keyValuePairs">The key-value pairs for the data you wish to UPDATE.</param>
         /// <param name="filter">The expression containing the UPDATE filter (i.e. WHERE clause data).</param>
         /// <returns>String.</returns>
-        public override string UpdateQuery(string tableName, Dictionary<string, object> keyValuePairs, Expr filter)
+        public override QueryAndParameters UpdateQuery(string tableName, Dictionary<string, object> keyValuePairs, Expr filter)
         {
-            string keyValueClause = BuildKeyValueClauseFromDictionary(keyValuePairs);
+            const string FIELD_PREFIX = "@F";
+            var parameters = keyValuePairs.Select(kv => new KeyValuePair<string, object>(FIELD_PREFIX + kv.Key, kv.Value)).ToList();
 
             string ret =
                 "UPDATE `" + SanitizeString(tableName) + "` SET " +
-                keyValueClause + " ";
+                string.Join(", ", parameters.Select(kv => kv.Key.Substring(FIELD_PREFIX.Length) + "=" + kv.Key)) + " ";
 
-            if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter) + " ";
+            if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter, parameters) + " ";
             
-            return ret;
+            return (ret, parameters);
         }
 
         /// <summary>
@@ -381,14 +387,15 @@ namespace DatabaseWrapper.Mysql
         /// <param name="tableName">Table name.</param>
         /// <param name="filter">Expression filter.</param>
         /// <returns>String.</returns>
-        public override string DeleteQuery(string tableName, Expr filter)
+        public override QueryAndParameters DeleteQuery(string tableName, Expr filter)
         {
             string ret =
                 "DELETE FROM `" + SanitizeString(tableName) + "` ";
 
-            if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter) + " ";
+            var parameters = new List<KeyValuePair<string, object>>();
+            if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter, parameters) + " ";
 
-            return ret;
+            return (ret, parameters);
         }
 
         /// <summary>
@@ -407,7 +414,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="tableName">Table name.</param>
         /// <param name="filter">Expression filter.</param>
         /// <returns>String.</returns>
-        public override string ExistsQuery(string tableName, Expr filter)
+        public override QueryAndParameters ExistsQuery(string tableName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -422,14 +429,15 @@ namespace DatabaseWrapper.Mysql
             //
             // expressions
             //
-            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            var parameters = new List<KeyValuePair<string, object>>();
+            if (filter != null) whereClause = ExpressionToWhereClause(filter, parameters);
             if (!String.IsNullOrEmpty(whereClause))
             {
                 query += "WHERE " + whereClause + " ";
             }
 
             query += "LIMIT 1";
-            return query;
+            return (query, parameters);
         }
 
         /// <summary>
@@ -439,7 +447,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="countColumnName">Column name to use to temporarily store the result.</param>
         /// <param name="filter">Expression filter.</param>
         /// <returns>String.</returns>
-        public override string CountQuery(string tableName, string countColumnName, Expr filter)
+        public override QueryAndParameters CountQuery(string tableName, string countColumnName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -454,13 +462,14 @@ namespace DatabaseWrapper.Mysql
             //
             // expressions
             //
-            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            var parameters = new List<KeyValuePair<string, object>>();
+            if (filter != null) whereClause = ExpressionToWhereClause(filter, parameters);
             if (!String.IsNullOrEmpty(whereClause))
             {
                 query += "WHERE " + whereClause + " ";
             }
 
-            return query;
+            return (query, parameters);
         }
 
         /// <summary>
@@ -471,7 +480,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="sumColumnName">Column name to temporarily store the result.</param>
         /// <param name="filter">Expression filter.</param>
         /// <returns>String.</returns>
-        public override string SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter)
+        public override QueryAndParameters SumQuery(string tableName, string fieldName, string sumColumnName, Expr filter)
         {
             string query = "";
             string whereClause = "";
@@ -486,13 +495,14 @@ namespace DatabaseWrapper.Mysql
             //
             // expressions
             //
-            if (filter != null) whereClause = ExpressionToWhereClause(filter);
+            var parameters = new List<KeyValuePair<string, object>>();
+            if (filter != null) whereClause = ExpressionToWhereClause(filter, parameters);
             if (!String.IsNullOrEmpty(whereClause))
             {
                 query += "WHERE " + whereClause + " ";
             }
 
-            return query;
+            return (query, parameters);
         }
 
         /// <summary>
@@ -515,486 +525,23 @@ namespace DatabaseWrapper.Mysql
             return ts.DateTime.ToString(TimestampFormat);
         }
 
-        #endregion
-
-        #region Private-Methods
-
-        private string PreparedFieldName(string fieldName)
+        /// <summary>
+        /// Prepare a field name for use in a SQL query.
+        /// </summary>
+        /// <param name="fieldName">Name of the field to be prepared.</param>
+        /// <returns>Field name for use in a SQL query.</returns>
+        public override string PreparedFieldName(string fieldName)
         {
             return "`" + fieldName + "`";
         }
 
+        #endregion
+
+        #region Private-Methods
+
         private string PreparedStringValue(string str)
         {
             return "'" + SanitizeString(str) + "'";
-        }
-
-        private string ExpressionToWhereClause(Expr expr)
-        {
-            if (expr == null) return null;
-
-            string clause = "";
-
-            if (expr.Left == null) return null;
-
-            clause += "(";
-
-            if (expr.Left is Expr)
-            {
-                clause += ExpressionToWhereClause((Expr)expr.Left) + " ";
-            }
-            else
-            {
-                if (!(expr.Left is string))
-                {
-                    throw new ArgumentException("Left term must be of type Expression or String");
-                }
-
-                if (expr.Operator != OperatorEnum.Contains
-                    && expr.Operator != OperatorEnum.ContainsNot
-                    && expr.Operator != OperatorEnum.StartsWith
-                    && expr.Operator != OperatorEnum.StartsWithNot
-                    && expr.Operator != OperatorEnum.EndsWith
-                    && expr.Operator != OperatorEnum.EndsWithNot)
-                {
-                    //
-                    // These operators will add the left term
-                    //
-                    clause += PreparedFieldName(expr.Left.ToString()) + " ";
-                }
-            }
-
-            switch (expr.Operator)
-            {
-                #region Process-By-Operators
-
-                case OperatorEnum.And:
-                    #region And
-
-                    if (expr.Right == null) return null;
-                    clause += "AND ";
-
-                    if (expr.Right is Expr)
-                    {
-                        clause += ExpressionToWhereClause((Expr)expr.Right);
-                    }
-                    else
-                    {
-                        if (expr.Right is DateTime || expr.Right is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
-                        }
-                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
-                        {
-                            clause += expr.Right.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(expr.Right.ToString());
-                        }
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.Or:
-                    #region Or
-
-                    if (expr.Right == null) return null;
-                    clause += "OR ";
-                    if (expr.Right is Expr)
-                    {
-                        clause += ExpressionToWhereClause((Expr)expr.Right);
-                    }
-                    else
-                    {
-                        if (expr.Right is DateTime || expr.Right is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
-                        }
-                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
-                        {
-                            clause += expr.Right.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(expr.Right.ToString());
-                        }
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.Equals:
-                    #region Equals
-
-                    if (expr.Right == null) return null;
-                    clause += "= ";
-                    if (expr.Right is Expr)
-                    {
-                        clause += ExpressionToWhereClause((Expr)expr.Right);
-                    }
-                    else
-                    {
-                        if (expr.Right is DateTime || expr.Right is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
-                        }
-                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
-                        {
-                            clause += expr.Right.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(expr.Right.ToString());
-                        }
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.NotEquals:
-                    #region NotEquals
-
-                    if (expr.Right == null) return null;
-                    clause += "<> ";
-                    if (expr.Right is Expr)
-                    {
-                        clause += ExpressionToWhereClause((Expr)expr.Right);
-                    }
-                    else
-                    {
-                        if (expr.Right is DateTime || expr.Right is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
-                        }
-                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
-                        {
-                            clause += expr.Right.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(expr.Right.ToString());
-                        }
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.In:
-                    #region In
-
-                    if (expr.Right == null) return null;
-                    int inAdded = 0;
-                    if (!Helper.IsList(expr.Right)) return null;
-                    List<object> inTempList = Helper.ObjectToList(expr.Right);
-                    clause += " IN (";
-                    foreach (object currObj in inTempList)
-                    {
-                        if (currObj == null) continue;
-                        if (inAdded > 0) clause += ",";
-                        if (currObj is DateTime || currObj is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(currObj)) + "'";
-                        }
-                        else if (currObj is int || currObj is long || currObj is decimal)
-                        {
-                            clause += currObj.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(currObj.ToString());
-                        }
-                        inAdded++;
-                    }
-                    clause += ")";
-                    break;
-
-                #endregion
-
-                case OperatorEnum.NotIn:
-                    #region NotIn
-
-                    if (expr.Right == null) return null;
-                    int notInAdded = 0;
-                    if (!Helper.IsList(expr.Right)) return null;
-                    List<object> notInTempList = Helper.ObjectToList(expr.Right);
-                    clause += " NOT IN (";
-                    foreach (object currObj in notInTempList)
-                    {
-                        if (currObj == null) continue;
-                        if (notInAdded > 0) clause += ",";
-                        if (currObj is DateTime || currObj is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(currObj)) + "'";
-                        }
-                        else if (currObj is int || currObj is long || currObj is decimal)
-                        {
-                            clause += currObj.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(currObj.ToString());
-                        }
-                        notInAdded++;
-                    }
-                    clause += ")";
-                    break;
-
-                #endregion
-
-                case OperatorEnum.Contains:
-                    #region Contains
-
-                    if (expr.Right == null) return null;
-                    if (expr.Right is string)
-                    {
-                        clause +=
-                            "(" +
-                            PreparedFieldName(expr.Left.ToString()) + " LIKE " + PreparedStringValue("%" + expr.Right.ToString()) +
-                            "OR " + PreparedFieldName(expr.Left.ToString()) + " LIKE " + PreparedStringValue("%" + expr.Right.ToString() + "%") +
-                            "OR " + PreparedFieldName(expr.Left.ToString()) + " LIKE " + PreparedStringValue(expr.Right.ToString() + "%") +
-                            ")";
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.ContainsNot:
-                    #region ContainsNot
-
-                    if (expr.Right == null) return null;
-                    if (expr.Right is string)
-                    {
-                        clause +=
-                            "(" +
-                            PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.Right.ToString()) +
-                            "OR " + PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.Right.ToString() + "%") +
-                            "OR " + PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + PreparedStringValue(expr.Right.ToString() + "%") +
-                            ")";
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.StartsWith:
-                    #region StartsWith
-
-                    if (expr.Right == null) return null;
-                    if (expr.Right is string)
-                    {
-                        clause +=
-                            "(" +
-                            PreparedFieldName(expr.Left.ToString()) + " LIKE " + PreparedStringValue(expr.Right.ToString() + "%") +
-                            ")";
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.StartsWithNot:
-                    #region StartsWithNot
-
-                    if (expr.Right == null) return null;
-                    if (expr.Right is string)
-                    {
-                        clause +=
-                            "(" +
-                            PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + PreparedStringValue(expr.Right.ToString() + "%") +
-                            ")";
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.EndsWith:
-                    #region EndsWith
-
-                    if (expr.Right == null) return null;
-                    if (expr.Right is string)
-                    {
-                        clause +=
-                            "(" +
-                            PreparedFieldName(expr.Left.ToString()) + " LIKE " + PreparedStringValue("%" + expr.Right.ToString()) +
-                            ")";
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.EndsWithNot:
-                    #region EndsWithNot
-
-                    if (expr.Right == null) return null;
-                    if (expr.Right is string)
-                    {
-                        clause +=
-                            "(" +
-                            PreparedFieldName(expr.Left.ToString()) + " NOT LIKE " + PreparedStringValue("%" + expr.Right.ToString()) +
-                            ")";
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.GreaterThan:
-                    #region GreaterThan
-
-                    if (expr.Right == null) return null;
-                    clause += "> ";
-                    if (expr.Right is Expr)
-                    {
-                        clause += ExpressionToWhereClause((Expr)expr.Right);
-                    }
-                    else
-                    {
-                        if (expr.Right is DateTime || expr.Right is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
-                        }
-                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
-                        {
-                            clause += expr.Right.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(expr.Right.ToString());
-                        }
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.GreaterThanOrEqualTo:
-                    #region GreaterThanOrEqualTo
-
-                    if (expr.Right == null) return null;
-                    clause += ">= ";
-                    if (expr.Right is Expr)
-                    {
-                        clause += ExpressionToWhereClause((Expr)expr.Right);
-                    }
-                    else
-                    {
-                        if (expr.Right is DateTime || expr.Right is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
-                        }
-                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
-                        {
-                            clause += expr.Right.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(expr.Right.ToString());
-                        }
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.LessThan:
-                    #region LessThan
-
-                    if (expr.Right == null) return null;
-                    clause += "< ";
-                    if (expr.Right is Expr)
-                    {
-                        clause += ExpressionToWhereClause((Expr)expr.Right);
-                    }
-                    else
-                    {
-                        if (expr.Right is DateTime || expr.Right is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
-                        }
-                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
-                        {
-                            clause += expr.Right.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(expr.Right.ToString());
-                        }
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.LessThanOrEqualTo:
-                    #region LessThanOrEqualTo
-
-                    if (expr.Right == null) return null;
-                    clause += "<= ";
-                    if (expr.Right is Expr)
-                    {
-                        clause += ExpressionToWhereClause((Expr)expr.Right);
-                    }
-                    else
-                    {
-                        if (expr.Right is DateTime || expr.Right is DateTime?)
-                        {
-                            clause += "'" + GenerateTimestamp(Convert.ToDateTime(expr.Right)) + "'";
-                        }
-                        else if (expr.Right is int || expr.Right is long || expr.Right is decimal)
-                        {
-                            clause += expr.Right.ToString();
-                        }
-                        else
-                        {
-                            clause += PreparedStringValue(expr.Right.ToString());
-                        }
-                    }
-                    break;
-
-                #endregion
-
-                case OperatorEnum.IsNull:
-                    #region IsNull
-
-                    clause += " IS NULL";
-                    break;
-
-                #endregion
-
-                case OperatorEnum.IsNotNull:
-                    #region IsNotNull
-
-                    clause += " IS NOT NULL";
-                    break;
-
-                    #endregion
-
-                    #endregion
-            }
-
-            clause += ")";
-
-            return clause;
         }
 
         private string PreparedUnicodeValue(string s)
@@ -1018,81 +565,6 @@ namespace DatabaseWrapper.Mysql
 
             ret += " ";
             return ret;
-        }
-
-        private void BuildKeysValuesFromDictionary(Dictionary<string, object> keyValuePairs, out string keys, out string vals)
-        {
-            keys = "";
-            vals = "";
-            int added = 0;
-
-            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
-            {
-                if (String.IsNullOrEmpty(currKvp.Key)) continue;
-
-                if (added > 0)
-                {
-                    keys += ",";
-                    vals += ",";
-                }
-
-                keys += PreparedFieldName(currKvp.Key);
-
-                if (currKvp.Value != null)
-                {
-                    if (currKvp.Value is DateTime
-                        || currKvp.Value is DateTime?)
-                    {
-                        vals += "'" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
-                    }
-                    else if (currKvp.Value is DateTimeOffset
-                        || currKvp.Value is DateTimeOffset?)
-                    {
-                        vals += "'" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
-                    }
-                    else if (currKvp.Value is int
-                        || currKvp.Value is long
-                        || currKvp.Value is decimal)
-                    {
-                        vals += currKvp.Value.ToString();
-                    }
-                    else if (currKvp.Value is bool)
-                    {
-                        vals += ((bool)currKvp.Value ? "1" : "0");
-                    }
-                    else if (currKvp.Value is byte[])
-                    {
-                        vals += "x'" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
-                    }
-                    else
-                    {
-                        if (IsExtendedCharacters(currKvp.Value.ToString()))
-                        {
-                            vals += PreparedUnicodeValue(currKvp.Value.ToString());
-                        }
-                        else
-                        {
-                            vals += PreparedStringValue(currKvp.Value.ToString());
-                        }
-                    }
-                }
-                else
-                {
-                    vals += "null";
-                }
-
-                added++;
-            }
-        }
-
-        private bool IsExtendedCharacters(string data)
-        {
-            if (String.IsNullOrEmpty(data)) return false;
-            foreach (char c in data)
-            {
-                if ((int)c > 255) return true;
-            }
-            return false;
         }
 
         private void ValidateInputDictionaries(List<Dictionary<string, object>> keyValuePairList)
@@ -1123,132 +595,6 @@ namespace DatabaseWrapper.Mysql
             }
 
             return keys;
-        }
-
-        private List<string> BuildValuesFromDictionaries(List<Dictionary<string, object>> dicts)
-        {
-            List<string> values = new List<string>();
-
-            foreach (Dictionary<string, object> currDict in dicts)
-            {
-                string vals = "";
-                int valsAdded = 0;
-
-                foreach (KeyValuePair<string, object> currKvp in currDict)
-                {
-                    if (valsAdded > 0) vals += ",";
-
-                    if (currKvp.Value != null)
-                    {
-                        if (currKvp.Value is DateTime
-                            || currKvp.Value is DateTime?)
-                        {
-                            vals += "'" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
-                        }
-                        else if (currKvp.Value is DateTimeOffset
-                            || currKvp.Value is DateTimeOffset?)
-                        {
-                            vals += "'" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
-                        }
-                        else if (currKvp.Value is int
-                            || currKvp.Value is long
-                            || currKvp.Value is decimal)
-                        {
-                            vals += currKvp.Value.ToString();
-                        }
-                        else if (currKvp.Value is bool)
-                        {
-                            vals += ((bool)currKvp.Value ? "1" : "0");
-                        }
-                        else if (currKvp.Value is byte[])
-                        {
-                            vals += "x'" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
-                        }
-                        else
-                        {
-                            if (IsExtendedCharacters(currKvp.Value.ToString()))
-                            {
-                                vals += PreparedUnicodeValue(currKvp.Value.ToString());
-                            }
-                            else
-                            {
-                                vals += PreparedStringValue(currKvp.Value.ToString());
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        vals += "null";
-                    }
-
-                    valsAdded++;
-                }
-
-                values.Add(vals);
-            }
-
-            return values;
-        }
-
-        private string BuildKeyValueClauseFromDictionary(Dictionary<string, object> keyValuePairs)
-        {
-            string keyValueClause = "";
-            int added = 0;
-
-            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
-            {
-                if (String.IsNullOrEmpty(currKvp.Key)) continue;
-
-                if (added > 0) keyValueClause += ",";
-
-                if (currKvp.Value != null)
-                {
-                    if (currKvp.Value is DateTime
-                        || currKvp.Value is DateTime?)
-                    {
-                        keyValueClause += PreparedFieldName(currKvp.Key) + "='" + ((DateTime)currKvp.Value).ToString(TimestampFormat) + "'";
-                    }
-                    else if (currKvp.Value is DateTimeOffset
-                        || currKvp.Value is DateTimeOffset?)
-                    {
-                        keyValueClause += PreparedFieldName(currKvp.Key) + "='" + ((DateTimeOffset)currKvp.Value).ToString(TimestampOffsetFormat) + "'";
-                    }
-                    else if (currKvp.Value is int
-                        || currKvp.Value is long
-                        || currKvp.Value is decimal)
-                    {
-                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + currKvp.Value.ToString();
-                    }
-                    else if (currKvp.Value is bool)
-                    {
-                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + ((bool)currKvp.Value ? "1" : "0");
-                    }
-                    else if (currKvp.Value is byte[])
-                    {
-                        keyValueClause += PreparedFieldName(currKvp.Key) + "=" + "x'" + BitConverter.ToString((byte[])currKvp.Value).Replace("-", "") + "'";
-                    }
-                    else
-                    {
-                        if (IsExtendedCharacters(currKvp.Value.ToString()))
-                        {
-                            keyValueClause += PreparedFieldName(currKvp.Key) + "=" + PreparedUnicodeValue(currKvp.Value.ToString());
-                        }
-                        else
-                        {
-                            keyValueClause += PreparedFieldName(currKvp.Key) + "=" + PreparedStringValue(currKvp.Value.ToString());
-                        }
-                    }
-                }
-                else
-                {
-                    keyValueClause += PreparedFieldName(currKvp.Key) + "= null";
-                }
-
-                added++;
-            }
-
-            return keyValueClause;
         }
 
         #endregion

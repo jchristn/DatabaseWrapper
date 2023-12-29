@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Data;
+using static System.FormattableString;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DatabaseWrapper.Core;
 using ExpressionTree;
 using System.Threading;
+using System.Data.Common;
+using System.Runtime.InteropServices;
 
 namespace DatabaseWrapper.Core
 {
@@ -305,9 +308,25 @@ namespace DatabaseWrapper.Core
         /// <summary>
         /// Execute a query.
         /// </summary>
+        /// <param name="queryAndParameters">A tuple of the aatabase query defined outside of the database client and query parameters.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public abstract DataTable Query((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters);
+
+        /// <summary>
+        /// Execute a query.
+        /// </summary>
         /// <param name="query">Database query defined outside of the database client.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public abstract DataTable Query(string query);
+        public DataTable Query(string query)
+            => Query((query, null));
+
+        /// <summary>
+        /// Execute a query.
+        /// </summary>
+        /// <param name="queryAndParameters">A tuple of the aatabase query defined outside of the database client and query parameters.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>A DataTable containing the results.</returns>
+        public abstract Task<DataTable> QueryAsync((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Execute a query.
@@ -315,7 +334,8 @@ namespace DatabaseWrapper.Core
         /// <param name="query">Database query defined outside of the database client.</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public abstract Task<DataTable> QueryAsync(string query, CancellationToken token = default);
+        public Task<DataTable> QueryAsync(string query, CancellationToken token = default(CancellationToken))
+            => QueryAsync((query, null), token);
 
         /// <summary>
         /// Determine if records exist by filter.

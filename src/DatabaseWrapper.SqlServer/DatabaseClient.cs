@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Data.SqlClient;
+using static System.FormattableString;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks; 
@@ -747,10 +748,11 @@ namespace DatabaseWrapper.SqlServer
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Tuple of a database query defined outside of the database client and of query parameters</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override DataTable Query(string query)
+        public override DataTable Query((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -768,11 +770,15 @@ namespace DatabaseWrapper.SqlServer
                     conn.Open();
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    using (SqlDataAdapter sda = new SqlDataAdapter(query, conn))
+                    using (var cmd = new SqlCommand(query, conn))
                     {
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+                        DatabaseHelperBase.AddParameters(cmd, (name,type) => new SqlParameter(name,type),  parameters);
+                        using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                        {
 
-                        sda.Fill(result);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+                            sda.Fill(result);
+                        }
                     }
 
                     conn.Dispose();
@@ -809,11 +815,12 @@ namespace DatabaseWrapper.SqlServer
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Tuple of a database query defined outside of the database client and of query parameters</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override async Task<DataTable> QueryAsync(string query, CancellationToken token = default)
+        public override async Task<DataTable> QueryAsync((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters, CancellationToken token = default)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -831,11 +838,15 @@ namespace DatabaseWrapper.SqlServer
                     await conn.OpenAsync(token).ConfigureAwait(false);
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    using (SqlDataAdapter sda = new SqlDataAdapter(query, conn))
+                    using (var cmd = new SqlCommand(query, conn))
                     {
+                        DatabaseHelperBase.AddParameters(cmd, (name,type) => new SqlParameter(name,type),  parameters);
+                        using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                        {
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities4
 
-                        sda.Fill(result);
+                            sda.Fill(result);
+                        }
                     }
 
 #if NET6_0_OR_GREATER

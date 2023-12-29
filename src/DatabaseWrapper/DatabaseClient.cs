@@ -1169,20 +1169,20 @@ namespace DatabaseWrapper
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Database query defined outside of the database client.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override DataTable Query(string query)
+        public override DataTable Query((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters)
         {
             switch (_Settings.Type)
             {
                 case DbTypeEnum.Mysql:
-                    return _Mysql.Query(query);
+                    return _Mysql.Query(queryAndParameters);
                 case DbTypeEnum.Postgresql:
-                    return _Postgresql.Query(query);
+                    return _Postgresql.Query(queryAndParameters);
                 case DbTypeEnum.Sqlite:
-                    return _Sqlite.Query(query);
+                    return _Sqlite.Query(queryAndParameters);
                 case DbTypeEnum.SqlServer:
-                    return _SqlServer.Query(query);
+                    return _SqlServer.Query(queryAndParameters);
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }
@@ -1191,21 +1191,21 @@ namespace DatabaseWrapper
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Database query defined outside of the database client.</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override async Task<DataTable> QueryAsync(string query, CancellationToken token = default)
+        public override async Task<DataTable> QueryAsync((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters, CancellationToken token = default)
         {
             switch (_Settings.Type)
             {
                 case DbTypeEnum.Mysql:
-                    return await _Mysql.QueryAsync(query, token).ConfigureAwait(false);
+                    return await _Mysql.QueryAsync(queryAndParameters, token).ConfigureAwait(false);
                 case DbTypeEnum.Postgresql:
-                    return await _Postgresql.QueryAsync(query, token).ConfigureAwait(false);
+                    return await _Postgresql.QueryAsync(queryAndParameters, token).ConfigureAwait(false);
                 case DbTypeEnum.Sqlite:
-                    return await _Sqlite.QueryAsync(query, token).ConfigureAwait(false);
+                    return await _Sqlite.QueryAsync(queryAndParameters, token).ConfigureAwait(false);
                 case DbTypeEnum.SqlServer:
-                    return await _SqlServer.QueryAsync(query, token).ConfigureAwait(false);
+                    return await _SqlServer.QueryAsync(queryAndParameters, token).ConfigureAwait(false);
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
             }

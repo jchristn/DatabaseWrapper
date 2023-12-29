@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Data;  
+using System.Data;
+using static System.FormattableString;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -67,6 +68,7 @@ namespace DatabaseWrapper.Sqlite
                 _Helper.TimestampOffsetFormat = value;
             }
         }
+
 
         /// <summary>
         /// Maximum supported statement length.
@@ -794,10 +796,11 @@ namespace DatabaseWrapper.Sqlite
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Database query defined outside of the database client, and, the corresponding parameters.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override DataTable Query(string query)
+        public override DataTable Query((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -818,6 +821,7 @@ namespace DatabaseWrapper.Sqlite
                     using (SqliteCommand cmd = new SqliteCommand(query, conn))
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
                     {
+                        DatabaseHelperBase.AddParameters(cmd, (name,type) => new SqliteParameter(name, type), parameters);
                         using (SqliteDataReader rdr = cmd.ExecuteReader())
                         {
                             result.Load(rdr);
@@ -857,11 +861,12 @@ namespace DatabaseWrapper.Sqlite
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Tuple of a database query defined outside of the database client and of query parameters</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override async Task<DataTable> QueryAsync(string query, CancellationToken token = default)
+        public override async Task<DataTable> QueryAsync((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters, CancellationToken token = default)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -882,6 +887,7 @@ namespace DatabaseWrapper.Sqlite
                     using (SqliteCommand cmd = new SqliteCommand(query, conn))
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
                     {
+                        DatabaseHelperBase.AddParameters(cmd, (name,type) => new SqliteParameter(name, type), parameters);
                         using (SqliteDataReader rdr = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false))
                         {
                             result.Load(rdr);
@@ -1071,7 +1077,6 @@ namespace DatabaseWrapper.Sqlite
 #endregion
 
 #region Private-Methods
-
         /// <summary>
         /// Dispose of the object.
         /// </summary>

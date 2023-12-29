@@ -9,6 +9,7 @@ using Npgsql;
 using ExpressionTree;
 using DatabaseWrapper.Core;
 using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace DatabaseWrapper.Postgresql
 {
@@ -116,6 +117,16 @@ namespace DatabaseWrapper.Postgresql
         private string _SumColumnName = "__sum__";
         private PostgresqlHelper _Helper = new PostgresqlHelper();
 
+        private static IEnumerable<KeyValuePair<string,object>> CorrectDateTimeOffsets(IEnumerable<KeyValuePair<string,object>> parameters)
+            => parameters?.Select(kv => {
+                // TODO: is it correct to drop the offset on DateTimeOffset parameters?
+                if (kv.Value != null && kv.Value.GetType()==typeof(DateTimeOffset))
+                {
+                    var dto = (DateTimeOffset)kv.Value;
+                    if (dto.Offset != TimeSpan.Zero) return new KeyValuePair<string, object>(kv.Key, new DateTimeOffset(dto.UtcDateTime));
+                }
+                return kv;
+            });
         #endregion
 
         #region Constructors-and-Factories
@@ -733,10 +744,11 @@ namespace DatabaseWrapper.Postgresql
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Database query defined outside of the database client, and, the corresponding parameters.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override DataTable Query(string query)
+        public override DataTable Query((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -754,16 +766,20 @@ namespace DatabaseWrapper.Postgresql
                     conn.Open();
 
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    using (NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn))
+                    using (var cmd = new NpgsqlCommand(query, conn))
                     {
+                        DatabaseHelperBase.AddParameters(cmd, (name,type) => new NpgsqlParameter(name,type), CorrectDateTimeOffsets(parameters));
+                        using (NpgsqlDataAdapter da = new NpgsqlDataAdapter(cmd))
+                        {
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
+                            DataSet ds = new DataSet();
+                            da.Fill(ds);
 
-                        if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
-                        {
-                            result = ds.Tables[0];
+                            if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
+                            {
+                                result = ds.Tables[0];
+                            }
                         }
                     }
 
@@ -800,11 +816,12 @@ namespace DatabaseWrapper.Postgresql
         /// <summary>
         /// Execute a query.
         /// </summary>
-        /// <param name="query">Database query defined outside of the database client.</param>
+        /// <param name="queryAndParameters">Database query defined outside of the database client, and, the corresponding parameters.</param>
         /// <param name="token">Cancellation token.</param>
         /// <returns>A DataTable containing the results.</returns>
-        public override async Task<DataTable> QueryAsync(string query, CancellationToken token = default)
+        public override async Task<DataTable> QueryAsync((string Query, IEnumerable<KeyValuePair<string,object>> Parameters) queryAndParameters, CancellationToken token = default)
         {
+            (var query, var parameters) = queryAndParameters;
             if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
             if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
@@ -821,17 +838,21 @@ namespace DatabaseWrapper.Postgresql
                 {
                     await conn.OpenAsync(token).ConfigureAwait(false);
 
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    using (NpgsqlDataAdapter da = new NpgsqlDataAdapter(query, conn))
+#pragma warning disable CA2100 // Review SQL queries for security 
+                    using (var cmd = new NpgsqlCommand(query, conn))
                     {
+                        DatabaseHelperBase.AddParameters(cmd, (name,type) => new NpgsqlParameter(name,type), CorrectDateTimeOffsets(parameters));
+                        using (NpgsqlDataAdapter da = new NpgsqlDataAdapter(cmd))
+                        {
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
+                            DataSet ds = new DataSet();
+                            da.Fill(ds);
 
-                        if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
-                        {
-                            result = ds.Tables[0];
+                            if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
+                            {
+                                result = ds.Tables[0];
+                            }
                         }
                     }
 
