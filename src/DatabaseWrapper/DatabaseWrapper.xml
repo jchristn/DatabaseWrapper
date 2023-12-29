@@ -329,18 +329,18 @@
             <param name="tableName">The table you wish to TRUNCATE.</param>
             <param name="token">Cancellation token.</param>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.Query(System.String)">
+        <member name="M:DatabaseWrapper.DatabaseClient.Query(System.ValueTuple{System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}}})">
             <summary>
             Execute a query.
             </summary>
-            <param name="query">Database query defined outside of the database client.</param>
+            <param name="queryAndParameters">Database query defined outside of the database client.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
-        <member name="M:DatabaseWrapper.DatabaseClient.QueryAsync(System.String,System.Threading.CancellationToken)">
+        <member name="M:DatabaseWrapper.DatabaseClient.QueryAsync(System.ValueTuple{System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}}},System.Threading.CancellationToken)">
             <summary>
             Execute a query.
             </summary>
-            <param name="query">Database query defined outside of the database client.</param>
+            <param name="queryAndParameters">Database query defined outside of the database client.</param>
             <param name="token">Cancellation token.</param>
             <returns>A DataTable containing the results.</returns>
         </member>
