@@ -116,7 +116,28 @@ namespace DatabaseWrapper.Mysql
         private string _CountColumnName = "__count__";
         private string _SumColumnName = "__sum__";
         private MysqlHelper _Helper = new MysqlHelper();
-        
+
+        static readonly Dictionary<SqlDbType, MySqlDbType> DbTypeMapping = new Dictionary<SqlDbType, MySqlDbType>()
+        {
+            { SqlDbType.Int, MySqlDbType.Int32 },
+            { SqlDbType.BigInt, MySqlDbType.Int64 },
+            { SqlDbType.Float, MySqlDbType.Double },
+            { SqlDbType.UniqueIdentifier, MySqlDbType.Guid },
+            { SqlDbType.Image, MySqlDbType.Blob },
+            { SqlDbType.DateTimeOffset, MySqlDbType.DateTime },
+            { SqlDbType.NText, MySqlDbType.Text },
+            { SqlDbType.NVarChar, MySqlDbType.VarChar },
+            { SqlDbType.Bit, MySqlDbType.Bit },
+            { SqlDbType.DateTime, MySqlDbType.DateTime }
+        };
+
+        static MySqlParameter CreateMySqlParameter(string name, SqlDbType type)
+        {
+            var real_type = DbTypeMapping[type];
+            var r = new MySqlParameter(name, real_type);
+            return r;
+        }
+
         #endregion
 
         #region Constructors-and-Factories
@@ -823,7 +844,7 @@ namespace DatabaseWrapper.Mysql
                         cmd.CommandText = query;
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
-                        DatabaseHelperBase.AddParameters(cmd, (name, type) => new MySqlParameter(name, type), parameters);
+                        DatabaseHelperBase.AddParameters(cmd, CreateMySqlParameter, parameters);
                         using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                         {
                             DataSet ds = new DataSet();
@@ -904,7 +925,7 @@ namespace DatabaseWrapper.Mysql
                         cmd.CommandText = query;
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
-                        DatabaseHelperBase.AddParameters(cmd, (name, type) => new MySqlParameter(name, type), parameters);
+                        DatabaseHelperBase.AddParameters(cmd, CreateMySqlParameter, parameters);
                         using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                         {
                             DataSet ds = new DataSet();
