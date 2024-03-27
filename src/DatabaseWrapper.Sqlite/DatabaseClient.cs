@@ -1070,7 +1070,7 @@ namespace DatabaseWrapper.Sqlite
          
 #endregion
 
-#region Private-Methods
+        #region Private-Methods
 
         /// <summary>
         /// Dispose of the object.

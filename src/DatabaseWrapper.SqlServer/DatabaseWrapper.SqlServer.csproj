@@ -2,12 +2,12 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;net462;net48;net6.0;net7.0</TargetFrameworks>
-		<Version>6.0.6</Version>
+		<Version>6.0.7</Version>
 		<PackageReleaseNotes>Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0.</PackageReleaseNotes>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
 		<Description>Simple database wrapper for SQL Server written in C# supporting dynamic query building and nesting using expressions.  Refer to other DatabaseWrapper packages for support for MySQL, Sqlite, and PostgreSQL.</Description>
-		<Copyright>(c)2023 Joel Christner</Copyright>
+		<Copyright>(c)2024 Joel Christner</Copyright>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageProjectUrl>https://github.com/jchristn/DatabaseWrapper</PackageProjectUrl>
 		<PackageIconUrl></PackageIconUrl>
@@ -79,7 +79,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="DatabaseWrapper.Core" Version="6.0.6" />
-		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
 	</ItemGroup>
 
 	<ItemGroup>

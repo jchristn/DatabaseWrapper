@@ -44,7 +44,7 @@ namespace DatabaseWrapper.Sqlite
         /// <returns>String.</returns>
         public override string GenerateConnectionString(DatabaseSettings settings)
         {
-            return "Data Source=" + settings.Filename;
+            return "Data Source=" + settings.Filename + ";Pooling=false";
         }
 
         /// <summary>

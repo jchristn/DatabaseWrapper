@@ -6,7 +6,7 @@
 		<PackageReleaseNotes>Bugfixes, retargeting to include .NET Framework 4.8 and .NET 7.0.</PackageReleaseNotes>
 		<Authors>Joel Christner</Authors>
 		<Description>Do not install this package directly.  Core classes for DatabaseWrapper packages.</Description>
-		<Copyright>(c)2023 Joel Christner</Copyright>
+		<Copyright>(c)2024 Joel Christner</Copyright>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageProjectUrl>https://github.com/jchristn/DatabaseWrapper</PackageProjectUrl>
 		<PackageIconUrl></PackageIconUrl>
