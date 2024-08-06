@@ -20,7 +20,7 @@
 		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
 		<PackageIcon>icon.png</PackageIcon>
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-		<SignAssembly>True</SignAssembly>
+		<SignAssembly>False</SignAssembly>
 		<AssemblyOriginatorKeyFile>../../DatabaseWrapper.snk</AssemblyOriginatorKeyFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<IncludeSymbols>True</IncludeSymbols>
@@ -92,10 +92,11 @@
 	</Target>
 
 	<ItemGroup>
-		<PackageReference Include="DatabaseWrapper.Mysql" Version="6.0.6" />
-		<PackageReference Include="DatabaseWrapper.Postgresql" Version="6.0.6" />
-		<PackageReference Include="DatabaseWrapper.Sqlite" Version="6.0.7" />
-		<PackageReference Include="DatabaseWrapper.SqlServer" Version="6.0.7" />
+	  <ProjectReference Include="..\DatabaseWrapper.Mysql\DatabaseWrapper.Mysql.csproj" />
+	  <ProjectReference Include="..\DatabaseWrapper.Oracle\DatabaseWrapper.Oracle.csproj" />
+	  <ProjectReference Include="..\DatabaseWrapper.Postgresql\DatabaseWrapper.Postgresql.csproj" />
+	  <ProjectReference Include="..\DatabaseWrapper.Sqlite\DatabaseWrapper.Sqlite.csproj" />
+	  <ProjectReference Include="..\DatabaseWrapper.SqlServer\DatabaseWrapper.SqlServer.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

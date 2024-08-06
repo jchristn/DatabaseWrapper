@@ -43,6 +43,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SqliteAsync", "Test.Sq
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SqlServerAsync", "Test.SqlServerAsync\Test.SqlServerAsync.csproj", "{DDCAC74D-C2F3-442D-940A-75FA7B81B329}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseWrapper.Oracle", "DatabaseWrapper.Oracle\DatabaseWrapper.Oracle.csproj", "{510D84C0-F8F9-4D01-A82F-81F9EB7F961C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Oracle", "Test.Oracle\Test.Oracle.csproj", "{1DA521CE-105D-4E38-BCEE-B8BE2886583C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +133,14 @@ Global
 		{DDCAC74D-C2F3-442D-940A-75FA7B81B329}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDCAC74D-C2F3-442D-940A-75FA7B81B329}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDCAC74D-C2F3-442D-940A-75FA7B81B329}.Release|Any CPU.Build.0 = Release|Any CPU
+		{510D84C0-F8F9-4D01-A82F-81F9EB7F961C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{510D84C0-F8F9-4D01-A82F-81F9EB7F961C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{510D84C0-F8F9-4D01-A82F-81F9EB7F961C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{510D84C0-F8F9-4D01-A82F-81F9EB7F961C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DA521CE-105D-4E38-BCEE-B8BE2886583C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DA521CE-105D-4E38-BCEE-B8BE2886583C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DA521CE-105D-4E38-BCEE-B8BE2886583C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DA521CE-105D-4E38-BCEE-B8BE2886583C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
