@@ -38,10 +38,10 @@ namespace Test
                  * 
                  */
 
-                string dbType = Inputty.GetString("DB type [sqlserver|mysql|postgresql|sqlite]:", "mysql", false);
+                string dbType = Inputty.GetString("DB type [sqlserver|mysql|postgresql|sqlite|oracle]:", "oracle", false);
                 dbType = dbType.ToLower();
 
-                if (dbType.Equals("sqlserver") || dbType.Equals("mysql") || dbType.Equals("postgresql"))
+                if (dbType.Equals("sqlserver") || dbType.Equals("mysql") || dbType.Equals("postgresql") || dbType.Equals("oracle")) 
                 {
                     string user = Inputty.GetString("User:", "root", false);
                     string pass = Inputty.GetString("Pass:", null, true);
@@ -64,6 +64,13 @@ namespace Test
                             break;
                         case "postgresql":
                             _Settings = new DatabaseSettings(DbTypeEnum.Postgresql, "localhost", 5432, user, pass, "test");
+                            _Settings.Debug.Logger = Logger;
+                            _Settings.Debug.EnableForQueries = true;
+                            _Settings.Debug.EnableForResults = true;
+                            _Database = new DatabaseClient(_Settings);
+                            break;
+                        case "oracle":
+                            _Settings = new DatabaseSettings(DbTypeEnum.Oracle, "localhost/XEPDB1", 1521, user, pass, "test");
                             _Settings.Debug.Logger = Logger;
                             _Settings.Debug.EnableForQueries = true;
                             _Settings.Debug.EnableForResults = true;

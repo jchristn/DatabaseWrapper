@@ -667,7 +667,7 @@ namespace DatabaseWrapper
                     _SqlServer.CreateTable(tableName, columns);
                     return;
                 case DbTypeEnum.Oracle:
-                    _SqlServer.CreateTable(tableName,columns);
+                    _Oracle.CreateTable(tableName,columns);
                     return;
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
@@ -725,7 +725,7 @@ namespace DatabaseWrapper
                     _SqlServer.DropTable(tableName);
                     return;
                 case DbTypeEnum.Oracle:
-                    _SqlServer.DropTable(tableName);
+                    _Oracle.DropTable(tableName);
                     return;
                 default:
                     throw new ArgumentException("Unknown database type '" + _Settings.Type.ToString() + "'.");
