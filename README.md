@@ -23,7 +23,7 @@ Core features:
 - Programmatic table creation and removal (drop)
 - Built-in sanitization
 - Support for .NET Standard, .NET Core, and .NET Framework
-- Support for SQL Server, Sqlite, PostgreSQL, MySQL, MariaDB, both on-premises and in the cloud
+- Support for SQL Server, Sqlite, PostgreSQL, MySQL, MariaDB, Oracle, both on-premises and in the cloud
 - Both synchronous and asynchronous APIs
 
 ## New in v6.x
@@ -38,7 +38,7 @@ Core features:
 
 Special thanks to those who have helped contribute or otherwise improve the library!  
 
-@shawty @constantinje @thedarklort @l-404-l @igrgurina @Vaelek @treyhay31 @daoye @twobytescy @rinkusahu1 
+@shawty @constantinje @thedarklort @l-404-l @igrgurina @Vaelek @treyhay31 @daoye @twobytescy @rinkusahu1 @Skimmenthal13
 
 ## A Note on Sanitization
 
