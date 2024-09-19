@@ -31,6 +31,11 @@ namespace DatabaseWrapper.Core
         /// Sqlite
         /// </summary>
         [EnumMember(Value = "Sqlite")]
-        Sqlite
+        Sqlite,
+        /// <summary>
+        /// Oracle
+        /// </summary>
+        [EnumMember(Value = "Oracle")]
+        Oracle
     }
 }

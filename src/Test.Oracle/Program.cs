@@ -6,10 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DatabaseWrapper;
+using DatabaseWrapper.Oracle;
 using DatabaseWrapper.Core;
 using ExpressionTree;
-using GetSomeInput;
 
 namespace Test
 {
@@ -19,12 +18,12 @@ namespace Test
         static DatabaseSettings _Settings;
         static DatabaseClient _Database;
         static byte[] _FileBytes = File.ReadAllBytes("./headshot.png");
-
-        // To use dbo.person, change _Table to either 'dbo.person' or just '" + _Table + "'
-        // To use with a specific schema, use 'schema.table', i.e. 'foo.person'
         static string _Table = "person";
 
-        static void Main(string[] args)
+        static string _Host = "localhost/XEPDB1";
+        static int _Port = 1521;
+
+        static async Task Main(string[] args)
         {
             try
             {
@@ -38,62 +37,18 @@ namespace Test
                  * 
                  */
 
-                string dbType = Inputty.GetString("DB type [sqlserver|mysql|postgresql|sqlite|oracle]:", "oracle", false);
-                dbType = dbType.ToLower();
+                Console.Write("User: ");
+                string user = Console.ReadLine();
 
-                if (dbType.Equals("sqlserver") || dbType.Equals("mysql") || dbType.Equals("postgresql") || dbType.Equals("oracle")) 
-                {
-                    string user = Inputty.GetString("User:", "root", false);
-                    string pass = Inputty.GetString("Pass:", null, true);
+                Console.Write("Password: ");
+                string pass = Console.ReadLine();
 
-                    switch (dbType)
-                    {
-                        case "sqlserver":
-                            _Settings = new DatabaseSettings("localhost", 1433, user, pass, null, "test");
-                            _Settings.Debug.Logger = Logger;
-                            _Settings.Debug.EnableForQueries = true;
-                            _Settings.Debug.EnableForResults = true;
-                            _Database = new DatabaseClient(_Settings);
-                            break;
-                        case "mysql":
-                            _Settings = new DatabaseSettings(DbTypeEnum.Mysql, "localhost", 3306, user, pass, "test");
-                            _Settings.Debug.Logger = Logger;
-                            _Settings.Debug.EnableForQueries = true;
-                            _Settings.Debug.EnableForResults = true;
-                            _Database = new DatabaseClient(_Settings);
-                            break;
-                        case "postgresql":
-                            _Settings = new DatabaseSettings(DbTypeEnum.Postgresql, "localhost", 5432, user, pass, "test");
-                            _Settings.Debug.Logger = Logger;
-                            _Settings.Debug.EnableForQueries = true;
-                            _Settings.Debug.EnableForResults = true;
-                            _Database = new DatabaseClient(_Settings);
-                            break;
-                        case "oracle":
-                            _Settings = new DatabaseSettings(DbTypeEnum.Oracle, "localhost/XEPDB1", 1521, user, pass, "test");
-                            _Settings.Debug.Logger = Logger;
-                            _Settings.Debug.EnableForQueries = true;
-                            _Settings.Debug.EnableForResults = true;
-                            _Database = new DatabaseClient(_Settings);
-                            break;
-                        default:
-                            return;
-                    }
-                }
-                else if (dbType.Equals("sqlite"))
-                {
-                    string filename = Inputty.GetString("Filename:", "sqlite.db", false);
-                    _Settings = new DatabaseSettings(filename);
-                    _Settings.Debug.Logger = Logger;
-                    _Settings.Debug.EnableForQueries = true;
-                    _Settings.Debug.EnableForResults = true;
-                    _Database = new DatabaseClient(_Settings);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid database type.");
-                    return;
-                }
+                _Settings = new DatabaseSettings(DbTypeEnum.Oracle, _Host, _Port, user, pass, "test");
+                _Settings.Debug.Logger = Logger;
+                _Settings.Debug.EnableForQueries = true;
+                _Settings.Debug.EnableForResults = true;
+
+                _Database = new DatabaseClient(_Settings);
 
                 #endregion
 
@@ -222,7 +177,7 @@ namespace Test
 
                 try
                 {
-                    _Database.Query("SELECT * FROM person(((");
+                    _Database.Query("SELECT * FROM " + _Table + "(((");
                 }
                 catch (Exception e)
                 {
@@ -259,6 +214,7 @@ namespace Test
                 d.Add("birthday", DateTime.Now);
                 d.Add("hourly", 123.456);
                 d.Add("localtime", new DateTimeOffset(2021, 4, 14, 01, 02, 03, new TimeSpan(7, 0, 0)));
+                d.Add("picture", _FileBytes);
                 d.Add("guid", Guid.NewGuid());
                 d.Add("active", (i % 2 > 0));
 
@@ -278,7 +234,7 @@ namespace Test
                 d.Add("guid", Guid.NewGuid());
                 d.Add("active", (i % 2 > 0));
 
-                _Database.Insert(_Table, d);
+                _Database.Insert("person", d);
             }
         }
 
@@ -348,6 +304,7 @@ namespace Test
                 d.Add("firstname", "first" + i + "-updated");
                 d.Add("lastname", "last" + i + "-updated");
                 d.Add("age", i);
+                d.Add("birthday", null);
 
                 Expr e = new Expr("id", OperatorEnum.Equals, i);
                 _Database.Update(_Table, d, e);
@@ -356,7 +313,7 @@ namespace Test
 
         static void RetrieveRows()
         {
-            List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
+            List<string> returnFields = new List<string> { "firstname", "lastname", "age", "picture" };
 
             for (int i = 30; i < 40; i++)
             {
@@ -375,7 +332,15 @@ namespace Test
                 ResultOrder[] resultOrder = new ResultOrder[1];
                 resultOrder[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);
 
-                _Database.Select(_Table, 0, 3, returnFields, e, resultOrder);
+                DataTable result = _Database.Select(_Table, 0, 3, returnFields, e, resultOrder);
+                if (result != null && result.Rows != null && result.Rows.Count > 0)
+                {
+                    foreach (DataRow row in result.Rows)
+                    {
+                        byte[] data = (byte[])(row["picture"]);
+                        Console.WriteLine("Picture data length " + data.Length + " vs original length " + _FileBytes.Length);
+                    }
+                }
             }
         }
 
@@ -383,7 +348,7 @@ namespace Test
         {
             List<string> returnFields = new List<string> { "firstname", "lastname", "age" };
 
-            Expr e = new Expr("lastname", OperatorEnum.StartsWith, "lasté");
+            Expr e = new Expr("firstname", OperatorEnum.StartsWith, "firsté");
 
             DataTable result = _Database.Select(_Table, 0, 5, returnFields, e);
             if (result != null && result.Rows != null && result.Rows.Count > 0)

@@ -855,6 +855,11 @@
             Sqlite
             </summary>
         </member>
+        <member name="F:DatabaseWrapper.Core.DbTypeEnum.Oracle">
+            <summary>
+            Oracle
+            </summary>
+        </member>
         <member name="T:DatabaseWrapper.Core.Helper">
             <summary>
             Static helper methods for DatabaseWrapper.
