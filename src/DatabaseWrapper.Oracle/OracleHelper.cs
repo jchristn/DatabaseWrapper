@@ -10,21 +10,11 @@ using ExpressionTree;
 
 namespace DatabaseWrapper.Oracle
 {
+    /// <summary>
+    /// Oracle implementation of helper properties and methods.
+    /// </summary>
     public class OracleHelper : DatabaseHelperBase
     {
-        private enum CharClass : byte
-        {
-            None,
-            Quote,
-            Backslash
-        }
-
-        private static string stringOfBackslashChars = "\\¥Š₩∖﹨＼";
-
-        private static string stringOfQuoteChars = "\"'`\u00b4ʹʺʻʼˈˊˋ\u02d9\u0300\u0301‘’‚′‵❛❜＇";
-
-        private static CharClass[] charClassArray = MakeCharClassArray();
-
         #region Public-Members
 
         /// <summary>
@@ -40,6 +30,19 @@ namespace DatabaseWrapper.Oracle
         #endregion
 
         #region Private-Members
+
+        private enum CharClass : byte
+        {
+            None,
+            Quote,
+            Backslash
+        }
+
+        private static string stringOfBackslashChars = "\\¥Š₩∖﹨＼";
+
+        private static string stringOfQuoteChars = "\"'`\u00b4ʹʺʻʼˈˊˋ\u02d9\u0300\u0301‘’‚′‵❛❜＇";
+
+        private static CharClass[] charClassArray = MakeCharClassArray();
 
         #endregion
 
@@ -80,10 +83,17 @@ namespace DatabaseWrapper.Oracle
         {
             return "SELECT * FROM user_tables";
         }
+
+        /// <summary>
+        /// Query to retrieve sequences.
+        /// </summary>
+        /// <param name="database">Database name.</param>
+        /// <returns>String.</returns>
         public string RetrieveSequencesQuery(string database)
         {
             return "SELECT * FROM user_sequences";
         }
+
         /// <summary>
         /// Query to retrieve the list of columns for a table.
         /// </summary>
@@ -95,11 +105,20 @@ namespace DatabaseWrapper.Oracle
             return
             "select * from user_tab_columns where table_name = '" + table.ToUpper() + "' order by column_id";
         }
-        internal string IsPrimaryKeyQuery(string database, string table, string column) 
+
+        /// <summary>
+        /// Query to determine if a column is the primary key.
+        /// </summary>
+        /// <param name="database">Database name.</param>
+        /// <param name="table">Table name.</param>
+        /// <param name="column">Column name.</param>
+        /// <returns>String.</returns>
+        public string IsPrimaryKeyQuery(string database, string table, string column) 
         {
             string query = $"SELECT cols.table_name, cols.column_name, cols.position, cons.status, cons.owner\r\nFROM all_constraints cons, all_cons_columns cols\r\nWHERE cols.table_name = '{table.ToUpper()}'\r\nAND cons.constraint_type = 'P'\r\nAND cons.constraint_name = cols.constraint_name\r\nAND cons.owner = cols.owner\r\n AND cols.column_name='{column.ToUpper()}' ORDER BY cols.table_name, cols.position";
             return query;
         }
+
         /// <summary>
         /// Method to sanitize a string.
         /// </summary>
@@ -111,47 +130,29 @@ namespace DatabaseWrapper.Oracle
             ret = OracleHelper.EscapeString(val);
             return ret;
         }
-        private static CharClass[] MakeCharClassArray()
+
+        /// <summary>
+        /// Escape a string.
+        /// </summary>
+        /// <param name="str">String.</param>
+        /// <returns>String.</returns>
+        public static string EscapeString(string str)
         {
-            CharClass[] array = new CharClass[65536];
-            string text = stringOfBackslashChars;
-            foreach (char c in text)
+            if (!NeedsQuoting(str))
             {
-                array[(uint)c] = CharClass.Backslash;
+                return str;
             }
 
-            text = stringOfQuoteChars;
-            foreach (char c2 in text)
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in str)
             {
-                array[(uint)c2] = CharClass.Quote;
+                if (charClassArray[(uint)c] != 0) sb.Append("\\");
+                sb.Append(c);
             }
 
-            return array;
+            return sb.ToString();
         }
-        private static bool NeedsQuoting(string s)
-        {
-            return s.Any((char c) => charClassArray[(uint)c] != CharClass.None);
-        }
-        public static string EscapeString(string value)
-        {
-            if (!NeedsQuoting(value))
-            {
-                return value;
-            }
 
-            StringBuilder stringBuilder = new StringBuilder();
-            foreach (char c in value)
-            {
-                if (charClassArray[(uint)c] != 0)
-                {
-                    stringBuilder.Append("\\");
-                }
-
-                stringBuilder.Append(c);
-            }
-
-            return stringBuilder.ToString();
-        }
         /// <summary>
         /// Method to convert a Column object to the values used in a table create statement.
         /// </summary>
@@ -271,21 +272,36 @@ namespace DatabaseWrapper.Oracle
             }
             return query;
         }
+
+        /// <summary>
+        /// Query to create a sequence for a table.
+        /// </summary>
+        /// <param name="tableName">Table.</param>
+        /// <returns>String.</returns>
         public string CreateSequnce(string tableName) 
         {
             string query = $"CREATE SEQUENCE {tableName}_seq START WITH 1 INCREMENT BY 1";
             return query;
         }
-        public string CreateTrigger(string tableName)
+
+        /// <summary>
+        /// Query to create a trigger for a table.
+        /// </summary>
+        /// <param name="tableName">Table.</param>
+        /// <param name="primaryKey">Primary key.</param>
+        /// <returns>String.</returns>
+        public string CreateTrigger(string tableName, string primaryKey)
         {
-            string query = $"CREATE OR REPLACE TRIGGER {tableName}_seq_tr " +
-                           "BEFORE INSERT ON person FOR EACH ROW " +
-                           "WHEN (NEW.id IS NULL) " +
-                           "BEGIN " +
-                           "SELECT person_seq.NEXTVAL INTO :NEW.id FROM DUAL; " +
-                           "END; ";
+            string query = 
+                $"CREATE OR REPLACE TRIGGER {tableName}_seq_tr " +
+                $"BEFORE INSERT ON {tableName} FOR EACH ROW " +
+                $"WHEN (NEW.{primaryKey} IS NULL) " +
+                "BEGIN " +
+                $"SELECT {tableName}_seq.NEXTVAL INTO :NEW.{primaryKey} FROM DUAL; " +
+                "END; ";
             return query;
         }
+
         /// <summary>
         /// Retrieve a query used for dropping a table.
         /// </summary>
@@ -297,12 +313,18 @@ namespace DatabaseWrapper.Oracle
             string query = "DROP TABLE " + SanitizeString(tableName.ToUpper()) + "";
             return query;
         }
-        internal string DropSequenceQuery(string tableName)
+
+        /// <summary>
+        /// Query to drop a sequence.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <returns>String.</returns>
+        public string DropSequenceQuery(string tableName)
         {
-            //string query = "DECLARE cnt NUMBER;\r\n  BEGIN\r\n    SELECT COUNT(*) INTO cnt FROM user_tables WHERE table_name = '" + SanitizeString(tableName) + "';\r\n    IF cnt <> 0 THEN\r\n      EXECUTE IMMEDIATE 'DROP TABLE " + SanitizeString(tableName) + "';\r\n    END IF;\r\n  END;";
             string query = "DROP SEQUENCE " + SanitizeString(tableName.ToUpper()+"_SEQ") + "";
             return query;
         }
+
         /// <summary>
         /// Retrieve a query used for selecting data from a table.
         /// </summary>
@@ -411,23 +433,7 @@ namespace DatabaseWrapper.Oracle
 
             return ret;
         }
-        internal string InsertQueryParams(string tableName, Dictionary<string, object> keyValuePairs)
-        {
-            string ret =
-                "INSERT INTO " + SanitizeString(tableName) + " " +
-                "(";
-
-            string keys = "";
-            string vals = "";
-            BuildKeysValuesFromDictionaryParams(keyValuePairs, out keys, out vals);
-
-            ret += keys + ") " +
-                //"OUTPUT INSERTED.* " +
-                "VALUES " +
-                "(" + vals + ") ";
-
-            return ret;
-        }
+        
         /// <summary>
         /// Retrieve a query for inserting multiple rows into a table.
         /// </summary>
@@ -622,6 +628,30 @@ namespace DatabaseWrapper.Oracle
         public override string GenerateTimestampOffset(DateTimeOffset ts)
         {
             return ts.DateTime.ToString(TimestampFormat);
+        }
+
+        /// <summary>
+        /// Query to insert query parameters.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <param name="keyValuePairs">Key value pairs.</param>
+        /// <returns></returns>
+        public string InsertQueryParams(string tableName, Dictionary<string, object> keyValuePairs)
+        {
+            string ret =
+                "INSERT INTO " + SanitizeString(tableName) + " " +
+                "(";
+
+            string keys = "";
+            string vals = "";
+            BuildKeysValuesFromDictionaryParams(keyValuePairs, out keys, out vals);
+
+            ret += keys + ") " +
+                //"OUTPUT INSERTED.* " +
+                "VALUES " +
+                "(" + vals + ") ";
+
+            return ret;
         }
 
         #endregion
@@ -1193,6 +1223,7 @@ namespace DatabaseWrapper.Oracle
                 added++;
             }
         }
+        
         private void BuildKeysValuesFromDictionaryParams(Dictionary<string, object> keyValuePairs, out string keys, out string vals)
         {
             keys = "";
@@ -1216,6 +1247,7 @@ namespace DatabaseWrapper.Oracle
                 added++;
             }
         }
+        
         private bool IsExtendedCharacters(string data)
         {
             if (String.IsNullOrEmpty(data)) return false;
@@ -1380,6 +1412,29 @@ namespace DatabaseWrapper.Oracle
             }
 
             return keyValueClause;
+        }
+        
+        private static CharClass[] MakeCharClassArray()
+        {
+            CharClass[] array = new CharClass[65536];
+            string text = stringOfBackslashChars;
+            foreach (char c in text)
+            {
+                array[(uint)c] = CharClass.Backslash;
+            }
+
+            text = stringOfQuoteChars;
+            foreach (char c2 in text)
+            {
+                array[(uint)c2] = CharClass.Quote;
+            }
+
+            return array;
+        }
+
+        private static bool NeedsQuoting(string s)
+        {
+            return s.Any((char c) => charClassArray[(uint)c] != CharClass.None);
         }
 
         #endregion

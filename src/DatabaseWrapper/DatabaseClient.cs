@@ -17,7 +17,7 @@ using System.Threading;
 namespace DatabaseWrapper
 {
     /// <summary>
-    /// Database client for Microsoft SQL Server, Mysql, PostgreSQL, and Sqlite.
+    /// Database client for Microsoft SQL Server, Mysql, PostgreSQL, Oracle, and Sqlite.
     /// </summary>
     public class DatabaseClient : DatabaseClientBase, IDisposable
     {

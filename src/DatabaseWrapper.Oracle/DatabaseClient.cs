@@ -9,20 +9,29 @@ using DatabaseWrapper.Core;
 using ExpressionTree;
 using System.Threading;
 using Oracle.ManagedDataAccess.Client;
+
 namespace DatabaseWrapper.Oracle
 {
+    /// <summary>
+    /// Database client for Oracle.
+    /// </summary>
     public class DatabaseClient : DatabaseClientBase, IDisposable
     {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
         #region Public-Members
 
         /// <summary>
         /// The connection string used to connect to the database.
         /// </summary>
-        public new string ConnectionString {
-            get {
+        public new string ConnectionString
+        {
+            get
+            {
                 return _ConnectionString;
             }
-            private set {
+            private set
+            {
                 _ConnectionString = value;
             }
         }
@@ -31,11 +40,14 @@ namespace DatabaseWrapper.Oracle
         /// Timestamp format.
         /// Default is yyyy-MM-dd HH:mm:ss.ffffff.
         /// </summary>
-        public new string TimestampFormat {
-            get {
+        public new string TimestampFormat
+        {
+            get
+            {
                 return TimestampFormat;
             }
-            set {
+            set
+            {
                 if (String.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(TimestampFormat));
                 TimestampFormat = value;
             }
@@ -45,11 +57,14 @@ namespace DatabaseWrapper.Oracle
         /// Timestamp format with offset.
         /// Default is yyyy-MM-dd HH:mm:ss.ffffffzzz.
         /// </summary>
-        public new string TimestampOffsetFormat {
-            get {
+        public new string TimestampOffsetFormat
+        {
+            get
+            {
                 return TimestampOffsetFormat;
             }
-            set {
+            set
+            {
                 if (String.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(TimestampOffsetFormat));
                 TimestampOffsetFormat = value;
             }
@@ -58,8 +73,10 @@ namespace DatabaseWrapper.Oracle
         /// <summary>
         /// Maximum supported statement length.
         /// </summary>
-        public new int MaxStatementLength {
-            get {
+        public new int MaxStatementLength
+        {
+            get
+            {
                 return _MaxStatementLength;
             }
         }
@@ -67,11 +84,14 @@ namespace DatabaseWrapper.Oracle
         /// <summary>
         /// Database settings.
         /// </summary>
-        public new DatabaseSettings Settings {
-            get {
+        public new DatabaseSettings Settings
+        {
+            get
+            {
                 return _Settings;
             }
-            set {
+            set
+            {
                 if (value == null) throw new ArgumentNullException(nameof(Settings));
                 _Settings = value;
             }
@@ -83,6 +103,7 @@ namespace DatabaseWrapper.Oracle
         public new event EventHandler<DatabaseQueryEvent> QueryEvent = delegate { };
 
         #endregion
+
         #region Private-Members
 
         private bool _Disposed = false;
@@ -140,6 +161,7 @@ namespace DatabaseWrapper.Oracle
         }
 
         #endregion
+
         #region Public-Methods
 
         /// <summary>
@@ -170,6 +192,11 @@ namespace DatabaseWrapper.Oracle
 
             return tableNames;
         }
+
+        /// <summary>
+        /// Retrieve the list of sequences.
+        /// </summary>
+        /// <returns>List of sequences.</returns>
         public List<string> ListSequences()
         {
             List<string> tableNames = new List<string>();
@@ -185,6 +212,7 @@ namespace DatabaseWrapper.Oracle
 
             return tableNames;
         }
+
         /// <summary>
         /// List all tables in the database.
         /// </summary>
@@ -216,11 +244,18 @@ namespace DatabaseWrapper.Oracle
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             return ListTables().Contains(tableName.ToUpper());
         }
+
+        /// <summary>
+        /// Check if a sequence exists.
+        /// </summary>
+        /// <param name="tableName">Table name.</param>
+        /// <returns>True if a sequence exists.</returns>
         public bool SequenceExists(string tableName)
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             return ListSequences().Contains(tableName.ToUpper() + "_SEQ");
         }
+
         /// <summary>
         /// Check if a table exists in the database.
         /// </summary>
@@ -291,16 +326,21 @@ namespace DatabaseWrapper.Oracle
 
             return columns;
         }
-        public bool IsPrimary(string database, string table, string column)
+        
+        /// <summary>
+        /// Determine if a column is the primary key for a given database table.
+        /// </summary>
+        /// <param name="databaseName">Database.</param>
+        /// <param name="tableName">Table.</param>
+        /// <param name="column">Column.</param>
+        /// <returns>True if primary key.</returns>
+        public bool IsPrimary(string databaseName, string tableName, string column)
         {
-            bool IsPrimary = false;
-            DataTable result = Query(_Helper.IsPrimaryKeyQuery(_Settings.DatabaseName, table, column));
-            if (result.Rows.Count > 0)
-            {
-                IsPrimary = true;
-            }
-            return IsPrimary;
+            DataTable result = Query(_Helper.IsPrimaryKeyQuery(_Settings.DatabaseName, tableName, column));
+            if (result.Rows.Count > 0) return true;
+            return false;
         }
+
         /// <summary>
         /// Show the columns and column metadata from a specific table.
         /// </summary>
@@ -416,14 +456,17 @@ namespace DatabaseWrapper.Oracle
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (columns == null || columns.Count < 1) throw new ArgumentNullException(nameof(columns));
+
+            string primaryKeyCol = null;
+            foreach (Column col in columns)
+                if (col.PrimaryKey) primaryKeyCol = col.Name;
+
+            string query = _Helper.CreateTableQuery(tableName, columns);
+            Query(query);
+            if (query.Contains("PRIMARY KEY"))
             {
-                string query = _Helper.CreateTableQuery(tableName, columns);
-                Query(query);
-                if (query.Contains("PRIMARY KEY"))
-                {
-                    Query(_Helper.CreateSequnce(tableName));
-                    Query(_Helper.CreateTrigger(tableName));
-                }
+                Query(_Helper.CreateSequnce(tableName));
+                Query(_Helper.CreateTrigger(tableName, primaryKeyCol));
             }
         }
 
@@ -717,11 +760,11 @@ namespace DatabaseWrapper.Oracle
         {
             if (String.IsNullOrEmpty(tableName)) throw new ArgumentNullException(nameof(tableName));
             if (keyValuePairList == null || keyValuePairList.Count < 1) throw new ArgumentNullException(nameof(keyValuePairList));
-            foreach (Dictionary<string, object> keyValuePair in keyValuePairList) 
+            foreach (Dictionary<string, object> keyValuePair in keyValuePairList)
             {
-                QueryParams(_Helper.InsertQueryParams(tableName, keyValuePair),keyValuePair);
+                QueryParams(_Helper.InsertQueryParams(tableName, keyValuePair), keyValuePair);
             }
-            
+
         }
 
         /// <summary>
@@ -887,164 +930,7 @@ namespace DatabaseWrapper.Oracle
                 QueryEvent?.Invoke(this, new DatabaseQueryEvent(query, totalMs, result, ex));
             }
         }
-        internal DataTable QueryParams(string query, Dictionary<string, object> keyValuePairs)
-        {
-            if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
-            if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
 
-            DateTime startTime = DateTime.Now;
-            DataTable result = new DataTable();
-            Exception ex = null;
-
-            if (_Settings.Debug.EnableForQueries && _Settings.Debug.Logger != null)
-                _Settings.Debug.Logger(_Header + "query: " + query);
-
-            try
-            {
-                using (OracleConnection conn = new OracleConnection(_ConnectionString))
-                {
-                    conn.Open();
-
-                    using (OracleCommand cmd = new OracleCommand())
-                    {
-                        cmd.Connection = conn;
-                        cmd.Parameters.Clear();
-                        List<OracleParameter> opc = GetParametersFromkeyValuePairs(keyValuePairs);
-                        foreach (OracleParameter param in opc)
-                        {
-                            cmd.Parameters.Add(param);
-                        }
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                        cmd.CommandText = query;
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-
-                        using (OracleDataAdapter sda = new OracleDataAdapter(cmd))
-                        {
-                            DataSet ds = new DataSet();
-                            sda.Fill(ds);
-                            if (ds != null)
-                            {
-                                if (ds.Tables != null)
-                                {
-                                    if (ds.Tables.Count > 0)
-                                    {
-                                        result = ds.Tables[0];
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    conn.Close();
-                }
-
-                if (_Settings.Debug.EnableForResults && _Settings.Debug.Logger != null)
-                {
-                    if (result != null)
-                    {
-                        _Settings.Debug.Logger(_Header + "result: " + result.Rows.Count + " rows");
-                    }
-                    else
-                    {
-                        _Settings.Debug.Logger(_Header + "result: null");
-                    }
-                }
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                e.Data.Add("Query", query);
-                ex = e;
-                throw;
-            }
-            finally
-            {
-                double totalMs = (DateTime.Now - startTime).TotalMilliseconds;
-                QueryEvent?.Invoke(this, new DatabaseQueryEvent(query, totalMs, result, ex));
-            }
-        }
-        internal List<OracleParameter> GetParametersFromkeyValuePairs(Dictionary<string, object> keyValuePairs)
-        {
-            string vals = "";
-            List<OracleParameter> prm = new List<OracleParameter>();
-            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
-            {
-
-                if (currKvp.Value is DateTime
-                    || currKvp.Value is DateTime?)
-                {
-                    OracleParameter para = new OracleParameter();
-                    para.ParameterName = ":" + currKvp.Key;
-                    para.Direction = ParameterDirection.Input;
-                    para.Value = currKvp.Value;
-                    prm.Add(para);
-                }
-                else if (currKvp.Value is DateTimeOffset
-                    || currKvp.Value is DateTimeOffset?)
-                {
-                    OracleParameter para = new OracleParameter();
-                    para.ParameterName = ":" + currKvp.Key;
-                    para.Direction = ParameterDirection.Input;
-                    para.Value = currKvp.Value;
-                    prm.Add(para);
-                }
-                else if (currKvp.Value is int
-                    || currKvp.Value is long
-                    || currKvp.Value is decimal)
-                {
-                    OracleParameter para = new OracleParameter();
-                    para.ParameterName = ":" + currKvp.Key;
-                    para.Direction = ParameterDirection.Input;
-                    para.Value = currKvp.Value;
-                    prm.Add(para);
-                }
-                else if (currKvp.Value is bool)
-                {
-                    string val = ((bool)currKvp.Value ? "1" : "0");
-                    OracleParameter para = new OracleParameter();
-                    para.ParameterName = ":" + currKvp.Key;
-                    para.Direction = ParameterDirection.Input;
-                    para.Value = val;
-                    prm.Add(para);
-                }
-                else if (currKvp.Value is byte[])
-                {
-                    OracleParameter para = new OracleParameter();
-                    para.ParameterName = ":" + currKvp.Key;
-                    para.Direction = ParameterDirection.Input;
-                    para.Value = currKvp.Value;
-                    prm.Add(para);
-                }
-                else if (currKvp.Value is string)
-                {
-                    OracleParameter para = new OracleParameter();
-                    para.ParameterName = ":" + currKvp.Key;
-                    para.Direction = ParameterDirection.Input;
-                    para.Value = currKvp.Value;
-                    prm.Add(para);
-                }
-                else if (currKvp.Value is Guid)
-                {
-                    OracleParameter para = new OracleParameter();
-                    para.ParameterName = ":" + currKvp.Key;
-                    para.Direction = ParameterDirection.Input;
-                    para.Value = currKvp.Value.ToString();
-                    prm.Add(para);
-                }
-                else 
-                {
-                    OracleParameter para = new OracleParameter();
-                    para.ParameterName = ":" + currKvp.Key;
-                    para.Direction = ParameterDirection.Input;
-                    para.Value = currKvp.Value;
-                    prm.Add(para);
-                }
-
-
-            }
-            return prm;
-        }
         /// <summary>
         /// Execute a query.
         /// </summary>
@@ -1312,6 +1198,165 @@ namespace DatabaseWrapper.Oracle
             //}
         }
 
+        private DataTable QueryParams(string query, Dictionary<string, object> keyValuePairs)
+        {
+            if (String.IsNullOrEmpty(query)) throw new ArgumentNullException(query);
+            if (query.Length > MaxStatementLength) throw new ArgumentException("Query exceeds maximum statement length of " + MaxStatementLength + " characters.");
+
+            DateTime startTime = DateTime.Now;
+            DataTable result = new DataTable();
+            Exception ex = null;
+
+            if (_Settings.Debug.EnableForQueries && _Settings.Debug.Logger != null)
+                _Settings.Debug.Logger(_Header + "query: " + query);
+
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(_ConnectionString))
+                {
+                    conn.Open();
+
+                    using (OracleCommand cmd = new OracleCommand())
+                    {
+                        cmd.Connection = conn;
+                        cmd.Parameters.Clear();
+                        List<OracleParameter> opc = GetParametersFromkeyValuePairs(keyValuePairs);
+                        foreach (OracleParameter param in opc)
+                        {
+                            cmd.Parameters.Add(param);
+                        }
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+                        cmd.CommandText = query;
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+
+                        using (OracleDataAdapter sda = new OracleDataAdapter(cmd))
+                        {
+                            DataSet ds = new DataSet();
+                            sda.Fill(ds);
+                            if (ds != null)
+                            {
+                                if (ds.Tables != null)
+                                {
+                                    if (ds.Tables.Count > 0)
+                                    {
+                                        result = ds.Tables[0];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    conn.Close();
+                }
+
+                if (_Settings.Debug.EnableForResults && _Settings.Debug.Logger != null)
+                {
+                    if (result != null)
+                    {
+                        _Settings.Debug.Logger(_Header + "result: " + result.Rows.Count + " rows");
+                    }
+                    else
+                    {
+                        _Settings.Debug.Logger(_Header + "result: null");
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                e.Data.Add("Query", query);
+                ex = e;
+                throw;
+            }
+            finally
+            {
+                double totalMs = (DateTime.Now - startTime).TotalMilliseconds;
+                QueryEvent?.Invoke(this, new DatabaseQueryEvent(query, totalMs, result, ex));
+            }
+        }
+
+        private List<OracleParameter> GetParametersFromkeyValuePairs(Dictionary<string, object> keyValuePairs)
+        {
+            List<OracleParameter> prm = new List<OracleParameter>();
+            foreach (KeyValuePair<string, object> currKvp in keyValuePairs)
+            {
+                if (currKvp.Value is DateTime
+                    || currKvp.Value is DateTime?)
+                {
+                    OracleParameter para = new OracleParameter();
+                    para.ParameterName = ":" + currKvp.Key;
+                    para.Direction = ParameterDirection.Input;
+                    para.Value = currKvp.Value;
+                    prm.Add(para);
+                }
+                else if (currKvp.Value is DateTimeOffset
+                    || currKvp.Value is DateTimeOffset?)
+                {
+                    OracleParameter para = new OracleParameter();
+                    para.ParameterName = ":" + currKvp.Key;
+                    para.Direction = ParameterDirection.Input;
+                    para.Value = currKvp.Value;
+                    prm.Add(para);
+                }
+                else if (currKvp.Value is int
+                    || currKvp.Value is long
+                    || currKvp.Value is decimal)
+                {
+                    OracleParameter para = new OracleParameter();
+                    para.ParameterName = ":" + currKvp.Key;
+                    para.Direction = ParameterDirection.Input;
+                    para.Value = currKvp.Value;
+                    prm.Add(para);
+                }
+                else if (currKvp.Value is bool)
+                {
+                    string val = ((bool)currKvp.Value ? "1" : "0");
+                    OracleParameter para = new OracleParameter();
+                    para.ParameterName = ":" + currKvp.Key;
+                    para.Direction = ParameterDirection.Input;
+                    para.Value = val;
+                    prm.Add(para);
+                }
+                else if (currKvp.Value is byte[])
+                {
+                    OracleParameter para = new OracleParameter();
+                    para.ParameterName = ":" + currKvp.Key;
+                    para.Direction = ParameterDirection.Input;
+                    para.Value = currKvp.Value;
+                    prm.Add(para);
+                }
+                else if (currKvp.Value is string)
+                {
+                    OracleParameter para = new OracleParameter();
+                    para.ParameterName = ":" + currKvp.Key;
+                    para.Direction = ParameterDirection.Input;
+                    para.Value = currKvp.Value;
+                    prm.Add(para);
+                }
+                else if (currKvp.Value is Guid)
+                {
+                    OracleParameter para = new OracleParameter();
+                    para.ParameterName = ":" + currKvp.Key;
+                    para.Direction = ParameterDirection.Input;
+                    para.Value = currKvp.Value.ToString();
+                    prm.Add(para);
+                }
+                else
+                {
+                    OracleParameter para = new OracleParameter();
+                    para.ParameterName = ":" + currKvp.Key;
+                    para.Direction = ParameterDirection.Input;
+                    para.Value = currKvp.Value;
+                    prm.Add(para);
+                }
+            }
+
+            return prm;
+        }
+
         #endregion
+
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 }

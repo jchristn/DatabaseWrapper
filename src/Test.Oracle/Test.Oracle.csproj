@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-   <OutputType>Exe</OutputType>
-		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFrameworks>net48;net6.0;net7.0;net8.0</TargetFrameworks>
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-  </PropertyGroup>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DatabaseWrapper.Oracle\DatabaseWrapper.Oracle.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DatabaseWrapper.Oracle\DatabaseWrapper.Oracle.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Update="headshot.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

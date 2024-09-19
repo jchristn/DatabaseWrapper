@@ -2,12 +2,13 @@
 
 ## Current Version
 
-v6.0.x
+v6.x
 
-- Minor breaking changes (API name changes)
+- Oracle support (thank you @Skimmenthal13)
 - Asynchronous APIs
 - Updated dependencies
 - Bugfixes
+- Minor breaking changes (API name changes)
 
 ## Previous Versions
 

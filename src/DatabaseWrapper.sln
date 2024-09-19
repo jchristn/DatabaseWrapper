@@ -45,7 +45,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SqlServerAsync", "Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseWrapper.Oracle", "DatabaseWrapper.Oracle\DatabaseWrapper.Oracle.csproj", "{510D84C0-F8F9-4D01-A82F-81F9EB7F961C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Oracle", "Test.Oracle\Test.Oracle.csproj", "{1DA521CE-105D-4E38-BCEE-B8BE2886583C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Oracle", "Test.Oracle\Test.Oracle.csproj", "{1DA521CE-105D-4E38-BCEE-B8BE2886583C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -103,7 +103,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="col">Column.</param>
         /// <returns>String.</returns>
         public override string ColumnToCreateQuery(Column col)
-        { 
+        {
             string ret =
                 "`" + SanitizeString(col.Name) + "` ";
 
@@ -228,7 +228,7 @@ namespace DatabaseWrapper.Mysql
         /// <param name="resultOrder">Result order.</param>
         /// <returns>String.</returns>
         public override string SelectQuery(string tableName, int? indexStart, int? maxResults, List<string> returnFields, Expr filter, ResultOrder[] resultOrder)
-        { 
+        {
             string query = "";
             string whereClause = "";
 
@@ -316,8 +316,8 @@ namespace DatabaseWrapper.Mysql
 
             ret += keys + ") " +
                 "VALUES " +
-                "(" + vals + "); " + 
-                "SELECT LAST_INSERT_ID() AS id; " + 
+                "(" + vals + "); " +
+                "SELECT LAST_INSERT_ID() AS id; " +
                 "COMMIT; ";
 
             return ret;
@@ -371,7 +371,7 @@ namespace DatabaseWrapper.Mysql
                 keyValueClause + " ";
 
             if (filter != null) ret += "WHERE " + ExpressionToWhereClause(filter) + " ";
-            
+
             return ret;
         }
 

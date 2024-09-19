@@ -2,17 +2,17 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>net48;net6.0;net7.0;net8.0</TargetFrameworks>
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Inputty" Version="1.0.5" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+		<PackageReference Include="Inputty" Version="1.0.12" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\DatabaseWrapper\DatabaseWrapper.csproj" />
+		<ProjectReference Include="..\DatabaseWrapper\DatabaseWrapper.csproj" />
 	</ItemGroup>
 
 </Project>

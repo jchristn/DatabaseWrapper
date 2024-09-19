@@ -52,7 +52,35 @@ namespace Test
                 _Settings.Debug.EnableForQueries = true;
                 _Settings.Debug.EnableForResults = true;
 
-                _Database = new DatabaseClient(_Settings); 
+                _Database = new DatabaseClient(_Settings);
+
+                #endregion
+
+                #region Sanitize-Data
+
+                string[] attacks = {
+                    "' OR '1'='1",
+                    "'; DROP TABLE Users; --",
+                    "' UNION SELECT username, password FROM Users--",
+                    "' OR 1=1--",
+                    "admin' --",
+                    "'; EXEC xp_cmdshell 'net user';--",
+                    "' OR 'x'='x",
+                    "1 OR 1=1",
+                    "1; SELECT * FROM Users",
+                    "' OR id IS NOT NULL OR id = '",
+                    "username' AND 1=0 UNION ALL SELECT 'admin', '81dc9bdb52d04dc20036dbd8313ed055'--",
+                    "' OR '1'='1' /*",
+                    "' UNION ALL SELECT NULL, NULL, NULL, CONCAT(username,':',password) FROM Users--",
+                    "' AND (SELECT * FROM (SELECT(SLEEP(5)))bAKL) AND 'vRxe'='vRxe",
+                    "'; WAITFOR DELAY '0:0:5'--",
+                    "The quick brown fox jumped over the lazy dog"
+                };
+
+                for (int i = 0; i < 8; i++) Console.WriteLine("");
+                Console.WriteLine("Sanitizing input strings");
+                foreach (string attack in attacks)
+                    Console.WriteLine("| " + attack + " | Sanitized: " + _Database.SanitizeString(attack));
 
                 #endregion
 

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Data; 
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MySql;
-using MySql.Data.MySqlClient; 
+using MySql.Data.MySqlClient;
 using DatabaseWrapper.Core;
 using ExpressionTree;
 using System.Threading;
@@ -24,7 +24,7 @@ namespace DatabaseWrapper.Mysql
         /// The connection string used to connect to the database.
         /// </summary>
         public new string ConnectionString
-        { 
+        {
             get
             {
                 return _ConnectionString;
@@ -116,7 +116,7 @@ namespace DatabaseWrapper.Mysql
         private string _CountColumnName = "__count__";
         private string _SumColumnName = "__sum__";
         private MysqlHelper _Helper = new MysqlHelper();
-        
+
         #endregion
 
         #region Constructors-and-Factories
@@ -142,11 +142,11 @@ namespace DatabaseWrapper.Mysql
         /// <param name="username">The username to use when authenticating with the database server.</param>
         /// <param name="password">The password to use when authenticating with the database server.</param> 
         /// <param name="database">The name of the database with which to connect.</param>
-        public DatabaseClient( 
+        public DatabaseClient(
             string serverIp,
             int serverPort,
             string username,
-            string password, 
+            string password,
             string database)
         {
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
@@ -158,7 +158,7 @@ namespace DatabaseWrapper.Mysql
 
             SetMaxStatementLength();
         }
-         
+
         #endregion
 
         #region Public-Methods
@@ -1096,9 +1096,9 @@ namespace DatabaseWrapper.Mysql
         public override string SanitizeString(string s)
         {
             if (String.IsNullOrEmpty(s)) return s;
-            return SanitizeString(s);
+            return _Helper.SanitizeString(s);
         }
-         
+
         #endregion
 
         #region Private-Methods
@@ -1115,19 +1115,19 @@ namespace DatabaseWrapper.Mysql
             }
 
             if (disposing)
-            { 
+            {
                 // placeholder
             }
 
             _Disposed = true;
         }
-         
+
         private void SetMaxStatementLength()
         {
             // https://stackoverflow.com/questions/16335011/what-is-maximum-query-size-for-mysql
             DataTable dt = Query("SHOW VARIABLES LIKE 'max_allowed_packet'");
-            if (dt != null 
-                && dt.Rows.Count == 1 
+            if (dt != null
+                && dt.Rows.Count == 1
                 && dt.Columns.Contains("Value"))
             {
                 _MaxStatementLength = Convert.ToInt32(dt.Rows[0]["Value"]);

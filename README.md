@@ -26,12 +26,13 @@ Core features:
 - Support for SQL Server, Sqlite, PostgreSQL, MySQL, MariaDB, both on-premises and in the cloud
 - Both synchronous and asynchronous APIs
 
-## New in v6.0.x
+## New in v6.x
 
-- Minor breaking changes (API name changes)
+- Oracle support (thank you @Skimmenthal13)
 - Asynchronous APIs
 - Updated dependencies
 - Bugfixes
+- Minor breaking changes (API name changes)
 
 ## Special Thanks
 

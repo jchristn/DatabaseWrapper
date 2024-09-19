@@ -180,7 +180,7 @@ namespace Test.DatabaseConsole
                     }
                     else if (userInput.StartsWith("describe "))
                     {
-                        string[] parts = userInput.Split(' ', 2);
+                        string[] parts = userInput.Split(new[] { ' ' }, 2);
                         if (parts != null && parts.Length == 2)
                         {
                             List<Column> cols = _Database.DescribeTable(parts[1]);

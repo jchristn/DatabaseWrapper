@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net462;net48;net6.0;net7.0</TargetFrameworks>
-		<Version>6.0.7</Version>
-		<PackageReleaseNotes>Dependency update</PackageReleaseNotes>
+		<TargetFrameworks>net48;net6.0;net7.0;net8.0</TargetFrameworks>
+		<Version>6.1.0</Version>
+		<PackageReleaseNotes>Oracle support (thank you @Skimmenthal13!), bugfixes, dependency updates.</PackageReleaseNotes>
+		<PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql oracle dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>DatabaseWrapper.Core.xml</DocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
@@ -14,66 +16,20 @@
 		<RepositoryUrl>https://github.com/jchristn/DatabaseWrapper</RepositoryUrl>
 		<RepositoryType>Github</RepositoryType>
 		<PackageLicenseUrl></PackageLicenseUrl>
-		<PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
 		<PackageIconUrl></PackageIconUrl>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
 		<PackageIcon>icon.png</PackageIcon>
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-		<SignAssembly>False</SignAssembly>
-		<AssemblyOriginatorKeyFile>../../DatabaseWrapper.snk</AssemblyOriginatorKeyFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp3.1|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net461|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-	</PropertyGroup>
-
-
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netcoreapp3.1|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net461|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
-		<DocumentationFile>DatabaseWrapper.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="..\..\README.md">
-		  <Pack>True</Pack>
-		  <PackagePath>\</PackagePath>
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
 		</None>
 		<None Include="assets\icon.png">
 			<Pack>True</Pack>
@@ -92,11 +48,11 @@
 	</Target>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\DatabaseWrapper.Mysql\DatabaseWrapper.Mysql.csproj" />
-	  <ProjectReference Include="..\DatabaseWrapper.Oracle\DatabaseWrapper.Oracle.csproj" />
-	  <ProjectReference Include="..\DatabaseWrapper.Postgresql\DatabaseWrapper.Postgresql.csproj" />
-	  <ProjectReference Include="..\DatabaseWrapper.Sqlite\DatabaseWrapper.Sqlite.csproj" />
-	  <ProjectReference Include="..\DatabaseWrapper.SqlServer\DatabaseWrapper.SqlServer.csproj" />
+		<ProjectReference Include="..\DatabaseWrapper.Mysql\DatabaseWrapper.Mysql.csproj" />
+		<ProjectReference Include="..\DatabaseWrapper.Oracle\DatabaseWrapper.Oracle.csproj" />
+		<ProjectReference Include="..\DatabaseWrapper.Postgresql\DatabaseWrapper.Postgresql.csproj" />
+		<ProjectReference Include="..\DatabaseWrapper.Sqlite\DatabaseWrapper.Sqlite.csproj" />
+		<ProjectReference Include="..\DatabaseWrapper.SqlServer\DatabaseWrapper.SqlServer.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

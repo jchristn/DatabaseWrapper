@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Data; 
+using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
 using Npgsql;
 using ExpressionTree;
 using DatabaseWrapper.Core;
@@ -18,12 +18,12 @@ namespace DatabaseWrapper.Postgresql
     public class DatabaseClient : DatabaseClientBase, IDisposable
     {
         #region Public-Members
-         
+
         /// <summary>
         /// The connection string used to connect to the database.
         /// </summary>
         public new string ConnectionString
-        { 
+        {
             get
             {
                 return _ConnectionString;
@@ -108,8 +108,8 @@ namespace DatabaseWrapper.Postgresql
         private bool _Disposed = false;
         private string _Header = "[DatabaseWrapper.Postgresql] ";
         private DatabaseSettings _Settings = null;
-        private string _ConnectionString = null;   
-          
+        private string _ConnectionString = null;
+
         private Random _Random = new Random();
 
         private string _CountColumnName = "__count__";
@@ -139,11 +139,11 @@ namespace DatabaseWrapper.Postgresql
         /// <param name="username">The username to use when authenticating with the database server.</param>
         /// <param name="password">The password to use when authenticating with the database server.</param> 
         /// <param name="database">The name of the database with which to connect.</param>
-        public DatabaseClient( 
+        public DatabaseClient(
             string serverIp,
             int serverPort,
             string username,
-            string password, 
+            string password,
             string database)
         {
             if (String.IsNullOrEmpty(serverIp)) throw new ArgumentNullException(nameof(serverIp));
@@ -153,7 +153,7 @@ namespace DatabaseWrapper.Postgresql
             _Settings = new DatabaseSettings(DbTypeEnum.Postgresql, serverIp, serverPort, username, password, database);
             _ConnectionString = _Helper.GenerateConnectionString(_Settings);
         }
-         
+
         #endregion
 
         #region Public-Methods
@@ -1014,7 +1014,7 @@ namespace DatabaseWrapper.Postgresql
             if (String.IsNullOrEmpty(s)) return s;
             return _Helper.SanitizeString(s);
         }
-         
+
         #endregion
 
         #region Private-Methods
@@ -1031,13 +1031,13 @@ namespace DatabaseWrapper.Postgresql
             }
 
             if (disposing)
-            { 
+            {
                 // placeholder
             }
 
             _Disposed = true;
         }
-         
+
         #endregion
     }
 }
