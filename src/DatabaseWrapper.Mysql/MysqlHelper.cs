@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MySql.Data;
-using MySql.Data.MySqlClient;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-
-namespace DatabaseWrapper.Mysql
+﻿namespace DatabaseWrapper.Mysql
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using MySql.Data;
+    using MySql.Data.MySqlClient;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+
     /// <summary>
     /// MySQL implementation of helper properties and methods.
     /// </summary>

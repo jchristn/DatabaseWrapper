@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MySql;
-using MySql.Data.MySqlClient;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-using System.Threading;
-
-namespace DatabaseWrapper.Mysql
+﻿namespace DatabaseWrapper.Mysql
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Concurrent;
+    using System.Data;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using MySql;
+    using MySql.Data.MySqlClient;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+    using System.Threading;
+
     /// <summary>
     /// Database client for Mysql.
     /// </summary>

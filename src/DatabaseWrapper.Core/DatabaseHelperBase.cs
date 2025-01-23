@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ExpressionTree;
-
-namespace DatabaseWrapper.Core
+﻿namespace DatabaseWrapper.Core
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    using ExpressionTree;
+
     /// <summary>
     /// Base implementation of helper properties and methods.
     /// </summary>

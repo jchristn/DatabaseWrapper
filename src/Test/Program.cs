@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DatabaseWrapper;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-using GetSomeInput;
-
-namespace Test
+﻿namespace Test
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+    using GetSomeInput;
+
     class Program
     {
         static Random _Random = new Random(DateTime.Now.Millisecond);
@@ -243,7 +243,7 @@ namespace Test
             }
             catch (Exception e)
             {
-                ExceptionConsole("Main", "Outer exception", e);
+                Console.WriteLine(e.ToString());
             }
         }
 
@@ -385,7 +385,10 @@ namespace Test
 
             Expr e = new Expr("lastname", OperatorEnum.StartsWith, "lasté");
 
-            DataTable result = _Database.Select(_Table, 0, 5, returnFields, e);
+            ResultOrder[] ro = new ResultOrder[1];
+            ro[0] = new ResultOrder("id", OrderDirectionEnum.Ascending);
+
+            DataTable result = _Database.Select(_Table, 0, 5, returnFields, e, ro);
             if (result != null && result.Rows != null && result.Rows.Count > 0)
             {
                 foreach (DataRow row in result.Rows)

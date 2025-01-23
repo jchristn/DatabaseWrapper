@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DatabaseWrapper;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-using GetSomeInput;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
-
-namespace Test.DatabaseConsole
+﻿namespace Test.DatabaseConsole
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+    using GetSomeInput;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json.Linq;
+
     class Program
     {
         static Random _Random = new Random(DateTime.Now.Millisecond);

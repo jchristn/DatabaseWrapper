@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using DatabaseWrapper.Core;
-using ExpressionTree;
-
-namespace DatabaseWrapper.Oracle
+﻿namespace DatabaseWrapper.Oracle
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+
     /// <summary>
     /// Oracle implementation of helper properties and methods.
     /// </summary>

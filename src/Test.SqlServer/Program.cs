@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DatabaseWrapper.SqlServer;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-
-namespace Test
+﻿namespace Test
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper.SqlServer;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+
     class Program
     {
         static Random _Random = new Random(DateTime.Now.Millisecond);
@@ -230,7 +230,7 @@ namespace Test
             }
             catch (Exception e)
             {
-                ExceptionConsole("Main", "Outer exception", e);
+                Console.WriteLine(e.ToString());
             }
         }
 
@@ -465,32 +465,6 @@ namespace Test
             }
 
             return ret;
-        }
-
-        private static void ExceptionConsole(string method, string text, Exception e)
-        {
-            var st = new StackTrace(e, true);
-            var frame = st.GetFrame(0);
-            int line = frame.GetFileLineNumber();
-            string filename = frame.GetFileName();
-
-            Console.WriteLine("---");
-            Console.WriteLine("An exception was encountered which triggered this message.");
-            Console.WriteLine("  Method: " + method);
-            Console.WriteLine("  Text: " + text);
-            Console.WriteLine("  Type: " + e.GetType().ToString());
-            Console.WriteLine("  Data: " + e.Data);
-            Console.WriteLine("  Inner: " + e.InnerException);
-            Console.WriteLine("  Message: " + e.Message);
-            Console.WriteLine("  Source: " + e.Source);
-            Console.WriteLine("  StackTrace: " + e.StackTrace);
-            Console.WriteLine("  Stack: " + StackToString());
-            Console.WriteLine("  Line: " + line);
-            Console.WriteLine("  File: " + filename);
-            Console.WriteLine("  ToString: " + e.ToString());
-            Console.WriteLine("---");
-
-            return;
         }
 
         private static void Logger(string msg)

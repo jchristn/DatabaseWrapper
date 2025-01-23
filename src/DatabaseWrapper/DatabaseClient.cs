@@ -1,21 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Data; 
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks; 
-using DatabaseWrapper.Core;
-using DatabaseWrapper.Mysql;
-using DatabaseWrapper.Postgresql;
-using DatabaseWrapper.Sqlite;
-using DatabaseWrapper.SqlServer;
-using ExpressionTree;
-using Microsoft.Extensions.Primitives;
-using System.Threading;
-
-namespace DatabaseWrapper
+﻿namespace DatabaseWrapper
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Concurrent;
+    using System.Data;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper.Core;
+    using DatabaseWrapper.Mysql;
+    using DatabaseWrapper.Postgresql;
+    using DatabaseWrapper.Sqlite;
+    using DatabaseWrapper.SqlServer;
+    using ExpressionTree;
+    using Microsoft.Extensions.Primitives;
+    using System.Threading;
+
     /// <summary>
     /// Database client for Microsoft SQL Server, Mysql, PostgreSQL, Oracle, and Sqlite.
     /// </summary>

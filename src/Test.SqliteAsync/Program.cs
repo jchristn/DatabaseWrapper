@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DatabaseWrapper.Sqlite;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-
-namespace Test.Sqlite
+﻿namespace Test.Sqlite
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper.Sqlite;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+
     class Program
     {
         static DatabaseSettings _Settings;
@@ -211,7 +211,7 @@ namespace Test.Sqlite
             }
             catch (Exception e)
             {
-                ExceptionConsole("Main", "Outer exception", e);
+                Console.WriteLine(e.ToString());
             }
         }
 

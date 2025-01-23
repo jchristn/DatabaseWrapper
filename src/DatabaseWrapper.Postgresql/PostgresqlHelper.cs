@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Npgsql;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-
-namespace DatabaseWrapper.Postgresql
+﻿namespace DatabaseWrapper.Postgresql
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Npgsql;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+
     /// <summary>
     /// PostgreSQL implementation of helper properties and methods.
     /// </summary>

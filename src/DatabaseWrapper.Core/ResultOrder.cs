@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DatabaseWrapper.Core
+﻿namespace DatabaseWrapper.Core
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
     /// <summary>
     /// Describe on which columns and in which direction results should be ordered.
     /// </summary>

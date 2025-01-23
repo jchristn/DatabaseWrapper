@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-
-namespace DatabaseWrapper.Sqlite
+﻿namespace DatabaseWrapper.Sqlite
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+
     /// <summary>
     /// Sqlite implementation of helper properties and methods.
     /// </summary>

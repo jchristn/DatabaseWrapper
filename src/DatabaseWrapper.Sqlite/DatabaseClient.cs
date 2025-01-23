@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Data;  
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-using System.Threading;
-
-namespace DatabaseWrapper.Sqlite
+﻿namespace DatabaseWrapper.Sqlite
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Concurrent;
+    using System.Data;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Microsoft.Data.Sqlite;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+    using System.Threading;
+
     /// <summary>
     /// Database client for Sqlite.
     /// </summary>

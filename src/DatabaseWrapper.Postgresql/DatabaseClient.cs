@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Npgsql;
-using ExpressionTree;
-using DatabaseWrapper.Core;
-using System.Threading;
-
-namespace DatabaseWrapper.Postgresql
+﻿namespace DatabaseWrapper.Postgresql
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Concurrent;
+    using System.Data;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Npgsql;
+    using ExpressionTree;
+    using DatabaseWrapper.Core;
+    using System.Threading;
+
     /// <summary>
     /// Database client for PostgreSQL.
     /// </summary>

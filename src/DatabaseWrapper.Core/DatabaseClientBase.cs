@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-using System.Threading;
-
-namespace DatabaseWrapper.Core
+﻿namespace DatabaseWrapper.Core
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Concurrent;
+    using System.Data;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+    using System.Threading;
+
     /// <summary>
     /// Database client base.
     /// </summary>

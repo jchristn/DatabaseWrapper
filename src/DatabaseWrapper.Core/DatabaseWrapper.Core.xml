@@ -686,6 +686,11 @@
             The name of the database.
             </summary>
         </member>
+        <member name="P:DatabaseWrapper.Core.DatabaseSettings.RequireEncryption">
+            <summary>
+            Boolean indicating if encryption should be required.
+            </summary>
+        </member>
         <member name="P:DatabaseWrapper.Core.DatabaseSettings.Debug">
             <summary>
             Debug settings.

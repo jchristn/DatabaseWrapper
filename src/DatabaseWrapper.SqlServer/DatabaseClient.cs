@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks; 
-using DatabaseWrapper.Core;
-using ExpressionTree;
-using System.Threading;
-
-namespace DatabaseWrapper.SqlServer
+﻿namespace DatabaseWrapper.SqlServer
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Concurrent;
+    using System.Data;
+    using System.Data.SqlClient;
+    using System.Linq;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+    using Microsoft.Data;
+
     /// <summary>
     /// Database client for Microsoft SQL Server.
     /// </summary>
@@ -760,23 +761,19 @@ namespace DatabaseWrapper.SqlServer
 
             if (_Settings.Debug.EnableForQueries && _Settings.Debug.Logger != null)
                 _Settings.Debug.Logger(_Header + "query: " + query);
-
             try
             {
-                using (SqlConnection conn = new SqlConnection(_ConnectionString))
+                using (var conn = new Microsoft.Data.SqlClient.SqlConnection(_ConnectionString))
                 {
                     conn.Open();
 
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    using (SqlDataAdapter sda = new SqlDataAdapter(query, conn))
+                    using (var command = new Microsoft.Data.SqlClient.SqlCommand(query, conn))
                     {
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-
-                        sda.Fill(result);
+                        using (var adapter = new Microsoft.Data.SqlClient.SqlDataAdapter(command))
+                        {
+                            adapter.Fill(result);
+                        }
                     }
-
-                    conn.Dispose();
-                    conn.Close();
                 }
 
                 if (_Settings.Debug.EnableForResults && _Settings.Debug.Logger != null)
@@ -826,28 +823,23 @@ namespace DatabaseWrapper.SqlServer
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(_ConnectionString))
+                using (var conn = new Microsoft.Data.SqlClient.SqlConnection(_ConnectionString))
                 {
                     await conn.OpenAsync(token).ConfigureAwait(false);
 
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    using (SqlDataAdapter sda = new SqlDataAdapter(query, conn))
+                    using (var command = new Microsoft.Data.SqlClient.SqlCommand(query, conn))
                     {
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities4
-
-                        sda.Fill(result);
+                        using (var adapter = new Microsoft.Data.SqlClient.SqlDataAdapter(command))
+                        {
+                            adapter.Fill(result);
+                        }
                     }
-
 #if NET6_0_OR_GREATER
-                    
-                    await conn.DisposeAsync().ConfigureAwait(false);
-                    await conn.CloseAsync().ConfigureAwait(false);
-
+        await conn.DisposeAsync().ConfigureAwait(false);
+        await conn.CloseAsync().ConfigureAwait(false);
 #elif NET461_OR_GREATER
-
                     conn.Dispose();
                     conn.Close();
-
 #endif
                 }
 

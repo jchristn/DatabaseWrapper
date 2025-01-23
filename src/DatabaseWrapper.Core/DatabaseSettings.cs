@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DatabaseWrapper.Core
+﻿namespace DatabaseWrapper.Core
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
     /// <summary>
     /// Database settings.
     /// </summary>
@@ -61,6 +61,11 @@ namespace DatabaseWrapper.Core
         /// The name of the database.
         /// </summary>
         public string DatabaseName { get; set; } = null;
+
+        /// <summary>
+        /// Boolean indicating if encryption should be required.
+        /// </summary>
+        public bool RequireEncryption { get; set; } = false;
 
         /// <summary>
         /// Debug settings.

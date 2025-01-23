@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Text;
-
-namespace DatabaseWrapper.Core
+﻿namespace DatabaseWrapper.Core
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Text;
+
     /// <summary>
     /// Database query event arguments.
     /// </summary>

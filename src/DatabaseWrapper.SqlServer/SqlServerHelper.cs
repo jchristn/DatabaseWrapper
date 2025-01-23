@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-
-namespace DatabaseWrapper.SqlServer
+﻿namespace DatabaseWrapper.SqlServer
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+
     /// <summary>
     /// SQL Server implementation of helper properties and methods.
     /// </summary>
@@ -70,6 +70,9 @@ namespace DatabaseWrapper.SqlServer
                 ret += "Database=" + settings.DatabaseName + "; ";
                 if (!String.IsNullOrEmpty(settings.Username)) ret += "User ID=" + settings.Username + "; ";
                 if (!String.IsNullOrEmpty(settings.Password)) ret += "Password=" + settings.Password + "; ";
+
+                if (settings.RequireEncryption) ret += "Encrypt=True; ";
+                else ret += "Encrypt=False; ";
             }
 
             return ret;

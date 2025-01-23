@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DatabaseWrapper.SqlServer;
-using DatabaseWrapper.Core;
-using ExpressionTree;
-
-namespace Test
+﻿namespace Test
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using DatabaseWrapper.SqlServer;
+    using DatabaseWrapper.Core;
+    using ExpressionTree;
+
     class Program
     {
         static Random _Random = new Random(DateTime.Now.Millisecond);
@@ -230,7 +230,7 @@ namespace Test
             }
             catch (Exception e)
             {
-                ExceptionConsole("Main", "Outer exception", e);
+                Console.WriteLine(e.ToString());
             }
         }
 
