@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netstandard2.1;net48;net6.0;net8.0</TargetFrameworks>
-		<Version>6.1.4</Version>
+		<Version>6.1.5</Version>
 		<PackageReleaseNotes>Oracle support (thank you @Skimmenthal13!), bugfixes, dependency updates.</PackageReleaseNotes>
 		<PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql oracle dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -48,11 +48,11 @@
 	</Target>
 
 	<ItemGroup>
-		<ProjectReference Include="..\DatabaseWrapper.Mysql\DatabaseWrapper.Mysql.csproj" />
-		<ProjectReference Include="..\DatabaseWrapper.Oracle\DatabaseWrapper.Oracle.csproj" />
-		<ProjectReference Include="..\DatabaseWrapper.Postgresql\DatabaseWrapper.Postgresql.csproj" />
-		<ProjectReference Include="..\DatabaseWrapper.Sqlite\DatabaseWrapper.Sqlite.csproj" />
-		<ProjectReference Include="..\DatabaseWrapper.SqlServer\DatabaseWrapper.SqlServer.csproj" />
+	  <PackageReference Include="DatabaseWrapper.Mysql" Version="6.1.5" />
+	  <PackageReference Include="DatabaseWrapper.Oracle" Version="6.1.5" />
+	  <PackageReference Include="DatabaseWrapper.Postgresql" Version="6.1.5" />
+	  <PackageReference Include="DatabaseWrapper.Sqlite" Version="6.1.5" />
+	  <PackageReference Include="DatabaseWrapper.SqlServer" Version="6.1.5" />
 	</ItemGroup>
 
 	<ItemGroup>

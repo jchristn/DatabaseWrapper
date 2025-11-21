@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netstandard2.1;net48;net6.0;net8.0</TargetFrameworks>
-		<Version>6.1.4</Version>
+		<Version>6.1.5</Version>
 		<PackageReleaseNotes>Oracle support (thank you @Skimmenthal13!), bugfixes, dependency updates.</PackageReleaseNotes>
 		<PackageTags>database sql server mssql mysql pgsql sqlite postgres postgresql oracle dynamic query builder datarow datatable orm relational mapper relation key foreign</PackageTags>
 		<Authors>Joel Christner</Authors>
@@ -24,6 +24,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="DatabaseWrapper.Core" Version="6.1.5" />
 		<PackageReference Include="Npgsql" Version="8.0.4" />
 	</ItemGroup>
 
@@ -52,10 +53,6 @@
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\DatabaseWrapper.Core\DatabaseWrapper.Core.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -1,3 +1,8 @@
+
+## ⚠️ NOTICE ⚠️
+
+**Efforts on this repository have been frozen in favor of [Durable](https://github.com/jchristn/durable). This repository has been made into a public archive.**
+
 # DatabaseWrapper
 
 | Library | Version | Downloads |
